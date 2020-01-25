@@ -49,11 +49,11 @@ def create_dest_table(db):
     engine = db['engine']
     # destinations and locations
     types = ['supermarket']
-    files = {'/homedirs/man112/access_inequality_index/data/processed/bal/gis/usa/chicago/supermarket'}
+    files = '/homedirs/man112/access_inequality_index/data/processed/bal/gis/usa/chicago/supermarket'
     # import the csv's
     gdf = gpd.GeoDataFrame()
     for dest_type in types:
-        df_type = gpd.read_file('{}'.format(files[dest_type]))
+        df_type = gpd.read_file('{}'.format(files))
         # df_type = pd.read_csv('data/destinations/' + dest_type + '_FL.csv', encoding = "ISO-8859-1", usecols = ['id','name','lat','lon'])
         if df_type.crs['init'] != 'epsg:4269':
             # project into lat lon
