@@ -27,10 +27,10 @@ def main(db, context):
     '''
 
     # init the destination tables
-    create_dest_table(db)
+    #create_dest_table(db)
 
     # query the distances
-    #query_points(db, context)
+    query_points(db, context)
 
     # close the connection
     db['con'].close()
