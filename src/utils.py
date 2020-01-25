@@ -1,190 +1,58 @@
 '''
-Init the database
-Query origins to dests in OSRM
+General functions that support the project
+- import_csv for csv -> postgres db
+-
 '''
 # user defined variables
 state = 'wa'
-par = True
-
-import utils
 from config import *
 db, context = cfg_init(state)
-logger = logging.getLogger(__name__)
-import os.path
-import osgeo.ogr
-import shapely
-from geoalchemy2 import Geometry, WKTElement
-import requests
-if par == True:
-    import multiprocessing as mp
-    from joblib import Parallel, delayed
-    from requests.adapters import HTTPAdapter
-    from requests.packages.urllib3.util.retry import Retry
 
-def main(db, context):
+import yagmail
+
+
+def send_email(body):
+    # send an email
+
+    receiver = "man112@uclive.ac.nz"
+    # filename = "document.pdf"
+
+    yag = yagmail.SMTP('toms.scrapers',open('pass_email.txt', 'r').read().strip('\n'))
+    yag.send(
+        to=receiver,
+        subject="Your code notification",
+        contents=body,
+        # attachments=filename,
+    )
+
+
+def import_csv(db):
     '''
-    set up the db tables I need for the querying
+    import a csv into the postgres db
     '''
+    # Might be wrong file paths
+    if state=='md':
+        file_name = 'data/bal/block/nhgis0033_csv/nhgis0033_ds172_2010_block.csv'
+        county = '510'
+    elif state == 'wa':
+        file_name = 'data/sea/block/nhgis0034_csv/nhgis0034_ds172_2010_block.csv'
+        county = '033'
+    elif state == 'nc':
+        file_name = 'data/wil/block/nhgis0031_csv/nhgis0031_ds172_2010_block.csv'
+        county = '129'
+    #
+    table_name = 'demograph'
+    # add csv to nc.demograph
+    df = pd.read_csv(file_name, dtype = {'STATEA':str, 'COUNTYA':str,'TRACTA':str,'BLOCKA':str, 'H7X001':int, 'H7X002':int, 'H7X003':int, 'H7X004':int})
+    df = df[df.COUNTYA==county]
+    df['geoid10'] = df['STATEA'] + df['COUNTYA'] + df['TRACTA'] + df['BLOCKA']
+    df.to_sql(table_name, db['engine'])
+    # add the table indices
 
-    # init the destination tables
-    # create_dest_table(db)
-
-    # query the distances
-    query_points(db, context)
-
-    # close the connection
-    db['con'].close()
-    logger.info('Database connection closed')
-
-    # email completion notification
-    utils.send_email(body='Querying {} complete'.format(context['city']))
-
-
-def create_dest_table(db):
-    '''
-    create a table with the destinations
-    '''
-    # db connections
-    con = db['con']
-    engine = db['engine']
-    # destinations and locations
-    types = ['library','supermarket','school','hospital']
-    files = {'library':'library/library.shp',
-             'supermarket':'supermarket/supermarket.shp',
-             'school':'school/primary_schools.shp',
-             'hospital':'hospital/hospital.shp'}
-    # import the csv's
-    gdf = gpd.GeoDataFrame()
-    for dest_type in types:
-        df_type = gpd.read_file('data/{}/{}'.format(city_code, files[dest_type]))
-        # df_type = pd.read_csv('data/destinations/' + dest_type + '_FL.csv', encoding = "ISO-8859-1", usecols = ['id','name','lat','lon'])
-        if df_type.crs['init'] != 'epsg:4326':
-            # project into lat lon
-            df_type = df_type.to_crs({'init':'epsg:4326'})
-        df_type['dest_type'] = dest_type
-        gdf = gdf.append(df_type)
-
-    # set a unique id for each destination
-    gdf['id'] = range(len(gdf))
-    # prepare for sql
-    gdf['geom'] = gdf['geometry'].apply(lambda x: WKTElement(x.wkt, srid=4326))
-    #drop all columns except id, dest_type, and geom
-    gdf = gdf[['id','dest_type','geom']]
-    # set index
-    gdf.set_index(['id','dest_type'], inplace=True)
-
-    # export to sql
-    gdf.to_sql('destinations', engine, dtype={'geom': Geometry('POINT', srid= 4326)})
-
-    # update indices
-    cursor = con.cursor()
-    queries = ['CREATE INDEX "dest_id" ON destinations' + ' ("id");',
-            'CREATE INDEX "dest_type" ON destinations' + ' ("dest_type");']
+    cursor = db['con'].cursor()
+    queries = ['CREATE INDEX "geoid10" ON demograph ("geoid10");',
+            'CREATE INDEX "id" ON demograph ("BLOCKA");']
     for q in queries:
         cursor.execute(q)
-
-    # commit to db
-    con.commit()
-
-
-def query_points(db, context):
-    '''
-    query OSRM for distances between origins and destinations
-    '''
-    # connect to db
-    cursor = db['con'].cursor()
-
-    # get list of all origin ids
-    sql = "SELECT * FROM block"
-    orig_df = gpd.GeoDataFrame.from_postgis(sql, db['con'], geom_col='geom')
-    orig_df['x'] = orig_df.geom.centroid.x
-    orig_df['y'] = orig_df.geom.centroid.y
-    # drop duplicates
-    orig_df.drop('geom',axis=1,inplace=True)
-    orig_df.drop_duplicates(inplace=True)
-    # set index
-    orig_df = orig_df.set_index('geoid10')
-
-    # get list of destination ids
-    sql = "SELECT * FROM destinations"
-    dest_df = gpd.GeoDataFrame.from_postgis(sql, db['con'], geom_col='geom')
-    dest_df = dest_df.set_index('id')
-    dest_df['lon'] = dest_df.geom.centroid.x
-    dest_df['lat'] = dest_df.geom.centroid.y
-
-    # list of origxdest pairs
-    origxdest = pd.DataFrame(list(itertools.product(orig_df.index, dest_df.index)), columns = ['id_orig','id_dest'])
-    origxdest['distance'] = None
-
-    # build query list:
-    query_0 = np.full(fill_value = context['osrm_url'] + '/route/v1/driving/', shape=origxdest.shape[0], dtype = object)
-    # the query looks like this: '{}/route/v1/driving/{},{};{},{}?overview=false'.format(osrm_url, lon_o, lat_o, lon_d, lat_d)
-    queries = query_0 + np.array(orig_df.loc[origxdest['id_orig'].values]['x'].values, dtype = str) + ',' + np.array(orig_df.loc[origxdest['id_orig'].values]['y'].values, dtype = str) + ';' + np.array(dest_df.loc[origxdest['id_dest'].values]['lon'].values, dtype = str) + ',' + np.array(dest_df.loc[origxdest['id_dest'].values]['lat'].values, dtype = str) + '?overview=false'
-
-    ###
-    # loop through the queries
-    ###
-    logger.info('Beginning to query {}'.format(context['city']))
-    total_len = len(queries)
-    if par == True:
-        # Query OSRM in parallel
-        num_workers = np.int(mp.cpu_count() * 0.8)
-        distances = Parallel(n_jobs=num_workers)(delayed(single_query)(query) for query in tqdm(queries))
-        # input distance into df
-        origxdest['distance'] = distances
-    else:
-        for index, query in enumerate(tqdm(queries)):
-            # single query
-            r = requests.get(query)
-            # input distance into df
-            origxdest.loc[index,'distance'] = r.json()['routes'][0]['legs'][0]['distance']
-    logger.info('Querying complete')
-
-    # add df to sql
-    logger.info('Writing data to SQL')
-    origxdest.to_sql('distance', con=db['engine'], if_exists='replace', index=False)
-    # add index
-    cursor.execute('CREATE INDEX on distance (id_orig);')
     # commit
     db['con'].commit()
-    logger.info('Distances written successfully to SQL')
-
-
-def single_query(query):
-    '''
-    this is for if we want it parallel
-    query a value and add to the table
-    '''
-    # query
-    # dist = requests.get(query).json()['routes'][0]['legs'][0]['distance']
-    dist = requests_retry_session(retries=100, backoff_factor=0.01, status_forcelist=(500, 502, 504), session=None).get(query).json()['routes'][0]['legs'][0]['distance']
-    # dist = r.json()['routes'][0]['legs'][0]['distance']
-    return(dist)
-
-
-def requests_retry_session(retries=10, backoff_factor=0.1, status_forcelist=(500, 502, 504), session=None):
-    '''
-    When par ==True, issues with connecting to the docker, can change the retries to keep trying to connect
-    '''
-    session = session or requests.Session()
-    retry = Retry(total=retries, read=retries, connect=retries, backoff_factor=backoff_factor, status_forcelist=status_forcelist)
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
-    return session
-
-
-def add_column_demograph(con):
-    '''
-    Add a useful geoid10 column to join data with
-    '''
-    queries = ['ALTER TABLE demograph ADD COLUMN geoid10 CHAR(15)',
-                '']
-
-
-
-
-
-if __name__ == "__main__":
-    logger.info('query.py code invoked')
-    main(db, context)

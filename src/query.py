@@ -3,7 +3,7 @@ Init the database
 Query origins to dests in OSRM
 '''
 # user defined variables
-state = 'wa'
+state = 'il'
 par = True
 
 import utils
@@ -27,10 +27,10 @@ def main(db, context):
     '''
 
     # init the destination tables
-    # create_dest_table(db)
+    create_dest_table(db)
 
     # query the distances
-    query_points(db, context)
+    #query_points(db, context)
 
     # close the connection
     db['con'].close()
@@ -48,33 +48,30 @@ def create_dest_table(db):
     con = db['con']
     engine = db['engine']
     # destinations and locations
-    types = ['library','supermarket','school','hospital']
-    files = {'library':'library/library.shp',
-             'supermarket':'supermarket/supermarket.shp',
-             'school':'school/primary_schools.shp',
-             'hospital':'hospital/hospital.shp'}
+    types = ['supermarket']
+    files = {'/homedirs/man112/access_inequality_index/data/processed/bal/gis/usa/chicago/supermarket'}
     # import the csv's
     gdf = gpd.GeoDataFrame()
     for dest_type in types:
         df_type = gpd.read_file('data/{}/{}'.format(city_code, files[dest_type]))
         # df_type = pd.read_csv('data/destinations/' + dest_type + '_FL.csv', encoding = "ISO-8859-1", usecols = ['id','name','lat','lon'])
-        if df_type.crs['init'] != 'epsg:4326':
+        if df_type.crs['init'] != 'epsg:4269':
             # project into lat lon
-            df_type = df_type.to_crs({'init':'epsg:4326'})
+            df_type = df_type.to_crs({'init':'epsg:4269'})
         df_type['dest_type'] = dest_type
         gdf = gdf.append(df_type)
 
     # set a unique id for each destination
     gdf['id'] = range(len(gdf))
     # prepare for sql
-    gdf['geom'] = gdf['geometry'].apply(lambda x: WKTElement(x.wkt, srid=4326))
+    gdf['geom'] = gdf['geometry'].apply(lambda x: WKTElement(x.wkt, srid=4269))
     #drop all columns except id, dest_type, and geom
     gdf = gdf[['id','dest_type','geom']]
     # set index
     gdf.set_index(['id','dest_type'], inplace=True)
 
     # export to sql
-    gdf.to_sql('destinations', engine, dtype={'geom': Geometry('POINT', srid= 4326)})
+    gdf.to_sql('destinations', engine, dtype={'geom': Geometry('POINT', srid= 4269)})
 
     # update indices
     cursor = con.cursor()
