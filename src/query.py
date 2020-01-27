@@ -30,7 +30,7 @@ def main(db, context):
     #create_dest_table(db)
 
     # query the distances
-    #query_points(db, context)
+    query_points(db, context)
 
     # close the connection
     db['con'].close()
