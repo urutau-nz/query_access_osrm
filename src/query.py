@@ -3,7 +3,7 @@ Init the database
 Query origins to dests in OSRM
 '''
 # user defined variables
-state = 'fl'
+state = 'or'
 par = True
 
 import utils
