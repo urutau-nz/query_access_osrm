@@ -60,6 +60,49 @@ def cfg_init(state):
         context['city'] = 'Chicago'
         context['osrm_url'] = 'http://localhost:6005'
         context['services'] = ['supermarket']
+    elif state == 'tx':
+        db['name'] = 'access_tx'
+        context['city_code'] = 'hou'
+        context['city'] = 'Houston'
+        context['osrm_url'] = 'http://localhost:6006'
+        context['services'] = ['supermarket']
+        context['services'] = ['supermarket']
+    elif state == 'or':
+        db['name'] = 'access_or'
+        context['city_code'] = 'por'
+        context['city'] = 'Portland'
+        context['osrm_url'] = 'http://localhost:6007'
+        context['services'] = ['supermarket']
+    elif state == 'ga':
+        db['name'] = 'access_ga'
+        context['city_code'] = 'Atl'
+        context['city'] = 'Atlanta'
+        context['osrm_url'] = 'http://localhost:6008'
+        context['services'] = ['supermarket']
+    elif state == 'la':
+        db['name'] = 'access_la'
+        context['city_code'] = 'new'
+        context['city'] = 'New_Orleans'
+        context['osrm_url'] = 'http://localhost:6009'
+        context['services'] = ['supermarket']
+    elif state == 'mi':
+        db['name'] = 'access_mi'
+        context['city_code'] = 'det'
+        context['city'] = 'Detroit'
+        context['osrm_url'] = 'http://localhost:6010'
+        context['services'] = ['supermarket']
+    elif state == 'co':
+        db['name'] = 'access_co'
+        context['city_code'] = 'den'
+        context['city'] = 'Denver'
+        context['osrm_url'] = 'http://localhost:6011'
+        context['services'] = ['supermarket']
+    elif state == 'fl':
+        db['name'] = 'access_fl'
+        context['city_code'] = 'mia'
+        context['city'] = 'Miami'
+        context['osrm_url'] = 'http://localhost:6012'
+        context['services'] = ['supermarket']
     # connect to database
     db['engine'] = create_engine('postgresql+psycopg2://postgres:' + db['passw'] + '@' + db['host'] + '/' + db['name'] + '?port=' + db['port'])
     db['address'] = "host=" + db['host'] + " dbname=" + db['name'] + " user=postgres password='"+ db['passw'] + "' port=" + db['port']
