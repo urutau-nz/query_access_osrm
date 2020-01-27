@@ -75,7 +75,7 @@ def cfg_init(state):
         context['services'] = ['supermarket']
     elif state == 'ga':
         db['name'] = 'access_ga'
-        context['city_code'] = 'Atl'
+        context['city_code'] = 'atl'
         context['city'] = 'Atlanta'
         context['osrm_url'] = 'http://localhost:6008'
         context['services'] = ['supermarket']
