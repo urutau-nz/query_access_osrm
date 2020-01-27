@@ -25,6 +25,7 @@ For a list of cities:
 beta = -0.5
 compare_city = False
 states = ['wa', 'md']#,'fl', 'co', 'mi', 'la', 'ga', 'or', 'tx', 'il']
+state_vars = [wa, md]
 compare_race = False
 races = ['all', 'white', 'non_white', 'black', 'american_indian', 'asian', 'hispanic'] #Black and african american, indiand and native alaskan, hispanic and latino
 file_name = ''
@@ -40,6 +41,7 @@ def main():
 def calc_kapa():
     dfs = []
     kapa_data = []
+    count = 0
     for state in states:
         db, context = cfg_init(state)
         cursor = db['con'].cursor()
@@ -48,7 +50,8 @@ def calc_kapa():
         sql = 'SELECT * FROM demograph'
         exec(f'{state}_demo = pd.read_sql(sql, db["con"])')
         db['con'].close()
-        dfs.append({state})
+        dfs.append(state_vars[count])
+        count += 1
     print(dfs)
     print(dfs[0])
         #exec(f'{state} = {state}.sort_values(by="geoid10")')
