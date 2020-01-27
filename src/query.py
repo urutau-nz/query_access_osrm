@@ -49,7 +49,7 @@ def create_dest_table(db):
     engine = db['engine']
     # destinations and locations
     types = ['supermarket']
-    files = '/homedirs/man112/access_inequality_index/data/processed/bal/gis/usa/chicago/supermarket'
+    files = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/supermarket/{}_supermarket.shp'.format(state,city_code, state)
     # import the csv's
     gdf = gpd.GeoDataFrame()
     for dest_type in types:
