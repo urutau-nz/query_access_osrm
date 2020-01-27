@@ -50,6 +50,7 @@ def calc_kapa():
         db['con'].close()
         dfs.append({state})
     print(dfs)
+    print(dfs[0])
         #exec(f'{state} = {state}.sort_values(by="geoid10")')
         #exec(f'{state}_demo = {state}.sort_values(by="geoid10")')
         #exec(f'{state}["pop_all"] = {state}_demo["H7X001"]')
