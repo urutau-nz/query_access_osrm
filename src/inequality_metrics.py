@@ -40,15 +40,16 @@ def main():
 def calc_kapa():
     dfs = []
     kapa_data = []
+    d= {}
     for state in states:
         db, context = cfg_init(state)
         cursor = db['con'].cursor()
         sql = 'SELECT * FROM nearest_dist'
-        exec(f'{state} = pd.read_sql(sql, db["con"])')
+        d["{}_df".format(state)] = pd.read_sql(sql, db["con"])
         sql = 'SELECT * FROM demograph'
-        exec(f'{state}_demo = pd.read_sql(sql, db["con"])')
+        d["{}_demo".format(state)] = pd.read_sql(sql, db['con'])
         db['con'].close()
-    print({'md'})
+    print(d)
     print(locals())
     return(locals())
         #exec(f'{state} = {state}.sort_values(by="geoid10")')
