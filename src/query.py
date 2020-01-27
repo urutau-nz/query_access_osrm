@@ -5,6 +5,7 @@ Query origins to dests in OSRM
 # user defined variables
 state = input('State: ')
 par = True
+par_frac = 0.95
 
 import utils
 from config import *
@@ -125,7 +126,7 @@ def query_points(db, context):
     total_len = len(queries)
     if par == True:
         # Query OSRM in parallel
-        num_workers = np.int(mp.cpu_count() * 0.8)
+        num_workers = np.int(mp.cpu_count() * par_frac)
         distances = Parallel(n_jobs=num_workers)(delayed(single_query)(query) for query in tqdm(queries))
         # input distance into df
         origxdest['distance'] = distances
