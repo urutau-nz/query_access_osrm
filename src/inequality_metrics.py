@@ -48,10 +48,7 @@ def calc_kapa():
         sql = 'SELECT * FROM demograph'
         exec(f'{state}_demo = pd.read_sql(sql, db["con"])')
         db['con'].close()
-    dfs = [wa, md]
-    dfs_demo = [wa_demo, md_demo]
-    print(dfs)
-    print(dfs[0])
+    return(locals())
         #exec(f'{state} = {state}.sort_values(by="geoid10")')
         #exec(f'{state}_demo = {state}.sort_values(by="geoid10")')
         #exec(f'{state}["pop_all"] = {state}_demo["H7X001"]')
