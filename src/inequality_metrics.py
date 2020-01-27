@@ -44,7 +44,7 @@ def calc_kapa():
         db, context = cfg_init(state)
         cursor = db['con'].cursor()
         sql = 'SELECT * FROM nearest_dist'
-        exec(f'{state} = pd.read_sql(sql, df["con"])')
+        exec(f'{state} = pd.read_sql(sql, db["con"])')
         sql = 'SELECT * FROM demograph'
         exec(f'{state}_demo = pd.read_sql(sql, db["con"])')
         db['con'].close()
