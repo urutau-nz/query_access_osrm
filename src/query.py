@@ -27,7 +27,7 @@ def main(db, context):
     '''
 
     # init the destination tables
-    create_dest_table(db)
+    #create_dest_table(db)
 
     # query the distances
     #query_points(db, context)
@@ -37,7 +37,7 @@ def main(db, context):
     logger.info('Database connection closed')
 
     # email completion notification
-    #utils.send_email(body='Querying {} complete'.format(context['city']))
+    utils.send_email(body='Querying {} complete'.format(context['city']))
 
 
 def create_dest_table(db):
