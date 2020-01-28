@@ -58,10 +58,9 @@ def calc_kapa():
         dem = demo['{}_demo'.format(state)]
         df = df.sort_values(by='id_orig')
         dem = dem.sort_values(by='geoid10')
-        df = df.dropna()
-        dem = dem.dropna()
         df = df.loc[df['distance'] != 0]
         dem = dem.loc[dem['H7X001'] !=0]
+        dem = dem.dropna()
         df['pop_all'] = dem['H7X001']
         df['pop_white'] = dem['H7X002']
         df['pop_non_white'] = dem['H7X001'] - dem['H7X002']
@@ -69,6 +68,7 @@ def calc_kapa():
         df['pop_americian_indian'] = dem['H7X004']
         df['pop_asian'] = dem['H7X005']
         #df['hispanic'] = dem['H7Y003']
+        df = df.dropna()
         data['{}_data'.format(state)] = df
 
         count = 0
