@@ -52,6 +52,9 @@ def calc_kapa():
         demo["{}_demo".format(state)] = pd.read_sql(sql, db['con'])
         db['con'].close()
 
-    print(dist['md_df'], demo['md_demo'])
+    for distance, demo in zip(dist.items(), demo.items()):
+         print(distance, demo)
+
+    #print(dist['md_df'], demo['md_demo'])
 
 calc_kapa()
