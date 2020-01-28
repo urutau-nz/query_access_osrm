@@ -38,8 +38,6 @@ def main():
 
 
 def calc_kapa():
-    dfs = []
-    kapa_data = []
     #Makes a dictionary of nearest dist and demo
     dist = {}
     demo = {}
@@ -52,8 +50,42 @@ def calc_kapa():
         demo["{}_demo".format(state)] = pd.read_sql(sql, db['con'])
         db['con'].close()
 
-    for distance, demo in zip(dist.items(), demo.items()):
-         print(distance, demo)
+    #Sorts the dfs for each state and gives population columns
+    data = {}
+    kapa_data = []
+    for state in states:
+        df = dist['{}_df'.format(state)]
+        dem = dem['{}_demo'.format(state)]
+        df = df.sort_values(by='id_orig')
+        dem = dem.sort_values(by='geoid10')
+        df = df.dropna()
+        dem = dem.dropna()
+        df = df.loc[df['distance'] != 0]
+        dem = dem.loc[dem['H7X001'] !=0]
+        df['pop_all'] = dem['H7X001']
+        df['pop_white'] = dem['H7X002']
+        df['pop_non_white'] = dem['H7X001'] - dem['H7X002']
+        df['pop_black'] = dem['H7X003']
+        df['pop_americian_indian'] = dem['H7X004']
+        df['pop_asian'] = dem['H7X005']
+        #df['hispanic'] = dem['H7Y003']
+        data['{}_data'.format(state)] = df
+
+        count = 0
+        for i in df['distance']/1000:
+            for pop in range(int(df['pop_all'].iloc[count])):
+                kapa_data.append(i)
+            count += 1
+
+    x_sum = 0
+    x_sq_sum = 0
+    for i in kapa_data:
+        x_sum += i
+        x_sq_sum += i**2
+    kapa = beta*(x_sum/x_sq_sum)
+
+    print(data)
+    print(kapa)
 
     #print(dist['md_df'], demo['md_demo'])
 
