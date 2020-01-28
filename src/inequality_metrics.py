@@ -40,6 +40,7 @@ def main():
 def calc_kapa():
     dfs = []
     kapa_data = []
+    #Makes a dictionary of nearest dist and demo
     d= {}
     for state in states:
         db, context = cfg_init(state)
@@ -49,18 +50,7 @@ def calc_kapa():
         sql = 'SELECT * FROM demograph'
         d["{}_demo".format(state)] = pd.read_sql(sql, db['con'])
         db['con'].close()
-    print(type(d))
-    for df in d.items():
-        print(df)
-        #exec(f'{state} = {state}.sort_values(by="geoid10")')
-        #exec(f'{state}_demo = {state}.sort_values(by="geoid10")')
-        #exec(f'{state}["pop_all"] = {state}_demo["H7X001"]')
-        #exec(f'{state}["pop_white"] = {state}_demo["H7X002"]')
-        #exec(f'{state}["pop_non_white"] = {state}_demo["H7X001"] - {state}_demo["H7X002"]')
-        #exec(f'{state}["pop_black"] = {state}_demo["H7X003"]')
-        #exec(f'{state}["pop_american_indian"] = {state}_demo["H7X004"]')
-        #exec(f'{state}["pop_asian"] = {state}_demo["H7X005"]')
-        #exec(f'{state}["pop_hispanic"] = {state}_demo["H7Y003"]')
-        #for distance in {state}
+
+    print(d['md_df.columns'])
 
 calc_kapa()
