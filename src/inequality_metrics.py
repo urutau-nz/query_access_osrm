@@ -50,7 +50,7 @@ def calc_kapa():
         d["{}_demo".format(state)] = pd.read_sql(sql, db['con'])
         db['con'].close()
     print(type(d))
-    for df in d:
+    for df in d.items():
         print(df)
         #exec(f'{state} = {state}.sort_values(by="geoid10")')
         #exec(f'{state}_demo = {state}.sort_values(by="geoid10")')
