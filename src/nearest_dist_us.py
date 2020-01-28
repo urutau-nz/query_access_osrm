@@ -1,10 +1,101 @@
 '''
 Populate the database for the nearest proximity throughout time
 '''
-# user defined variables
+import code
+import pickle as pk
+import pandas as pd
+import numpy as np
+import psycopg2
+from sqlalchemy.engine import create_engine
+from datetime import datetime, timedelta
+import itertools
+import time
+import pandas as pd
+import geopandas as gpd
+from tqdm import tqdm
+
+# SQL connection
+passw = open('pass.txt', 'r').read().strip('\n')
+host = '132.181.102.2'
+port = '5001'
+
+# city information
 state = input('State: ')
-from config import *
-cfg_init(state)
+if state == 'md':
+    db_name = 'access_md'
+    city = 'bal'
+    # url to the osrm routing machine
+    osrm_url = 'http://localhost:6003'
+    services = ['supermarket', 'school', 'hospital', 'library']
+elif state == 'wa':
+    db_name = 'access_wa'
+    city = 'sea'
+    # url to the osrm routing machine
+    osrm_url = 'http://localhost:6004'
+    services = ['supermarket', 'school', 'hospital', 'library']
+elif state == 'nc':
+    db_name = 'access_nc'
+    city = 'wil'
+    # url to the osrm routing machine
+    osrm_url = 'http://localhost:6002'
+    services = ['super_market_operating', 'gas_station']
+elif state == 'il':
+    db_name = 'access_il'
+    city = 'chi'
+    city_full = 'Chicago'
+    osrm_url = 'http://localhost:6005'
+    services = ['supermarket']
+elif state == 'tx':
+    db_name = 'access_tx'
+    city = 'hou'
+    city_full = 'Houston'
+    osrm_url = 'http://localhost:6006'
+    services = ['supermarket']
+    services = ['supermarket']
+elif state == 'or':
+    db_name = 'access_or'
+    city = 'por'
+    city_full = 'Portland'
+    osrm_url = 'http://localhost:6007'
+    services = ['supermarket']
+elif state == 'ga':
+    db_name = 'access_ga'
+    city = 'atl'
+    city_full = 'Atlanta'
+    osrm_url = 'http://localhost:6008'
+    services = ['supermarket']
+elif state == 'la':
+    db_name = 'access_la'
+    city = 'new'
+    city_full = 'New_Orleans'
+    osrm_url = 'http://localhost:6009'
+    services = ['supermarket']
+elif state == 'mi':
+    db_name = 'access_mi'
+    city = 'det'
+    city_full = 'Detroit'
+    osrm_url = 'http://localhost:6010'
+    services = ['supermarket']
+elif state == 'co':
+    db_name = 'access_co'
+    city = 'den'
+    city_full = 'Denver'
+    osrm_url = 'http://localhost:6011'
+    services = ['supermarket']
+elif state == 'fl':
+    db_name = 'access_fl'
+    city = 'mia'
+    city_full = 'Miami'
+    osrm_url = 'http://localhost:6012'
+    services = ['supermarket']
+
+
+# connect to database
+engine = create_engine('postgresql+psycopg2://postgres:' + passw + '@' + host + '/' + db_name + '?port=' + port)
+connect_string = "host=" + host + " dbname=" + db_name + " user=postgres password='"+ passw + "' port=" + port
+
+con = psycopg2.connect(connect_string)
+cursor = con.cursor()
 
 def populate_database():
     '''
@@ -26,7 +117,7 @@ def populate_database():
     times = sorted(outs[services[0]].keys()) #times is just ['0'] in this initial case
     time_stamp = times[0] #because this is the initial case where everything is open
     # get the distance matrix
-    distances = pd.read_sql('SELECT * FROM distance_matrix', con)
+    distances = pd.read_sql('SELECT * FROM distance', con)
     #making the id_dest column the index
     distances = distances.set_index('id_dest')
     #converts distance column from string to float
