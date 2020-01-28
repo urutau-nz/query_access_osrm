@@ -50,6 +50,7 @@ def main():
     kapas = []
     betas = []
     epsilons = []
+    states_ = []
 
     for state in states:
         df = data['{}_data'.format(state)]
@@ -77,7 +78,9 @@ def main():
         kapas.append(kapa)
         betas.append(beta)
         epsilons.append(epsilon)
-    results = pd.DataFrame(list(zip(states, kapas, betas, epsilons, kp_edes, at_edes, at_adj_edes, kp_inds, at_inds, at_adj_inds, gini_inds, dist_means, dist_maxs, dist_stds, dist_covs)), columns=['State', 'Kapa', 'Beta', 'Epsilon', 'Kolm Pollock EDE', 'Atkinson EDE', 'Atkinson Adjusted EDE', 'Kolm Pollock Index', 'Atkinson Index', 'Atkinson Adjusted Index', 'Gini Index', 'Distribution Mean', 'Distribution Max', 'Distribution Standard Deviation', 'Distribution Coefficient of Variation'])
+
+        states_.append(state)
+    results = pd.DataFrame(list(zip(states_, kapas, betas, epsilons, kp_edes, at_edes, at_adj_edes, kp_inds, at_inds, at_adj_inds, gini_inds, dist_means, dist_maxs, dist_stds, dist_covs)), columns=['State', 'Kapa', 'Beta', 'Epsilon', 'Kolm Pollock EDE', 'Atkinson EDE', 'Atkinson Adjusted EDE', 'Kolm Pollock Index', 'Atkinson Index', 'Atkinson Adjusted Index', 'Gini Index', 'Distribution Mean', 'Distribution Max', 'Distribution Standard Deviation', 'Distribution Coefficient of Variation'])
     results.to_csv(r'/homedirs/man112/access_inequality_index/data/results/{}.csv'.format(file_name))
 
 
