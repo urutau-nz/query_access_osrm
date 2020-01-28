@@ -71,7 +71,7 @@ def main():
         mean, max, std, cov = get_stats(df)
         dist_means.append(mean)
         dist_maxs.append(max)
-        dist_std.append(std)
+        dist_stds.append(std)
         dist_covs.append(cov)
 
         kapas.append(kapa)
