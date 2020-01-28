@@ -111,8 +111,8 @@ def calc_kapa():
         #df['pop_americian_indian'] = dem['H7X004']
         #df['pop_asian'] = dem['H7X005']
         #df['hispanic'] = dem['H7Y003']
-        df['dist_perc'] = df['distance'].cumsum()/df['distance'].sum()*100
-        df['pop_perc'] = df['pop_all'].cumsum()/df['pop_all'].sum()*100
+        #df['dist_perc'] = df['distance'].cumsum()/df['distance'].sum()*100
+        #df['pop_perc'] = df['pop_all'].cumsum()/df['pop_all'].sum()*100
         df = df.dropna()
         data['{}_data'.format(state)] = df
 
@@ -132,7 +132,11 @@ def calc_kapa():
     return(data, kapa)
 
 def get_gini(df):
+    dist_tot = df['distance'].sum()
+    pop_tot = df['pop_all'].sum()
     df = df.sort_values(by='distance')
+    df['pop_perc'] = df['pop_all'].cumsum()/pop_tot*100
+    df['dist_perc'] = df['distance'].cumsum()/dist_tot*100
     area_tot = simps(np.arange(0,101,1), dx=1)
     area_real = simps(df['dist_perc'], df['pop_perc'])
     area_diff = area_tot - area_real
