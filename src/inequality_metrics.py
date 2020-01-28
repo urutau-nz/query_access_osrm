@@ -170,6 +170,7 @@ def get_kp(df, kapa):
     x_mean = np.average(df['distance'], weights = df['pop_all'])/1000
     sum_ede = 0
     sum_ii = 0
+    count = 0
     for x_n in df['distance']:
         sum_ede += np.exp(-kapa*x_n)*df['pop_all'].iloc[count]
         sum_ii += np.exp(-kapa*(x_n-x_mean))*df['pop_all'].iloc[count]
