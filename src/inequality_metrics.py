@@ -60,7 +60,6 @@ def calc_kapa():
         dem = dem.sort_values(by='geoid10')
         df = df.loc[df['distance'] != 0]
         dem = dem.loc[dem['H7X001'] !=0]
-        dem = dem.dropna()
         df['pop_all'] = dem['H7X001']
         df['pop_white'] = dem['H7X002']
         df['pop_non_white'] = dem['H7X001'] - dem['H7X002']
@@ -82,7 +81,7 @@ def calc_kapa():
     for i in kapa_data:
         x_sum += i
         x_sq_sum += i**2
-    #kapa = beta*(x_sum/x_sq_sum)
+    kapa = beta*(x_sum/x_sq_sum)
 
     print(data)
     #print(kapa)
