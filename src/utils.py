@@ -4,7 +4,7 @@ General functions that support the project
 -
 '''
 # user defined variables
-state = 'wa'
+state = input('State: ')
 from config import *
 db, context = cfg_init(state)
 
@@ -30,20 +30,43 @@ def import_csv(db):
     '''
     import a csv into the postgres db
     '''
-    # Might be wrong file paths
     if state=='md':
-        file_name = 'data/bal/block/nhgis0033_csv/nhgis0033_ds172_2010_block.csv'
+        file_name = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/demo/demo.csv'.format(state, context['city_code'])
         county = '510'
     elif state == 'wa':
-        file_name = 'data/sea/block/nhgis0034_csv/nhgis0034_ds172_2010_block.csv'
+        file_name = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/demo/demo.csv'.format(state, context['city_code'])
         county = '033'
     elif state == 'nc':
-        file_name = 'data/wil/block/nhgis0031_csv/nhgis0031_ds172_2010_block.csv'
+        file_name = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/demo/demo.csv'.format(state, context['city_code'])
         county = '129'
+    elif state == 'il':
+        file_name = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/demo/demo.csv'.format(state, context['city_code'])
+        county = '031'
+    elif state == 'tx':
+        file_name = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/demo/demo.csv'.format(state, context['city_code'])
+        county = '201'
+    elif state == 'or':
+        file_name = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/demo/demo.csv'.format(state, context['city_code'])
+        county = '051'
+    elif state == 'ga':
+        file_name = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/demo/demo.csv'.format(state, context['city_code'])
+        county = '121'
+    elif state == 'la':
+        file_name = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/demo/demo.csv'.format(state, context['city_code'])
+        county = '071'
+    elif state == 'mi':
+        file_name = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/demo/demo.csv'.format(state, context['city_code'])
+        county = '163'
+    elif state == 'co':
+        file_name = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/demo/demo.csv'.format(state, context['city_code'])
+        county = '031'
+    elif state == 'fl':
+        file_name = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/demo/demo.csv'.format(state, context['city_code'])
+        county = '086'
     #
     table_name = 'demograph'
     # add csv to nc.demograph
-    df = pd.read_csv(file_name, dtype = {'STATEA':str, 'COUNTYA':str,'TRACTA':str,'BLOCKA':str, 'H7X001':int, 'H7X002':int, 'H7X003':int, 'H7X004':int})
+    df = pd.read_csv(file_name, dtype = {'STATEA':str, 'COUNTYA':str,'TRACTA':str,'BLOCKA':str, 'H7X001':int, 'H7X002':int, 'H7X003':int, 'H7X004':int, 'H7X005':int, 'H7Y003':int})
     df = df[df.COUNTYA==county]
     df['geoid10'] = df['STATEA'] + df['COUNTYA'] + df['TRACTA'] + df['BLOCKA']
     df.to_sql(table_name, db['engine'])
@@ -56,3 +79,7 @@ def import_csv(db):
         cursor.execute(q)
     # commit
     db['con'].commit()
+
+
+if __name__ == '__main__':
+    import_csv(db)
