@@ -18,6 +18,8 @@ import os
 from datetime import datetime, timedelta
 import time
 from tqdm import tqdm
+#plotting
+from scipy.integrate import simps
 # logging
 import logging
 logging.basicConfig(
