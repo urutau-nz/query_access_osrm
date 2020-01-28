@@ -84,7 +84,7 @@ def calc_kapa():
     kapa = beta*(x_sum/x_sq_sum)
 
     print(data)
-    #print(kapa)
+    print(kapa)
 
     #print(dist['md_df'], demo['md_demo'])
 
