@@ -82,10 +82,10 @@ def calc_kapa():
     for i in kapa_data:
         x_sum += i
         x_sq_sum += i**2
-    kapa = beta*(x_sum/x_sq_sum)
+    #kapa = beta*(x_sum/x_sq_sum)
 
     print(data)
-    print(kapa)
+    #print(kapa)
 
     #print(dist['md_df'], demo['md_demo'])
 
