@@ -51,6 +51,6 @@ def calc_kapa():
         d["{}_demo".format(state)] = pd.read_sql(sql, db['con'])
         db['con'].close()
 
-    print(d['md_df'.columns])
+    print(d['md_df'].columns)
 
 calc_kapa()
