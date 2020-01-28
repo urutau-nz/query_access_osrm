@@ -111,8 +111,8 @@ def calc_kapa():
         #df['pop_americian_indian'] = dem['H7X004']
         #df['pop_asian'] = dem['H7X005']
         #df['hispanic'] = dem['H7Y003']
-        #df['dist_perc'] = df['distance'].cumsum()/df['distance'].sum()
-        #df['pop_perc'] = df['pop_all'].cumsum()/df['pop_all'].sum()
+        df['dist_perc'] = df['distance'].cumsum()/df['distance'].sum()
+        df['pop_perc'] = df['pop_all'].cumsum()/df['pop_all'].sum()
         df = df.dropna()
         data['{}_data'.format(state)] = df
 
