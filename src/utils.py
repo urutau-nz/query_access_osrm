@@ -82,8 +82,7 @@ def import_csv(db):
     # add the table indices
 
     cursor = db['con'].cursor()
-    queries = ['CREATE INDEX "geoid10" ON demograph ("geoid10");',
-            'CREATE INDEX "id" ON demograph ("BLOCKA");']
+    queries = ['CREATE INDEX "geoid10" ON demograph_filt ("geoid10");']
     for q in queries:
         cursor.execute(q)
     # commit
