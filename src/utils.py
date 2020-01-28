@@ -4,7 +4,7 @@ General functions that support the project
 -
 '''
 # user defined variables
-state = 'wa'
+state = input('State: ')
 from config import *
 db, context = cfg_init(state)
 
@@ -64,12 +64,21 @@ def import_csv(db):
         file_name = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/demo/demo.csv'.format(state, context['city_code'])
         county = '086'
     #
-    table_name = 'demograph'
+    table_name = 'demograph_filt'
     # add csv to nc.demograph
     df = pd.read_csv(file_name, dtype = {'STATEA':str, 'COUNTYA':str,'TRACTA':str,'BLOCKA':str, 'H7X001':int, 'H7X002':int, 'H7X003':int, 'H7X004':int, 'H7X005':int, 'H7Y003':int})
     df = df[df.COUNTYA==county]
     df['geoid10'] = df['STATEA'] + df['COUNTYA'] + df['TRACTA'] + df['BLOCKA']
-    df.to_sql(table_name, db['engine'])
+
+    df_filt = pd.DataFrame()
+    df_filt['geoid10'] = df['geoid10']
+    df_filt['H7X001'] = df['H7X001']
+    df_filt['H7X002'] = df['H7X002']
+    df_filt['H7X003'] = df['H7X003']
+    df_filt['H7X004'] = df['H7X004']
+    df_filt['H7X005'] = df['H7X005']
+    df_filt['H7Y003'] = df['H7Y003']
+    df_filt.to_sql(table_name, db['engine'])
     # add the table indices
 
     cursor = db['con'].cursor()
@@ -81,5 +90,5 @@ def import_csv(db):
     db['con'].commit()
 
 
-#if __name__ == '__main__':
-    #import_csv(db)
+if __name__ == '__main__':
+    import_csv(db)
