@@ -171,7 +171,7 @@ def get_kp(df, kapa):
     sum_ede = 0
     sum_ii = 0
     count = 0
-    for x_n in df['distance']:
+    for x_n in df['distance']/1000:
         sum_ede += np.exp(-kapa*x_n)*df['pop_all'].iloc[count]
         sum_ii += np.exp(-kapa*(x_n-x_mean))*df['pop_all'].iloc[count]
         count += 1
