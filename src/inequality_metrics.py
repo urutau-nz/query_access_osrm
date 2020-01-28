@@ -41,16 +41,17 @@ def calc_kapa():
     dfs = []
     kapa_data = []
     #Makes a dictionary of nearest dist and demo
-    d= {}
+    dist = {}
+    demo = {}
     for state in states:
         db, context = cfg_init(state)
         cursor = db['con'].cursor()
         sql = 'SELECT * FROM nearest_dist'
-        d["{}_df".format(state)] = pd.read_sql(sql, db["con"])
+        dist["{}_df".format(state)] = pd.read_sql(sql, db["con"])
         sql = 'SELECT * FROM demograph'
-        d["{}_demo".format(state)] = pd.read_sql(sql, db['con'])
+        demo["{}_demo".format(state)] = pd.read_sql(sql, db['con'])
         db['con'].close()
 
-    print(d['md_df'].columns)
+    print(dist['md_df'], demo['md_demo'])
 
 calc_kapa()
