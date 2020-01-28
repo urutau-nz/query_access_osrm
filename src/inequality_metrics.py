@@ -105,14 +105,14 @@ def calc_kapa():
         df = df.loc[df['distance'] != 0]
         dem = dem.loc[dem['H7X001'] !=0]
         df['pop_all'] = dem['H7X001']
-        df['pop_white'] = dem['H7X002']
-        df['pop_non_white'] = dem['H7X001'] - dem['H7X002']
-        df['pop_black'] = dem['H7X003']
-        df['pop_americian_indian'] = dem['H7X004']
-        df['pop_asian'] = dem['H7X005']
+        #df['pop_white'] = dem['H7X002']
+        #df['pop_non_white'] = dem['H7X001'] - dem['H7X002']
+        #df['pop_black'] = dem['H7X003']
+        #df['pop_americian_indian'] = dem['H7X004']
+        #df['pop_asian'] = dem['H7X005']
         #df['hispanic'] = dem['H7Y003']
-        df['dist_perc'] = df['distance'].cumsum()/df['distance'].sum()
-        df['pop_perc'] = df['pop_all'].cumsum()/df['pop_all'].sum()
+        #df['dist_perc'] = df['distance'].cumsum()/df['distance'].sum()
+        #df['pop_perc'] = df['pop_all'].cumsum()/df['pop_all'].sum()
         df = df.dropna()
         data['{}_data'.format(state)] = df
 
