@@ -4,7 +4,7 @@ General functions that support the project
 -
 '''
 # user defined variables
-state = input('State: ')
+#state = input('State: ')
 from config import *
 db, context = cfg_init(state)
 
