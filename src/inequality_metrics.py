@@ -52,7 +52,7 @@ def main():
     epsilons = []
 
     for state in states:
-        df = data['{}_df'.format(state)]
+        df = data['{}_data'.format(state)]
         gini = get_gini(df)
         gini_inds.append(gini)
 
