@@ -81,5 +81,5 @@ def import_csv(db):
     db['con'].commit()
 
 
-if __name__ == '__main__':
-    import_csv(db)
+#if __name__ == '__main__':
+    #import_csv(db)
