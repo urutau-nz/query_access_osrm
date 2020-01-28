@@ -25,7 +25,7 @@ For a list of cities:
 beta = -0.5
 epsilon = 0.5
 compare_city = False
-states = ['wa', 'md']#,'fl', 'co', 'mi', 'la', 'ga', 'or', 'tx', 'il']
+states = ['wa', 'md','fl', 'co', 'mi', 'la', 'ga', 'or', 'tx', 'il']
 compare_race = False
 races = ['all', 'white', 'non_white', 'black', 'american_indian', 'asian', 'hispanic'] #Black and african american, indiand and native alaskan, hispanic and latino
 file_name = 'test_results'
