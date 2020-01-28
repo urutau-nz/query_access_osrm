@@ -23,18 +23,62 @@ For a list of cities:
 # User defined variables
 # Will compare the
 beta = -0.5
+epsilon = 0.5
 compare_city = False
 states = ['wa', 'md']#,'fl', 'co', 'mi', 'la', 'ga', 'or', 'tx', 'il']
 compare_race = False
 races = ['all', 'white', 'non_white', 'black', 'american_indian', 'asian', 'hispanic'] #Black and african american, indiand and native alaskan, hispanic and latino
-file_name = ''
+file_name = 'test_results'
 
 import utils
 from config import *
 
 
 def main():
-    kapa = calc_kapa()
+    data, kapa = calc_kapa()
+    gini_inds = []
+    at_adj_inds = []
+    at_inds = []
+    kp_inds = []
+    kp_edes = []
+    at_adj_edes = []
+    at_edes = []
+    dist_means = []
+    dist_maxs = []
+    dist_stds = []
+    dist_covs = []
+    kapas = []
+    betas = []
+    epsilons = []
+
+    for state in states:
+        df = data['{}_df'.format(state)]
+        gini = get_gini(df)
+        gini_inds.append(gini)
+
+        at_adj_ind, at_adj_ede = get_at_adj(df)
+        at_adj_inds.append(at_adj_ind)
+        at_adj_edes.append(at_adj_ede)
+
+        at_ind, at_ede = get_at(df)
+        at_inds.append(at_ind)
+        at_edes.append(at_ede)
+
+        kp_ind, kp_ede = get_kp(df, kapa)
+        kp_inds.append(kp_ind)
+        kp_edes.append(kp_ede)
+
+        mean, max, std, cov = get_stats(df)
+        dist_means.append(mean)
+        dist_maxs.append(max)
+        dist_std.append(std)
+        dist_covs.append(cov)
+
+        kapas.append(kapa)
+        betas.appened(beta)
+        epsilons.append(epsilon)
+    results = pd.DataFrame(list(zip(states, kapa, beta, epsilon, kp_edes, at_edes, at_adj_edes, kp_inds, at_inds, at_adj_inds, gini_inds, dist_means, dist_maxs, dist_stds, dist_covs)), columns=['State', 'Kapa', 'Beta', 'Epsilon', 'Kolm Pollock EDE', 'Atkinson EDE', 'Atkinson Adjusted EDE', 'Kolm Pollock Index', 'Atkinson Index', 'Atkinson Adjusted Index', 'Gini Index', 'Distribution Mean', 'Distribution Max', 'Distribution Standard Deviation', 'Distribution Coefficient of Variation'])
+    results.to_csv(r'/homedirs/man112/access_inequality_index/data/results/{}.csv'.format(file_name))
 
 
 def calc_kapa():
@@ -67,6 +111,8 @@ def calc_kapa():
         df['pop_americian_indian'] = dem['H7X004']
         df['pop_asian'] = dem['H7X005']
         #df['hispanic'] = dem['H7Y003']
+        df['dist_perc'] = df['distance'].cumsum()/df['distance'].sum()
+        df['pop_perc'] = df['pop_all'].cumsum()/df['pop_all'].sum()
         df = df.dropna()
         data['{}_data'.format(state)] = df
 
@@ -83,9 +129,70 @@ def calc_kapa():
         x_sq_sum += i**2
     kapa = beta*(x_sum/x_sq_sum)
 
-    print(data)
-    print(kapa)
+    return(data, kapa)
 
-    #print(dist['md_df'], demo['md_demo'])
+def get_gini(df):
+    df =df.sort_values(by='distance')
+    area_tot = simps(np.arange(0,101,1), dx=1)
+    area_real = simps(df['dist_perc'], df['pop_perc'])
+    area_diff = area_tot - area_real
+    gini = area_diff/area_tot
+    gini = round(gini, 3)
+    return(gini)
 
-calc_kapa()
+def get_at_adj(df):
+    at_sum = 0
+    count = 0
+    N = df['pop_all'].sum()
+    x_mean = np.average(df['distance'], weights = df['pop_all'])/1000
+    for i in df['distance']/1000:
+        at_sum += (i**(1-beta))*df['pop_all'].iloc[count]
+        count += 1
+    at_ede = (at_sum/N)**(1/(1-beta))
+    at_ind = (at_ede/x_mean)-1
+    return(at_ind, at_ede)
+
+def get_at(df):
+    at_sum = 0
+    N = df['pop_all'].sum()
+    x_mean = np.average(df['distance'], weights = df['pop_all'])/1000
+    count = 0
+    for i in df['distance']/1000:
+        i = 1/i
+        at_sum += (i**(1-epsilon))*df['pop_all'].iloc[count]
+        count += 1
+    at_ede = (at_sum/N)**(1/(1-epsilon))
+    at_ind = 1 - (at_ede/x_mean)
+    return(at_ind, at_ede)
+
+def get_kp(df, kapa):
+    N = df['pop_all'].sum()
+    x_mean = np.average(df['distance'], weights = df['pop_all'])/1000
+    sum_ede = 0
+    sum_ii = 0
+    for x_n in df['distance']:
+        sum_ede += np.exp(-kapa*x_n)*df['pop_all'].iloc[count]
+        sum_ii += np.exp(-kapa*(x_n-x_mean))*df['pop_all'].iloc[count]
+        count += 1
+    kp_ede = (-1/kapa)*np.log(sum_ede/N)
+    kp_ind = -(1/kapa)*np.log(sum_ii/N)
+    return(kp_ind, kp_ede)
+
+def get_stats(df):
+    pop_total = df['pop_all'].sum()
+    df = df.sort_values(by='distance')
+    hist_data = []
+    count =0
+    for i in df['distance']/1000:
+        for pop in range(int(df['pop_all'].iloc[count])):
+            hist_data.append(i)
+        count += 1
+    mean = np.mean(hist_data)
+    max = np.max(hist_data)
+    std = np.std(hist_data)
+    cov = std/mean
+    return(mean, max, std, cov)
+
+
+if __name__ == '__main__':
+    main()
