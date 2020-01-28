@@ -64,7 +64,7 @@ def import_csv(db):
         file_name = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/demo/demo.csv'.format(state, context['city_code'])
         county = '086'
     #
-    table_name = 'demograph_filt'
+    table_name = 'demograph'
     # add csv to nc.demograph
     df = pd.read_csv(file_name, dtype = {'STATEA':str, 'COUNTYA':str,'TRACTA':str,'BLOCKA':str, 'H7X001':int, 'H7X002':int, 'H7X003':int, 'H7X004':int, 'H7X005':int, 'H7Y003':int})
     df = df[df.COUNTYA==county]
@@ -82,7 +82,7 @@ def import_csv(db):
     # add the table indices
 
     cursor = db['con'].cursor()
-    queries = ['CREATE INDEX "geoid10" ON demograph_filt ("geoid10");']
+    queries = ['CREATE INDEX "geoid10" ON demograph ("geoid10");']
     for q in queries:
         cursor.execute(q)
     # commit
