@@ -55,7 +55,7 @@ def calc_kapa():
     kapa_data = []
     for state in states:
         df = dist['{}_df'.format(state)]
-        dem = dem['{}_demo'.format(state)]
+        dem = demo['{}_demo'.format(state)]
         df = df.sort_values(by='id_orig')
         dem = dem.sort_values(by='geoid10')
         df = df.dropna()
