@@ -102,6 +102,8 @@ def calc_kapa():
     kapa_data = []
     for state in states:
         df = dist['{}_df'.format(state)]
+        df = df.loc[df['distance'] !=0]
+        df = df.loc[df['H7X001'] !=0]
         df = df.dropna()
         data['{}_data'.format(state)] = df
         count = 0
