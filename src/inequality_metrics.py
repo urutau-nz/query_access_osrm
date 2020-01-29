@@ -216,7 +216,7 @@ def plot_gini(data):
     plt.savefig(fig_out, dpi=500, format='pdf', transparent=False)#, bbox_inches='tight')
     plt.clf()
 
-def plot_hist(data, city):
+def plot_hist(data):
     fig, axes = plt.subplots(ncols=2,nrows=5, sharex=True, sharey=True, gridspec_kw={'hspace':0.5})
     for state, ax in zip(states, axes.flat):
         df = data['{}_data'.format(state)]
