@@ -87,14 +87,11 @@ def main():
 def calc_kapa():
     #Makes a dictionary of nearest dist and demo
     dist = {}
-    demo = {}
     for state in states:
         db, context = cfg_init(state)
         cursor = db['con'].cursor()
-        sql = 'SELECT * FROM nearest_dist'
+        sql = 'SELECT * FROM distxdem'
         dist["{}_df".format(state)] = pd.read_sql(sql, db["con"])
-        sql = 'SELECT * FROM demograph'
-        demo["{}_demo".format(state)] = pd.read_sql(sql, db['con'])
         db['con'].close()
 
     #Sorts the dfs for each state and gives population columns
@@ -102,26 +99,11 @@ def calc_kapa():
     kapa_data = []
     for state in states:
         df = dist['{}_df'.format(state)]
-        dem = demo['{}_demo'.format(state)]
-        df = df.sort_values(by='id_orig')
-        dem = dem.sort_values(by='geoid10')
-        df = df.loc[df['distance'] != 0]
-        dem = dem.loc[dem['H7X001'] !=0]
-        df['pop_all'] = dem['H7X001']
-        #df['pop_white'] = dem['H7X002']
-        #df['pop_non_white'] = dem['H7X001'] - dem['H7X002']
-        #df['pop_black'] = dem['H7X003']
-        #df['pop_americian_indian'] = dem['H7X004']
-        #df['pop_asian'] = dem['H7X005']
-        #df['hispanic'] = dem['H7Y003']
-        #df['dist_perc'] = df['distance'].cumsum()/df['distance'].sum()*100
-        #df['pop_perc'] = df['pop_all'].cumsum()/df['pop_all'].sum()*100
         df = df.dropna()
         data['{}_data'.format(state)] = df
-
         count = 0
         for i in df['distance']/1000:
-            for pop in range(int(df['pop_all'].iloc[count])):
+            for pop in range(int(df['H7X001'].iloc[count])):
                 kapa_data.append(i)
             count += 1
 
@@ -131,30 +113,29 @@ def calc_kapa():
         x_sum += i
         x_sq_sum += i**2
     kapa = beta*(x_sum/x_sq_sum)
-
     return(data, kapa)
 
 def get_gini(df):
-    #dist_tot = df['distance'].sum()
-    #pop_tot = df['pop_all'].sum()
-    #df = df.sort_values(by='distance')
-    #df['pop_perc'] = df['pop_all'].cumsum()/pop_tot*100
-    #df['dist_perc'] = df['distance'].cumsum()/dist_tot*100
-    #area_tot = simps(np.arange(0,101,1), dx=1)
-    #area_real = simps(df['dist_perc'], df['pop_perc'])
-    #area_diff = area_tot - area_real
-    #gini = area_diff/area_tot
-    #gini = round(gini, 3)
+    dist_tot = df['distance'].sum()
+    pop_tot = df['H7X001'].sum()
+    df = df.sort_values(by='distance')
+    df['pop_perc'] = df['H7X001'].cumsum()/pop_tot*100
+    df['dist_perc'] = df['distance'].cumsum()/dist_tot*100
+    area_tot = simps(np.arange(0,101,1), dx=1)
+    area_real = simps(df['dist_perc'], df['pop_perc'])
+    area_diff = area_tot - area_real
+    gini = area_diff/area_tot
+    gini = round(gini, 3)
     gini = 1
     return(gini)
 
 def get_at_adj(df):
     at_sum = 0
     count = 0
-    N = df['pop_all'].sum()
-    x_mean = np.average(df['distance'], weights = df['pop_all'])/1000
+    N = df['H7X001'].sum()
+    x_mean = np.average(df['distance'], weights = df['H7X001'])/1000
     for i in df['distance']/1000:
-        at_sum += (i**(1-beta))*df['pop_all'].iloc[count]
+        at_sum += (i**(1-beta))*df['H7X001'].iloc[count]
         count += 1
     at_ede = (at_sum/N)**(1/(1-beta))
     at_ind = (at_ede/x_mean)-1
@@ -162,38 +143,38 @@ def get_at_adj(df):
 
 def get_at(df):
     at_sum = 0
-    N = df['pop_all'].sum()
-    x_mean = np.average(df['distance'], weights = df['pop_all'])/1000
+    N = df['H7X001'].sum()
+    x_mean = np.average(df['distance'], weights = df['H7X001'])/1000
     count = 0
     for i in df['distance']/1000:
         i = 1/i
-        at_sum += (i**(1-epsilon))*df['pop_all'].iloc[count]
+        at_sum += (i**(1-epsilon))*df['H7X001'].iloc[count]
         count += 1
     at_ede = (at_sum/N)**(1/(1-epsilon))
     at_ind = 1 - (at_ede/x_mean)
     return(at_ind, at_ede)
 
 def get_kp(df, kapa):
-    N = df['pop_all'].sum()
-    x_mean = np.average(df['distance'], weights = df['pop_all'])/1000
+    N = df['H7X001'].sum()
+    x_mean = np.average(df['distance'], weights = df['H7X001'])/1000
     sum_ede = 0
     sum_ii = 0
     count = 0
     for x_n in df['distance']/1000:
-        sum_ede += np.exp(-kapa*x_n)*df['pop_all'].iloc[count]
-        sum_ii += np.exp(-kapa*(x_n-x_mean))*df['pop_all'].iloc[count]
+        sum_ede += np.exp(-kapa*x_n)*df['H7X001'].iloc[count]
+        sum_ii += np.exp(-kapa*(x_n-x_mean))*df['H7X001'].iloc[count]
         count += 1
     kp_ede = (-1/kapa)*np.log(sum_ede/N)
     kp_ind = -(1/kapa)*np.log(sum_ii/N)
     return(kp_ind, kp_ede)
 
 def get_stats(df):
-    pop_total = df['pop_all'].sum()
+    pop_total = df['H7X001'].sum()
     df = df.sort_values(by='distance')
     hist_data = []
     count =0
     for i in df['distance']/1000:
-        for pop in range(int(df['pop_all'].iloc[count])):
+        for pop in range(int(df['H7X001'].iloc[count])):
             hist_data.append(i)
         count += 1
     mean = np.mean(hist_data)
