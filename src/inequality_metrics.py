@@ -195,9 +195,9 @@ def get_stats(df):
 def plot_gini(data):
     for state in states:
         df = data['{}_data'.format(state)]
-        pop_tot = df.pop_all.sum()
+        pop_tot = df.H7X001.sum()
         dist_tot = df.distance.sum()
-        df['pop_perc'] = df.pop_all.cumsum()/pop_tot*100
+        df['pop_perc'] = df.H7X001.cumsum()/pop_tot*100
         df['dist_perc'] = df.distance.cumsum()/dist_tot*100
         plt.plot(df.pop_perc. df.dist_perc, label=state)
     plt.plot(np.arange(0,101,1), np.arange(0, 101, 1), '--', color='black', lw=0.5, label = 'Perfect Equality Line')
@@ -213,7 +213,7 @@ def plot_gini(data):
     if os.path.isfile(fig_out):
         os.remove(fig_out)
     plt.savefig(fig_out, dpi=500, format='pdf', transparent=False)#, bbox_inches='tight')
-    plt.clf() 
+    plt.clf()
 
 if __name__ == '__main__':
     main()
