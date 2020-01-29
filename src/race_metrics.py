@@ -27,7 +27,7 @@ states = ['md','fl', 'co', 'mi', 'la', 'ga', 'or', 'il', 'wa', 'tx']
 state = input('State: ')
 compare_race = False
 race_labels = ['all', 'white', 'black', 'american_indian', 'asian', 'hispanic'] #Black and african american, indiand and native alaskan, hispanic and latino
-races = ['HX7001', 'HX7002', 'H7X003', 'H7X004', 'H7X005', 'H7Y003']
+races = ['H7X001', 'H7X002', 'H7X003', 'H7X004', 'H7X005', 'H7Y003']
 
 import utils
 from config import *
