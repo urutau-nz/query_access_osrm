@@ -23,6 +23,8 @@ For a list of cities:
 # User defined variables
 
 kapa = -0.170477678 #This should be equal to kapa used for intercity comparisons
+beta = -0.5
+epsilon = 0.5
 states = ['md','fl', 'co', 'mi', 'la', 'ga', 'or', 'il', 'wa', 'tx']
 state = input('State: ')
 compare_race = False
