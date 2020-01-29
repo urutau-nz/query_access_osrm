@@ -21,6 +21,7 @@ from tqdm import tqdm
 #plotting
 from scipy.integrate import simps
 import matplotlib.pyplot as plt
+import random
 # logging
 import logging
 logging.basicConfig(

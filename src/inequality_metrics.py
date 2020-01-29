@@ -82,7 +82,7 @@ def main():
         states_.append(state)
 
     plot_gini(data)
-    #plot_hist(data)
+    plot_hist(data)
     #plot_cdf(data)
 
     results = pd.DataFrame(list(zip(states_, city, kapas, betas, epsilons, kp_edes, at_edes, at_adj_edes, kp_inds, at_inds, at_adj_inds, gini_inds, dist_means, dist_maxs, dist_stds, dist_covs)), columns=['State','City', 'Kapa', 'Beta', 'Epsilon', 'Kolm Pollock EDE', 'Atkinson EDE', 'Atkinson Adjusted EDE', 'Kolm Pollock Index', 'Atkinson Index', 'Atkinson Adjusted Index', 'Gini Index', 'Distribution Mean', 'Distribution Max', 'Distribution Standard Deviation', 'Distribution Coefficient of Variation'])
@@ -215,6 +215,42 @@ def plot_gini(data):
         os.remove(fig_out)
     plt.savefig(fig_out, dpi=500, format='pdf', transparent=False)#, bbox_inches='tight')
     plt.clf()
+
+def plot_hist(data):
+    fig, axes = plt.subplots(ncols=2,nrows=5, sharex=True, sharey=False, gridspec_kw={'hspace':0.5})
+    for state, ax in zip(states, axes.flat):
+        df = data['{}_data'.format(state)]
+        pop_tot = df.H7X001.sum()
+        df = df.sort_values(by='distance')
+        hist_data = []
+        count = 0
+        for i in tqdm((df.distance)/1000):
+            for pop in range(df.H7X001.iloc[count]):
+                hist_data.append(i)
+        sns.distplot(hist_data, hist = True, kde = True, bins = int(100), label = state, ax=ax, color=random.choice(['red','blue','green','yellow','orange','purple', 'pink']), kde_kws={'color':'black'})
+
+    plt.xlim([0,20])
+    plt.ylim([0,None])
+
+    fig_out = '/homedirs/man112/access_inequality_index/data/results/HIST_test.pdf'.format()
+    if os.path.isfile(fig_out):
+        os.remove(fig_out)
+    plt.savefig(fig_out, format='pdf')#, bbox_inches='tight')
+    plt.clf()
+
+if __name__ == '__main__':
+    main()
+
+    plt.xlim([0,20])
+    plt.ylim([0,None])
+
+    fig_out = '/homedirs/man112/Project11/data/processed/figures/food_des/{}_HIST.pdf'.format(fig_name)
+    if os.path.isfile(fig_out):
+        os.remove(fig_out)
+    plt.savefig(fig_out, format='pdf')#, bbox_inches='tight')
+    plt.clf()
+
+
 
 if __name__ == '__main__':
     main()
