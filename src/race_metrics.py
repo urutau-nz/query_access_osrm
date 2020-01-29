@@ -86,7 +86,7 @@ def get_df():
     #Sorts the dfs for each state and gives population columns
     kapa_data = []
     df = df.loc[df['distance'] !=0]
-    df = df.loc[df[race] !=0]
+    df = df.loc[df['HX7001'] !=0]
     df = df.dropna()
     return(df)
 
