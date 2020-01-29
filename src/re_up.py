@@ -5,7 +5,7 @@ General functions that support the project
 -
 '''
 # user defined variables
-state = 'wa'
+state = 'md'
 from config import *
 db, context = cfg_init(state)
 
