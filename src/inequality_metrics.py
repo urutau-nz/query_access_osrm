@@ -81,6 +81,10 @@ def main():
 
         states_.append(state)
 
+    plot_gini(data)
+    plot_hist(data)
+    plot_cdf(data)
+
     results = pd.DataFrame(list(zip(states_, city, kapas, betas, epsilons, kp_edes, at_edes, at_adj_edes, kp_inds, at_inds, at_adj_inds, gini_inds, dist_means, dist_maxs, dist_stds, dist_covs)), columns=['State','City', 'Kapa', 'Beta', 'Epsilon', 'Kolm Pollock EDE', 'Atkinson EDE', 'Atkinson Adjusted EDE', 'Kolm Pollock Index', 'Atkinson Index', 'Atkinson Adjusted Index', 'Gini Index', 'Distribution Mean', 'Distribution Max', 'Distribution Standard Deviation', 'Distribution Coefficient of Variation'])
     results.to_csv(r'/homedirs/man112/access_inequality_index/data/results/{}.csv'.format(file_name))
 
@@ -188,6 +192,28 @@ def get_stats(df):
     cov = std/mean
     return(mean, max, std, cov)
 
+def plot_gini(data):
+    for state in states:
+        df = data['{}_data'.format(state)]
+        pop_tot = df.pop_all.sum()
+        dist_tot = df.distance.sum()
+        df['pop_perc'] = df.pop_all.cumsum()/pop_tot*100
+        df['dist_perc'] = df.distance.cumsum()/dist_tot*100
+        plt.plot(df.pop_perc. df.dist_perc, label=state)
+    plt.plot(np.arange(0,101,1), np.arange(0, 101, 1), '--', color='black', lw=0.5, label = 'Perfect Equality Line')
+    plt.xlabel('% Residents')
+    # xlabel
+    plt.ylabel('% Distance')
+    plt.xlim([0,None])
+    plt.ylim([0,None])
+    plt.title('Gini Curve'.format(loc='center'))
+    plt.legend(loc='best')
+    #Save figrue
+    fig_out = '/homedirs/man112/access_inequality_index/data/results/GINI_test.pdf'.format()
+    if os.path.isfile(fig_out):
+        os.remove(fig_out)
+    plt.savefig(fig_out, dpi=500, format='pdf', transparent=False)#, bbox_inches='tight')
+    plt.clf() 
 
 if __name__ == '__main__':
     main()
