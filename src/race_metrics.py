@@ -94,6 +94,7 @@ def get_df():
     return(df)
 
 def get_gini(df, race):
+    df = df.loc[df[race]!=0]
     dist_tot = df['distance'].sum()
     pop_tot = df[race].sum()
     df = df.sort_values(by='distance')
@@ -108,6 +109,7 @@ def get_gini(df, race):
     return(gini)
 
 def get_at_adj(df, race):
+    df = df.loc[df[race]!=0]
     at_sum = 0
     count = 0
     N = df[race].sum()
@@ -120,6 +122,7 @@ def get_at_adj(df, race):
     return(at_ind, at_ede)
 
 def get_at(df, race):
+    df = df.loc[df[race]!=0]
     at_sum = 0
     N = df[race].sum()
     x_mean = np.average(df['distance'], weights = df[race])/1000
@@ -133,6 +136,7 @@ def get_at(df, race):
     return(at_ind, at_ede)
 
 def get_kp(df, kapa, race):
+    df = df.loc[df[race]!=0]
     N = df[race].sum()
     x_mean = np.average(df['distance'], weights = df[race])/1000
     sum_ede = 0
@@ -147,6 +151,7 @@ def get_kp(df, kapa, race):
     return(kp_ind, kp_ede)
 
 def get_stats(df, race):
+    df = df.loc[df[race]!=0]
     pop_total = df[race].sum()
     df = df.sort_values(by='distance')
     hist_data = []
@@ -163,6 +168,7 @@ def get_stats(df, race):
 
 def plot_gini(df):
     for race in races:
+        df = df.loc[df[race]!=0]
         pop_tot = df[race].sum()
         dist_tot = df.distance.sum()
         df = df.sort_values(by='distance')
@@ -188,6 +194,7 @@ def plot_hist(df):
 
     fig, axes = plt.subplots(ncols=2,nrows=3, sharex=True, sharey=True, gridspec_kw={'hspace':0.5})
     for race, ax in zip(races, axes.flat):
+        df = df.loc[df[race]!=0]
         pop_tot = df[race].sum()
         df = df.sort_values(by='distance')
         hist_data = []
@@ -208,6 +215,7 @@ def plot_hist(df):
 
 def plot_cdf(df):
     for race in races:
+        df = df.loc[df[race]!=0]
         pop_tot = df[race].sum()
         df = df.sort_values(by='distance')
         df['pop_perc'] = df[race].cumsum()/pop_tot*100
