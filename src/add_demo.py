@@ -45,7 +45,7 @@ def import_csv(db):
     table_name = 'demograph'
 
     # import distances
-    dist = pd.read_sql('SELECT id_orig, distance FROM nearest_dist', db['con'])
+    dist = pd.read_sql("SELECT id_orig, distance FROM nearest_dist WHERE service = 'supermarket'", db['con'])
     dist = dist.loc[dist['distance']!=0]
     dist['geoid10'] = dist['id_orig']
     # import demographic
