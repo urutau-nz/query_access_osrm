@@ -4,7 +4,7 @@ General functions that support the project
 -
 '''
 # user defined variables
-state = input('State: ')
+state = 'wa'
 from config import *
 db, context = cfg_init(state)
 
@@ -89,5 +89,5 @@ def import_csv(db):
     db['con'].commit()
 
 
-if __name__ == '__main__':
-    import_csv(db)
+#if __name__ == '__main__':
+    #import_csv(db)
