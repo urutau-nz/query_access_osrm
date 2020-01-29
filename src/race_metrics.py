@@ -41,7 +41,7 @@ def main():
     df = get_df()
     gini_inds, at_adj_inds, at_inds, kp_inds, kp_edes, at_adj_edes = [], [], [], [], [], []
     at_edes, dist_means, dist_maxs, dist_stds, dist_covs = [], [], [], [], []
-    kapas, betas, epsilons, states_ = [], [], [], []
+    kapas, betas, epsilons, states_, city = [], [], [], [], []
     for race in races:
         gini = get_gini(df, race)
         gini_inds.append(gini)
@@ -69,6 +69,7 @@ def main():
         epsilons.append(epsilon)
 
         states_.append(state)
+        city.append(context['city'])
 
     plot_gini(df)
     plot_hist(df)
