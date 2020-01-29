@@ -186,7 +186,7 @@ def plot_gini(df):
 
 def plot_hist(df):
 
-    fig, axes = plt.subplots(ncols=2,nrows=5, sharex=True, sharey=True, gridspec_kw={'hspace':0.5})
+    fig, axes = plt.subplots(ncols=2,nrows=3, sharex=True, sharey=True, gridspec_kw={'hspace':0.5})
     for race, ax in zip(races, axes.flat):
         pop_tot = df[race].sum()
         df = df.sort_values(by='distance')
