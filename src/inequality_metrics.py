@@ -238,18 +238,6 @@ def plot_hist(data):
     plt.savefig(fig_out, format='pdf')#, bbox_inches='tight')
     plt.clf()
 
-if __name__ == '__main__':
-    main()
-
-    plt.xlim([0,20])
-    plt.ylim([0,None])
-
-    fig_out = '/homedirs/man112/Project11/data/processed/figures/food_des/{}_HIST.pdf'.format(fig_name)
-    if os.path.isfile(fig_out):
-        os.remove(fig_out)
-    plt.savefig(fig_out, format='pdf')#, bbox_inches='tight')
-    plt.clf()
-
 
 
 if __name__ == '__main__':
