@@ -20,6 +20,7 @@ import time
 from tqdm import tqdm
 #plotting
 from scipy.integrate import simps
+import matplotlib.pyplot as plt
 # logging
 import logging
 logging.basicConfig(
