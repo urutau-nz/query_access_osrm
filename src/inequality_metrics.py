@@ -83,7 +83,7 @@ def main():
 
     plot_gini(data)
     plot_hist(data)
-    #plot_cdf(data)
+    plot_cdf(data)
 
     results = pd.DataFrame(list(zip(states_, city, kapas, betas, epsilons, kp_edes, at_edes, at_adj_edes, kp_inds, at_inds, at_adj_inds, gini_inds, dist_means, dist_maxs, dist_stds, dist_covs)), columns=['State','City', 'Kapa', 'Beta', 'Epsilon', 'Kolm Pollock EDE', 'Atkinson EDE', 'Atkinson Adjusted EDE', 'Kolm Pollock Index', 'Atkinson Index', 'Atkinson Adjusted Index', 'Gini Index', 'Distribution Mean', 'Distribution Max', 'Distribution Standard Deviation', 'Distribution Coefficient of Variation'])
     results.to_csv(r'/homedirs/man112/access_inequality_index/data/results/{}.csv'.format(file_name))
@@ -217,6 +217,7 @@ def plot_gini(data):
     plt.clf()
 
 def plot_hist(data):
+
     fig, axes = plt.subplots(ncols=2,nrows=5, sharex=True, sharey=True, gridspec_kw={'hspace':0.5})
     for state, ax in zip(states, axes.flat):
         df = data['{}_data'.format(state)]
@@ -238,7 +239,30 @@ def plot_hist(data):
     plt.savefig(fig_out, format='pdf')#, bbox_inches='tight')
     plt.clf()
 
+def plot_cdf(data):
+    for state in states:
+        df = data['{}_data'.format(state)]
+        pop_tot = df.H7X001.sum()
+        df = df.sort_values(by='distance')
+        df['pop_perc'] = df.H7X001.cumsum()/pop_tot*100
+        plt.plot(df.distance/1000, df.pop_perc, label = state)
+    plt.plot(np.arange(0,100,100/10000), 10000*[100], '--')
+    # ylabel
+    plt.ylabel('% Residents')
+    # xlabel
+    plt.xlabel('Distance to the nearest supermakrt (km)'.format())
+    plt.xlim([0,15])
+    plt.ylim([0,None])
+    #making the title todays date and the time_stamp
+    plt.title('CDF: Distance to the nearest supermarket'.format(), loc='center')
+    plt.legend(loc='best')
 
+    # savefig
+    fig_out = '/homedirs/man112/access_inequality_index/data/results/CDF_test.pdf'.format()
+    if os.path.isfile(fig_out):
+        os.remove(fig_out)
+    plt.savefig(fig_out, dpi=500, format='pdf', transparent=False)#, bbox_inches='tight')
+    plt.clf()
 
 if __name__ == '__main__':
     main()
