@@ -116,16 +116,16 @@ def calc_kapa():
     return(data, kapa)
 
 def get_gini(df):
-    dist_tot = df['distance'].sum()
-    pop_tot = df['H7X001'].sum()
-    df = df.sort_values(by='distance')
-    df['pop_perc'] = df['H7X001'].cumsum()/pop_tot*100
-    df['dist_perc'] = df['distance'].cumsum()/dist_tot*100
-    area_tot = simps(np.arange(0,101,1), dx=1)
-    area_real = simps(df['dist_perc'], df['pop_perc'])
-    area_diff = area_tot - area_real
-    gini = area_diff/area_tot
-    gini = round(gini, 3)
+    #dist_tot = df['distance'].sum()
+#    pop_tot = df['H7X001'].sum()
+    #df = df.sort_values(by='distance')
+    #df['pop_perc'] = df['H7X001'].cumsum()/pop_tot*100
+    #df['dist_perc'] = df['distance'].cumsum()/dist_tot*100
+    #area_tot = simps(np.arange(0,101,1), dx=1)
+    #area_real = simps(df['dist_perc'], df['pop_perc'])
+    #area_diff = area_tot - area_real
+    #gini = area_diff/area_tot
+    #gini = round(gini, 3)
     gini = 1
     return(gini)
 
