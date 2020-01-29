@@ -199,7 +199,7 @@ def plot_gini(data):
         dist_tot = df.distance.sum()
         df['pop_perc'] = df.H7X001.cumsum()/pop_tot*100
         df['dist_perc'] = df.distance.cumsum()/dist_tot*100
-        plt.plot(df.pop_perc. df.dist_perc, label=state)
+        plt.plot(df.pop_perc, df.dist_perc, label=state)
     plt.plot(np.arange(0,101,1), np.arange(0, 101, 1), '--', color='black', lw=0.5, label = 'Perfect Equality Line')
     plt.xlabel('% Residents')
     # xlabel
