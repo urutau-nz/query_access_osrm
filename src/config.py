@@ -22,6 +22,7 @@ from tqdm import tqdm
 from scipy.integrate import simps
 import matplotlib.pyplot as plt
 import random
+import seaborn as sns
 # logging
 import logging
 logging.basicConfig(
