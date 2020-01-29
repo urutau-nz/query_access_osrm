@@ -216,8 +216,8 @@ def plot_gini(data):
     plt.savefig(fig_out, dpi=500, format='pdf', transparent=False)#, bbox_inches='tight')
     plt.clf()
 
-def plot_hist(data):
-    fig, axes = plt.subplots(ncols=2,nrows=5, sharex=True, sharey=False, gridspec_kw={'hspace':0.5})
+def plot_hist(data, city):
+    fig, axes = plt.subplots(ncols=2,nrows=5, sharex=True, sharey=True, gridspec_kw={'hspace':0.5})
     for state, ax in zip(states, axes.flat):
         df = data['{}_data'.format(state)]
         pop_tot = df.H7X001.sum()
@@ -228,7 +228,7 @@ def plot_hist(data):
             for pop in range(df.H7X001.iloc[count]):
                 hist_data.append(i)
         sns.distplot(hist_data, hist = True, kde = True, bins = int(100), label = state, ax=ax, color=random.choice(['red','blue','green','yellow','orange','purple', 'pink']), kde_kws={'color':'black'})
-
+        ax.title.set_text(state)
     plt.xlim([0,20])
     plt.ylim([0,None])
 
