@@ -82,8 +82,8 @@ def main():
         states_.append(state)
 
     plot_gini(data)
-    plot_hist(data)
-    plot_cdf(data)
+    #plot_hist(data)
+    #plot_cdf(data)
 
     results = pd.DataFrame(list(zip(states_, city, kapas, betas, epsilons, kp_edes, at_edes, at_adj_edes, kp_inds, at_inds, at_adj_inds, gini_inds, dist_means, dist_maxs, dist_stds, dist_covs)), columns=['State','City', 'Kapa', 'Beta', 'Epsilon', 'Kolm Pollock EDE', 'Atkinson EDE', 'Atkinson Adjusted EDE', 'Kolm Pollock Index', 'Atkinson Index', 'Atkinson Adjusted Index', 'Gini Index', 'Distribution Mean', 'Distribution Max', 'Distribution Standard Deviation', 'Distribution Coefficient of Variation'])
     results.to_csv(r'/homedirs/man112/access_inequality_index/data/results/{}.csv'.format(file_name))
@@ -198,6 +198,7 @@ def plot_gini(data):
         pop_tot = df.H7X001.sum()
         dist_tot = df.distance.sum()
         df['pop_perc'] = df.H7X001.cumsum()/pop_tot*100
+        df = df.sort_values(by='distance')
         df['dist_perc'] = df.distance.cumsum()/dist_tot*100
         plt.plot(df.pop_perc, df.dist_perc, label=state)
     plt.plot(np.arange(0,101,1), np.arange(0, 101, 1), '--', color='black', lw=0.5, label = 'Perfect Equality Line')
