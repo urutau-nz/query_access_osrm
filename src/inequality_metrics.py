@@ -25,7 +25,7 @@ For a list of cities:
 beta = -0.5
 epsilon = 0.5
 compare_city = False
-states = ['md','fl', 'co', 'mi', 'la', 'ga', 'or', 'il']#, 'wa', 'tx']
+states = ['md','fl', 'co', 'mi', 'la', 'ga', 'or', 'il', 'wa', 'tx']
 compare_race = False
 races = ['all', 'white', 'non_white', 'black', 'american_indian', 'asian', 'hispanic'] #Black and african american, indiand and native alaskan, hispanic and latino
 file_name = 'test_results'
@@ -35,7 +35,7 @@ from config import *
 
 
 def main():
-    data, kapa = calc_kapa()
+    data, kapa, city = calc_kapa()
     gini_inds = []
     at_adj_inds = []
     at_inds = []
@@ -50,7 +50,6 @@ def main():
     kapas = []
     betas = []
     epsilons = []
-    states_ = []
 
     for state in states:
         df = data['{}_data'.format(state)]
@@ -79,20 +78,21 @@ def main():
         betas.append(beta)
         epsilons.append(epsilon)
 
-        states_.append(state)
-    results = pd.DataFrame(list(zip(states_, kapas, betas, epsilons, kp_edes, at_edes, at_adj_edes, kp_inds, at_inds, at_adj_inds, gini_inds, dist_means, dist_maxs, dist_stds, dist_covs)), columns=['State', 'Kapa', 'Beta', 'Epsilon', 'Kolm Pollock EDE', 'Atkinson EDE', 'Atkinson Adjusted EDE', 'Kolm Pollock Index', 'Atkinson Index', 'Atkinson Adjusted Index', 'Gini Index', 'Distribution Mean', 'Distribution Max', 'Distribution Standard Deviation', 'Distribution Coefficient of Variation'])
+    results = pd.DataFrame(list(zip(city, kapas, betas, epsilons, kp_edes, at_edes, at_adj_edes, kp_inds, at_inds, at_adj_inds, gini_inds, dist_means, dist_maxs, dist_stds, dist_covs)), columns=['State', 'Kapa', 'Beta', 'Epsilon', 'Kolm Pollock EDE', 'Atkinson EDE', 'Atkinson Adjusted EDE', 'Kolm Pollock Index', 'Atkinson Index', 'Atkinson Adjusted Index', 'Gini Index', 'Distribution Mean', 'Distribution Max', 'Distribution Standard Deviation', 'Distribution Coefficient of Variation'])
     results.to_csv(r'/homedirs/man112/access_inequality_index/data/results/{}.csv'.format(file_name))
 
 
 def calc_kapa():
     #Makes a dictionary of nearest dist and demo
     dist = {}
+    city = []
     for state in states:
         db, context = cfg_init(state)
         cursor = db['con'].cursor()
         sql = 'SELECT * FROM distxdem'
         dist["{}_df".format(state)] = pd.read_sql(sql, db["con"])
         db['con'].close()
+        city.append(context['city'])
 
     #Sorts the dfs for each state and gives population columns
     data = {}
@@ -113,7 +113,7 @@ def calc_kapa():
         x_sum += i
         x_sq_sum += i**2
     kapa = beta*(x_sum/x_sq_sum)
-    return(data, kapa)
+    return(data, kapa, city)
 
 def get_gini(df):
     dist_tot = df['distance'].sum()
