@@ -7,7 +7,7 @@
 .bash_history
 *.gdoc
 *.ini
-
+*.pyc
 
 # other
 pass.txt
