@@ -1,7 +1,15 @@
+# directories
 /data
-/.git
-.bash_history
+/literature
 /venv
+
+# file extensions
+.bash_history
+*.gdoc
+*.ini
+
+
+# other
 pass.txt
 pass_email.txt
 NOTES.md
