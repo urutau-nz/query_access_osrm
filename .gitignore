@@ -8,6 +8,7 @@
 *.gdoc
 *.ini
 *.pyc
+*.pdf
 
 # other
 pass.txt
