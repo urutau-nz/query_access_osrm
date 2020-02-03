@@ -28,17 +28,17 @@ def main(db, context):
     '''
 
     # init the destination tables
-    #create_dest_table(db)
+    create_dest_table(db)
 
     # query the distances
-    query_points(db, context)
+    #query_points(db, context)
 
     # close the connection
     db['con'].close()
     logger.info('Database connection closed')
 
     # email completion notification
-    utils.send_email(body='Querying {} complete'.format(context['city']))
+    #utils.send_email(body='Querying {} complete'.format(context['city']))
 
 
 def create_dest_table(db):
@@ -49,11 +49,11 @@ def create_dest_table(db):
     con = db['con']
     engine = db['engine']
     # destinations and locations
-    types = ['supermarket']
-    files = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/supermarket/{}_supermarket.shp'.format(state,context['city_code'], state)
+    types = ['supermarket', 'hospital']
     # import the csv's
     gdf = gpd.GeoDataFrame()
     for dest_type in types:
+        files = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/{}/{}_{}.shp'.format(state, context['city_code'], dest_type, state, dest_type)
         df_type = gpd.read_file('{}'.format(files))
         # df_type = pd.read_csv('data/destinations/' + dest_type + '_FL.csv', encoding = "ISO-8859-1", usecols = ['id','name','lat','lon'])
         if df_type.crs['init'] != 'epsg:4269':
