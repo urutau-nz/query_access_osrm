@@ -17,7 +17,7 @@ import matplotlib.style as style
 style.use('fivethirtyeight')
 import code
 
-services = ['gas_station','super_market']
+services = ['gas_station','super_market'] 
 
 # plot size
 w = 5

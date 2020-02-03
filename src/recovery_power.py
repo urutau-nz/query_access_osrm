@@ -13,7 +13,7 @@ from matplotlib import cm
 import pandas as pd
 import datetime
 import seaborn as sns
-
+ 
 data_dir = "//file.canterbury.ac.nz/Research/CivilSystems/data/scraped_data/power_outages/2016-hurricane-matthew/"
 
 # loop txt files and append to df
