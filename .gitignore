@@ -1,16 +1,8 @@
-# directories
 /data
-/literature
-/venv
-
-# file extensions
+/.git
 .bash_history
-*.gdoc
-*.ini
-*.pyc
-*.pdf
-
-# other
+/venv
 pass.txt
 pass_email.txt
 NOTES.md
+.ftpconfig
