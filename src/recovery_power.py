@@ -1,8 +1,8 @@
+
 '''
 Plot the distribution of customer's power restoration times
 Hurricane Matthew, 2016
 Calculate the
-
 '''
 from mpl_toolkits import mplot3d
 import numpy as np
@@ -13,7 +13,7 @@ from matplotlib import cm
 import pandas as pd
 import datetime
 import seaborn as sns
- 
+
 data_dir = "//file.canterbury.ac.nz/Research/CivilSystems/data/scraped_data/power_outages/2016-hurricane-matthew/"
 
 # loop txt files and append to df
