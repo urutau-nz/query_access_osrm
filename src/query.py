@@ -16,6 +16,7 @@ import osgeo.ogr
 import shapely
 from geoalchemy2 import Geometry, WKTElement
 import requests
+from sqlalchemy.types import Float
 if par == True:
     import multiprocessing as mp
     from joblib import Parallel, delayed
