@@ -6,3 +6,7 @@ pass.txt
 pass_email.txt
 NOTES.md
 .ftpconfig
+__pycache__
+*ini
+*.pdf
+*.gdoc

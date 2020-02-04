@@ -140,7 +140,7 @@ def query_points(db, context):
 
     # add df to sql
     logger.info('Writing data to SQL')
-    origxdest.to_sql('distance', con=db['engine'], if_exists='replace', index=False)
+    origxdest.to_sql('distance', con=db['engine'], if_exists='replace', index=False, dtype={"distance": Float()}))
     # add index
     cursor.execute('CREATE INDEX on distance (id_orig);')
     # commit
