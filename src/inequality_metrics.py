@@ -12,16 +12,14 @@ For given beta and states, will take data from SQL with population and distance 
 beta = -0.5
 epsilon = 0.5
 states = ['md','fl', 'co', 'mi', 'la', 'ga', 'or', 'il', 'wa', 'tx']
-file_name = 'full_city_compare_'.format(beta)
+file_name = 'full_city_compare_{}'.format(beta)
 
 # Imports
-
 import utils
 from config import *
 
-
 def main():
-    '''Creates dataframe and adds data before plotting and exporting CSV'''
+    '''Creates dataframe and adds data for each city before plotting and exporting CSV'''
     city, data = get_data() # data is a dictionary of dataframes for each state
     kapa = calc_kapa(data) # kapa is based on the distances from ALL states and the beta provided
     results = pd.DataFrame(np.nan, index=np.arange(10), columns=['State','City', 'Kapa', 'Beta', 'Epsilon', 'Kolm-Pollak EDE', 'Atkinson EDE', 'Atkinson Adjusted EDE', 'Kolm-Pollak Index', 'Atkinson Index', 'Atkinson Adjusted Index', 'Gini Index', 'Distribution Mean', 'Distribution Max', 'Distribution Standard Deviation', 'Distribution Coefficient of Variation'])

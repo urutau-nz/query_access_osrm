@@ -1,83 +1,57 @@
 '''
-The goal of this script is to do any of the following:
-For supermarkets in a given city:
-    1. Calculate the EDEs and Indices
-    2. Plot a population weight Histogram with summary statistics
-    3. Plot a gini curve
-    4. Plot a CDF
-    5. Return a CSV file with all EDEs, Indices, and Summary statistics
-For a list of races/ethnicities within a given city:
-    1. Calculate the EDEs and Indices for each race
-    2. Plot a population weight Histogram with summary statistics for each race
-    3. Plot a gini curve for each race
-    4. Plot a CDF for each race
-    5. Return a CSV file with all EDEs, Indices, and Summary statistics
-For a list of cities:
-    1. Calculate the EDEs and Indices
-    2. Plot a population weight Histogram with summary statistics
-    3. Plot a gini curve
-    4. Plot a CDF
-    5. Return a CSV file with all EDEs, Indices, and Summary statistics
+For given beta and states, will take data from SQL with population and distance and provide:
+    Kolm-Pollak Index & EDE
+    Atkinson Index & EDE
+    Adjusted Atkinson Index and EDE
+    Gini Index
+    Plot of Gini, CDF and Distribution
+    Distribution summary statistics
 '''
 
 # User defined variables
-
-kapa = -0.170477678 #This should be equal to kapa used for intercity comparisons
+kapa = -0.170477678 #This should be equal to kapa used for city comparisons
 beta = -0.5
 epsilon = 0.5
-states = ['md','fl', 'co', 'mi', 'la', 'ga', 'or', 'il', 'wa', 'tx']
-state = input('State: ')
-compare_race = False
-race_labels = ['all', 'white', 'black', 'american_indian', 'asian', 'hispanic'] #Black and african american, indiand and native alaskan, hispanic and latino
 races = ['H7X001', 'H7X002', 'H7X003', 'H7X004', 'H7X005', 'H7Y003']
+race_labels = ['all', 'white', 'black', 'american_indian', 'asian', 'hispanic'] #Black and african american, indiand and native alaskan, hispanic and latino
+state = input('State: ')
 
+#imports
 import utils
 from config import *
 db, context = cfg_init(state)
 cursor = db['con'].cursor()
+
 file_name = '{}_race_results'.format(context['city'])
 
 def main():
-    df = get_df()
-    gini_inds, at_adj_inds, at_inds, kp_inds, kp_edes, at_adj_edes = [], [], [], [], [], []
-    at_edes, dist_means, dist_maxs, dist_stds, dist_covs = [], [], [], [], []
-    kapas, betas, epsilons, states_, city = [], [], [], [], []
+    df, city = get_df()
+    results = pd.DataFrame(np.nan, index=np.arange(6), columns=['State', 'City', 'Race', 'Race_Label', 'Kapa', 'Beta', 'Epsilon', 'Kolm-Pollak EDE', 'Atkinson EDE', 'Atkinson Adjusted EDE', 'Kolm-Pollak Index', 'Atkinson Index', 'Atkinson Adjusted Index', 'Gini Index', 'Distribution Mean', 'Distribution Max', 'Distribution Standard Deviation', 'Distribution Coefficient of Variation'])
+    # adds race
+    results.Race_Label = race_labels
+    results.Race = races
+    #sets index to race
+    results = results.set_index('Race')
     for race in races:
-        gini = get_gini(df, race)
-        gini_inds.append(gini)
-
-        at_adj_ind, at_adj_ede = get_at_adj(df, race)
-        at_adj_inds.append(at_adj_ind)
-        at_adj_edes.append(at_adj_ede)
-
-        at_ind, at_ede = get_at(df, race)
-        at_inds.append(at_ind)
-        at_edes.append(at_ede)
-
-        kp_ind, kp_ede = get_kp(df, kapa, race)
-        kp_inds.append(kp_ind)
-        kp_edes.append(kp_ede)
-
-        mean, max, std, cov = get_stats(df, race)
-        dist_means.append(mean)
-        dist_maxs.append(max)
-        dist_stds.append(std)
-        dist_covs.append(cov)
-
-        kapas.append(kapa)
-        betas.append(beta)
-        epsilons.append(epsilon)
-
-        states_.append(state)
-        city.append(context['city'])
+        # adds the city name
+        results.City = city
+        # adds aversion params
+        results.loc[race, 'Kapa'], results.loc[race, 'Beta'], results.loc[race, 'Epsilon'] = kapa, beta, epsilon
+        # adds all Kolm-Pollak metrics
+        results.loc[race, 'Kolm-Pollak Index'], results.loc[race, 'Kolm-Pollak EDE'] = get_kolm(df, kapa, race)
+        # adds all normal (with inverted x) atkinson metrics
+        results.loc[race, 'Atkinson Index'], results.loc[race, 'Atkinson EDE'] = get_at(df, race)
+        # adds all adjusted atkinson metrics
+        results.loc[race, 'Atkinson Adjusted Index'], results.loc[race, 'Atkinson Adjusted EDE'] = get_at_adj(df, race)
+        # adds gini
+        results.loc[race, 'Gini Index'] = get_gini(df, race)
+        # adds all summary stats from the distribution
+        results.loc[race, 'Distribution Mean'], results.loc[race, 'Distribution Max'], results.loc[race, 'Distribution Standard Deviation'], results.loc[race, 'Distribution Coefficient of Variation'] = get_stats(df, race)
 
     plot_gini(df)
     plot_hist(df)
     plot_cdf(df)
-
-    results = pd.DataFrame(list(zip(states_, city, races, kapas, betas, epsilons, kp_edes, at_edes, at_adj_edes, kp_inds, at_inds, at_adj_inds, gini_inds, dist_means, dist_maxs, dist_stds, dist_covs)), columns=['State', 'City', 'Race','Kapa', 'Beta', 'Epsilon', 'Kolm Pollock EDE', 'Atkinson EDE', 'Atkinson Adjusted EDE', 'Kolm Pollock Index', 'Atkinson Index', 'Atkinson Adjusted Index', 'Gini Index', 'Distribution Mean', 'Distribution Max', 'Distribution Standard Deviation', 'Distribution Coefficient of Variation'])
     results.to_csv(r'/homedirs/man112/access_inequality_index/data/results/{}.csv'.format(file_name))
-
 
 def get_df():
     #Makes a dictionary of nearest dist and demo
@@ -91,7 +65,7 @@ def get_df():
     df = df.loc[df['distance'] !=0]
     df = df.loc[df['H7X001'] !=0]
     df = df.dropna()
-    return(df)
+    return(df, city)
 
 def get_gini(df, race):
     df = df.loc[df[race]!=0]
@@ -135,7 +109,7 @@ def get_at(df, race):
     at_ind = 1 - (at_ede/x_mean)
     return(at_ind, at_ede)
 
-def get_kp(df, kapa, race):
+def get_kolm(df, kapa, race):
     df = df.loc[df[race]!=0]
     N = df[race].sum()
     x_mean = np.average(df['distance'], weights = df[race])/1000
