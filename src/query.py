@@ -39,7 +39,7 @@ def main(db, context):
     logger.info('Database connection closed')
 
     # email completion notification
-    #utils.send_email(body='Querying {} complete'.format(context['city']))
+    utils.send_email(body='Querying {} complete'.format(context['city']))
 
 
 def create_dest_table(db):
