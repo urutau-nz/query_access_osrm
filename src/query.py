@@ -16,7 +16,7 @@ import osgeo.ogr
 import shapely
 from geoalchemy2 import Geometry, WKTElement
 import requests
-from sqlalchemy.types import Float
+from sqlalchemy.types import Float, Integer
 if par == True:
     import multiprocessing as mp
     from joblib import Parallel, delayed
@@ -77,8 +77,8 @@ def create_dest_table(db):
 
     # update indices
     cursor = con.cursor()
-    queries = ['CREATE INDEX "dest_id" ON destinations' + ' ("id");',
-            'CREATE INDEX "dest_type" ON destinations' + ' ("dest_type");']
+    queries = ['CREATE INDEX "dest_id" ON destinations ("id");',
+            'CREATE INDEX "dest_type" ON destinations ("dest_type");']
     for q in queries:
         cursor.execute(q)
 
@@ -141,11 +141,15 @@ def query_points(db, context):
 
     # add df to sql
     logger.info('Writing data to SQL')
-    origxdest.to_sql('distance', con=db['engine'], if_exists='replace', index=False, dtype={"distance": Float()}))
-    # add index
-    cursor.execute('CREATE INDEX on distance (id_orig);')
-    # commit
-    db['con'].commit()
+    origxdest.to_sql('distance', con=db['engine'], if_exists='replace', index=False, dtype={"distance":Float(), 'id_dest':Integer()})
+    # update indices
+    queries = ['CREATE INDEX "dest_idx" ON distance ("id_dest");',
+            'CREATE INDEX "orig_idx" ON distance ("id_orig");']
+    for q in queries:
+        cursor.execute(q)
+
+    # commit to db
+    con.commit()
     logger.info('Distances written successfully to SQL')
 
 
