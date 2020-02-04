@@ -1,24 +1,4 @@
-'''
-The goal of this script is to do any of the following:
-For supermarkets in a given city:
-    1. Calculate the EDEs and Indices
-    2. Plot a population weight Histogram with summary statistics
-    3. Plot a gini curve
-    4. Plot a CDF
-    5. Return a CSV file with all EDEs, Indices, and Summary statistics
-For a list of races/ethnicities within a given city:
-    1. Calculate the EDEs and Indices for each race
-    2. Plot a population weight Histogram with summary statistics for each race
-    3. Plot a gini curve for each race
-    4. Plot a CDF for each race
-    5. Return a CSV file with all EDEs, Indices, and Summary statistics
-For a list of cities:
-    1. Calculate the EDEs and Indices
-    2. Plot a population weight Histogram with summary statistics
-    3. Plot a gini curve
-    4. Plot a CDF
-    5. Return a CSV file with all EDEs, Indices, and Summary statistics
-'''
+
 
 # User defined variables
 # Will compare the
@@ -36,6 +16,7 @@ from config import *
 
 def main():
     data, kapa, city = calc_kapa()
+    results = pd.DataFrame(np.nan, index[], columns=['State','City', 'Kapa', 'Beta', 'Epsilon', 'Kolm Pollock EDE', 'Atkinson EDE', 'Atkinson Adjusted EDE', 'Kolm Pollock Index', 'Atkinson Index', 'Atkinson Adjusted Index', 'Gini Index', 'Distribution Mean', 'Distribution Max', 'Distribution Standard Deviation', 'Distribution Coefficient of Variation'])
     gini_inds = []
     at_adj_inds = []
     at_inds = []
