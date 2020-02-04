@@ -4,93 +4,55 @@
 # Will compare the
 beta = -0.5
 epsilon = 0.5
-compare_city = False
 states = ['md','fl', 'co', 'mi', 'la', 'ga', 'or', 'il', 'wa', 'tx']
-compare_race = False
-races = ['all', 'white', 'non_white', 'black', 'american_indian', 'asian', 'hispanic'] #Black and african american, indiand and native alaskan, hispanic and latino
-file_name = 'test_results'
+file_name = 'test_results_cleaned'
 
 import utils
 from config import *
 
 
 def main():
-    data, kapa, city = calc_kapa()
-    results = pd.DataFrame(np.nan, index[], columns=['State','City', 'Kapa', 'Beta', 'Epsilon', 'Kolm Pollock EDE', 'Atkinson EDE', 'Atkinson Adjusted EDE', 'Kolm Pollock Index', 'Atkinson Index', 'Atkinson Adjusted Index', 'Gini Index', 'Distribution Mean', 'Distribution Max', 'Distribution Standard Deviation', 'Distribution Coefficient of Variation'])
-    gini_inds = []
-    at_adj_inds = []
-    at_inds = []
-    kp_inds = []
-    kp_edes = []
-    at_adj_edes = []
-    at_edes = []
-    dist_means = []
-    dist_maxs = []
-    dist_stds = []
-    dist_covs = []
-    kapas = []
-    betas = []
-    epsilons = []
-    states_ = []
-
+    city, data = get_data()
+    kapa = calc_kapa(data)
+    results = pd.DataFrame(np.nan, index=np.arange(10), columns=['State','City', 'Kapa', 'Beta', 'Epsilon', 'Kolm-Pollak EDE', 'Atkinson EDE', 'Atkinson Adjusted EDE', 'Kolm-Pollak Index', 'Atkinson Index', 'Atkinson Adjusted Index', 'Gini Index', 'Distribution Mean', 'Distribution Max', 'Distribution Standard Deviation', 'Distribution Coefficient of Variation'])
+    results.State = states
+    results = results.set_index('State')
     for state in states:
         df = data['{}_data'.format(state)]
-        gini = get_gini(df)
-        gini_inds.append(gini)
-
-        at_adj_ind, at_adj_ede = get_at_adj(df)
-        at_adj_inds.append(at_adj_ind)
-        at_adj_edes.append(at_adj_ede)
-
-        at_ind, at_ede = get_at(df)
-        at_inds.append(at_ind)
-        at_edes.append(at_ede)
-
-        kp_ind, kp_ede = get_kp(df, kapa)
-        kp_inds.append(kp_ind)
-        kp_edes.append(kp_ede)
-
-        mean, max, std, cov = get_stats(df)
-        dist_means.append(mean)
-        dist_maxs.append(max)
-        dist_stds.append(std)
-        dist_covs.append(cov)
-
-        kapas.append(kapa)
-        betas.append(beta)
-        epsilons.append(epsilon)
-
-        states_.append(state)
+        results.City = city
+        results.loc[state, 'Kapa'], results.loc[state, 'Beta'], results.loc[state, 'Epsilon'] = kapa, beta, epsilon
+        results.loc[state, 'Kolm-Pollak Index'], results.loc[state, 'Kolm-Pollak EDE'] = get_kp(df, kapa)
+        results.loc[state, 'Atkinson Index'], results.loc[state, 'Atkinson EDE'] = get_at(df)
+        results.loc[state, 'Atkinson Adjusted Index'], results.loc[state, 'Atkinson Adjusted EDE'] = get_at_adj(df)
+        results.loc[state, 'Gini Index'] = get_gini(df)
+        results.loc[state, 'Distribution Mean'], results.loc[state, 'Distribution Max'], results.loc[state, 'Distribution Standard Deviation'], results.loc[state, 'Distribution Coefficient of Variation'] = get_stats(df)
 
     plot_gini(data)
     plot_hist(data)
     plot_cdf(data)
 
-    results = pd.DataFrame(list(zip(states_, city, kapas, betas, epsilons, kp_edes, at_edes, at_adj_edes, kp_inds, at_inds, at_adj_inds, gini_inds, dist_means, dist_maxs, dist_stds, dist_covs)), columns=['State','City', 'Kapa', 'Beta', 'Epsilon', 'Kolm Pollock EDE', 'Atkinson EDE', 'Atkinson Adjusted EDE', 'Kolm Pollock Index', 'Atkinson Index', 'Atkinson Adjusted Index', 'Gini Index', 'Distribution Mean', 'Distribution Max', 'Distribution Standard Deviation', 'Distribution Coefficient of Variation'])
     results.to_csv(r'/homedirs/man112/access_inequality_index/data/results/{}.csv'.format(file_name))
 
-
-def calc_kapa():
-    #Makes a dictionary of nearest dist and demo
-    dist = {}
+def get_data():
+    data = {}
     city = []
     for state in states:
         db, context = cfg_init(state)
         cursor = db['con'].cursor()
         sql = 'SELECT * FROM distxdem'
-        dist["{}_df".format(state)] = pd.read_sql(sql, db["con"])
+        data["{}_data".format(state)] = pd.read_sql(sql, db["con"])
         db['con'].close()
         city.append(context['city'])
-
-    #Sorts the dfs for each state and gives population columns
-    data = {}
-    kapa_data = []
-    for state in states:
-        df = dist['{}_df'.format(state)]
+        df = data['{}_data'.format(state)]
         df = df.loc[df['distance'] !=0]
         df = df.loc[df['H7X001'] !=0]
-        df = df.dropna()
         data['{}_data'.format(state)] = df
+    return(city, data)
+
+def calc_kapa(data):
+    kapa_data = []
+    for state in states:
+        df = data['{}_data'.format(state)]
         count = 0
         for i in df['distance']/1000:
             for pop in range(int(df['H7X001'].iloc[count])):
@@ -103,7 +65,7 @@ def calc_kapa():
         x_sum += i
         x_sq_sum += i**2
     kapa = beta*(x_sum/x_sq_sum)
-    return(data, kapa, city)
+    return(kapa)
 
 def get_gini(df):
     dist_tot = df['distance'].sum()
@@ -200,6 +162,7 @@ def plot_gini(data):
 def plot_hist(data):
 
     fig, axes = plt.subplots(ncols=2,nrows=5, sharex=True, sharey=True, gridspec_kw={'hspace':0.5})
+    print('Collecting Histogram Data')
     for state, ax in zip(states, axes.flat):
         df = data['{}_data'.format(state)]
         pop_tot = df.H7X001.sum()
