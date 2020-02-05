@@ -10,3 +10,4 @@ __pycache__
 *ini
 *.pdf
 *.gdoc
+src/test.py
