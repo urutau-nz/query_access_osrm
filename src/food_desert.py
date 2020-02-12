@@ -44,7 +44,7 @@ def main():
         # adds all adjusted atkinson metrics
         results.loc[state, 'Atkinson Adjusted Index'], results.loc[state, 'Atkinson Adjusted EDE'] = inequality_function.atkinson_adjusted_index(a, beta, weight), inequality_function.atkinson_adjusted_ede(a, beta, weight)
         # adds gini
-        results.loc[state, 'Gini Index'] = inequality_function.gini_index(a, epsilon, weight)
+        results.loc[state, 'Gini Index'] = inequality_function.gini_index(a, beta, weight)
         # adds all summary stats from the distribution
         results.loc[state, 'Distribution Mean'], results.loc[state, 'Distribution Max'], results.loc[state, 'Distribution Standard Deviation'], results.loc[state, 'Distribution Coefficient of Variation'] = get_stats(df)
 

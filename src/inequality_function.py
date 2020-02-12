@@ -144,7 +144,6 @@ def atkinson_index(a, epsilon = -0.5, weight = None):
 
 def gini_index(a, beta = -0.5, weight = None):
     area_total = simps(np.arange(0,101,1), dx=1) #Calculates the area under the x=y curve
-    print(area_total)
     if not weight:
         N = len(a)
     else:
@@ -173,6 +172,7 @@ def gini_index(a, beta = -0.5, weight = None):
         for i in weight:
             w_perc_sum += i/weight_tot*100
             weight_perc.append(w_perc_sum)
+
         area_real = simps(a_percent, weight_perc)
         area_diff = area_total - area_real
         gini = round((area_diff / area_total), 3)

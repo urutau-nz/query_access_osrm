@@ -39,7 +39,7 @@ def main(db, context):
     logger.info('Database connection closed')
 
     # email completion notification
-    utils.send_email(body='Querying {} complete'.format(context['city']))
+    #utils.send_email(body='Querying {} complete'.format(context['city']))
 
 
 def create_dest_table(db):
@@ -119,7 +119,6 @@ def query_points(db, context):
     query_0 = np.full(fill_value = context['osrm_url'] + '/route/v1/driving/', shape=origxdest.shape[0], dtype = object)
     # the query looks like this: '{}/route/v1/driving/{},{};{},{}?overview=false'.format(osrm_url, lon_o, lat_o, lon_d, lat_d)
     queries = query_0 + np.array(orig_df.loc[origxdest['id_orig'].values]['x'].values, dtype = str) + ',' + np.array(orig_df.loc[origxdest['id_orig'].values]['y'].values, dtype = str) + ';' + np.array(dest_df.loc[origxdest['id_dest'].values]['lon'].values, dtype = str) + ',' + np.array(dest_df.loc[origxdest['id_dest'].values]['lat'].values, dtype = str) + '?overview=false'
-
     ###
     # loop through the queries
     ###
@@ -149,7 +148,7 @@ def query_points(db, context):
         cursor.execute(q)
 
     # commit to db
-    con.commit()
+    db['con'].commit()
     logger.info('Distances written successfully to SQL')
 
 

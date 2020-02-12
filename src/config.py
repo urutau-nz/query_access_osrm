@@ -113,7 +113,7 @@ def cfg_init(state):
         context['city_code'] = 'san'
         context['city'] = 'San_Francisco'
         context['osrm_url'] = 'http://localhost:6013'
-        context['services'] = ['supermarket', 'hospital']
+        context['services'] = ['supermarket','hospital']
     # connect to database
     db['engine'] = create_engine('postgresql+psycopg2://postgres:' + db['passw'] + '@' + db['host'] + '/' + db['name'] + '?port=' + db['port'])
     db['address'] = "host=" + db['host'] + " dbname=" + db['name'] + " user=postgres password='"+ db['passw'] + "' port=" + db['port']
