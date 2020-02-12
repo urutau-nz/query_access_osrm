@@ -5,7 +5,7 @@ Query origins to dests in OSRM
 # user defined variables
 state = input('State: ')
 par = True
-par_frac = 0.5
+par_frac = 0.8
 
 import utils
 from config import *
