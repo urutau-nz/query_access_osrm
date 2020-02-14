@@ -11,3 +11,4 @@ __pycache__
 *.pdf
 *.gdoc
 src/test.py
+inequality_function_test.py

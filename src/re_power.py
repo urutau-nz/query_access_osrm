@@ -7,12 +7,14 @@ from mpl_toolkits import mplot3d
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.style as style
+from pathlib import Path
 style.use('fivethirtyeight')
 from matplotlib import cm
 import pandas as pd
 import datetime
 import seaborn as sns
-data_dir = "//file.canterbury.ac.nz/Research/CivilSystems/data/scraped_data/power_outages/2016-hurricane-matthew/"
+import inequality_funtion_test
+data_dir = "/homedirs/man112/access_inequality_index/data/power/2016-hurricane-matthew/"
 # loop txt files and append to df
 df = pd.DataFrame(columns=['datetime', 'area', 'cust_out','cust_total','util'])
 utilities = ['DC_MD_Pepco','FL_DukeEnergy','FL_FloridaPower_Light','GA_GeorgiaPower','NC_SC_DukeEnergy','VA_DominionVirginiaPower']
@@ -82,3 +84,25 @@ for util in utilities:
     df_util['perc'].plot(kind='hist',alpha=0.5)
     # a = np.histogram(a=df_restor_util.time_restore, weights=df_restor_util.customers)
     # _ = plt.hist(a)
+
+#get ede for time to restore for each util
+#init results dataframe
+results = pd.DataFrame(columns=['util', 'mean', 'ede', 'index'])
+# input utilities
+results['util'] = utilities
+results = results.set_index('util')
+
+kappa = inequality_funtion_test.calc_kappa(list(df_restor.time_restore), -0.5, list(df_restor.customers))
+print(kappa)
+for utility in utilities:
+    df = df_restor.set_index('util')
+    # sort by utility
+    df = df.loc[utility]
+    results.loc[utility, ['mean']] = np.average(list(df.time_restore), weights = list(df.customers))
+    results.loc[utility, ['ede']] = inequality_funtion_test.kolm_pollak_ede(list(df.time_restore), -0.5, kappa, list(df.customers))
+    results.loc[utility,['index']] = inequality_funtion_test.kolm_pollak_index(list(df.time_restore), -0.5, kappa, list(df.customers))
+
+results.to_csv(r'/homedirs/man112/access_inequality_index/data/results/EDE_power.csv'.format())
+
+
+#code.interact(local=locals())

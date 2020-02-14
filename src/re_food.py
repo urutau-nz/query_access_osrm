@@ -7,7 +7,7 @@ state = 'nc'
 import utils
 from config import *
 db, context = cfg_init(state)
-import inequality_metrics
+import inequality_function
 # import race_metrics
 from datetime import datetime
 import matplotlib as mpl
@@ -43,6 +43,7 @@ for service in services:
         # read the distances
         sql = 'SELECT distance, id_orig FROM nearest_florence WHERE time_stamp = %s AND service = %s'
         distance = pd.read_sql(sql, con, params = (time_stamp, service,))
+        distance['distance'] = distance.distance/1000
         # import number of people
         sql = 'SELECT "H7X001", "H7X002", geoid10 FROM demograph;'
         distribution = pd.read_sql(sql, con)
@@ -51,34 +52,52 @@ for service in services:
         # calculate the mean
         results.loc[index, 'mean'] = np.average(distribution.distance.values, weights = distribution.H7X001.values)
         # determine kappa
-        # if not kappa:
-            # kappa = calc_kapa()
-        # results.loc[index,['EDE_kp_a','equal_kp_a']] = inequality_metrics.get_kp()
-        # results.loc[index,['EDE_kp_w','equal_kp_w']] = race_metrics.get_kp()
-        # results.loc[index,['EDE_kp_b','equal_kp_b']] = race_metrics.get_kp()
+        if not kappa:
+            kappa = inequality_function.calc_kappa(list(distribution.distance), -0.5, list(distribution.H7X001))
+        results.loc[index,['EDE_kp_a']] = inequality_function.kolm_pollak_ede(list(distribution.distance), -0.5, kappa, list(distribution.H7X001))
+        results.loc[index,['equal_kp_a']] = inequality_function.kolm_pollak_index(list(distribution.distance), -0.5, kappa, list(distribution.H7X001))
+        #results.loc[index,['EDE_kp_w']] = inequality_function.kolm_pollak_ede(list(distribution.distance), -0.5, kappa, list(distribution.H7X002))
+        #results.loc[index,['equal_kp_w']] = inequality_function.kolm_pollak_index(list(distribution.distance), -0.5, kappa, list(distribution.H7X002))
+        #results.loc[index,['EDE_kp_b']] = inequality_function.kolm_pollak_ede(list(distribution.distance), -0.5, kappa, list(distribution.H7X001-distribution.H7X002))
+        #results.loc[index,['equal_kp_b']] = inequality_function.kolm_pollak_index(list(distribution.distance), -0.5, kappa, list(distribution.H7X001-distribution.H7X002))
         # plot the results
         # if service == 'gas_station':
-    results['mean'] = results['mean'] - results.loc[0,'mean']
-    f1 = results.plot(x='days', y='mean', figsize = (w,h), legend = False, ax=ax)
+    #results['mean'] = results['mean'] - results.loc[0,'mean']
+
+plt.plot(results.days, (results.EDE_kp_a - results.EDE_kp_a.iloc[0]))
+plt.plot(results.days, (results['mean'] - results['mean'].iloc[0]))
+
+plt.title('EDE change over time: Wilmington access to supermarkets')
+plt.xlabel('Days since landfall')
+plt.ylabel('Change in EDE (km)')
+plt.ylim([-1,6])
+plt.xlim([-5,20])
+
+    #f1 = results.plot(x='days', y='mean', figsize = (w,h), legend = False, ax=ax)
 # plot the results
+#plt.plot(results.days, results.EDE_kp_a)
 # plot as difference from initial
 # horizontal line at 0
-# f1.axhline(y = 0, color = 'black', linewidth = 1.3, alpha = .7)
+#f1.axhline(y = 0, color = 'black', linewidth = 1.3, alpha = .7)
 # vertical line on left
-# if service == 'gas_station':
-#     f1.set_xlim(left = -5, right = 25)
-#     f1.set_ylim([0,1500])
-# else:
-#     f1.set_xlim(left = -5, right = 15)
-#     f1.set_ylim([0,6000])
-f1.set_xlim(left = -5, right = 15)
-f1.set_ylim([0,2000])
+#if service == 'gas_station':
+#    f1.set_xlim(left = -5, right = 25)
+#    f1.set_ylim([0,1500])
+#else:
+#    f1.set_xlim(left = -5, right = 15)
+#    f1.set_ylim([0,6000])
+#f1.set_xlim(left = -5, right = 15)
+#f1.set_ylim([0,2])
 # axis labels
-f1.tick_params(axis = 'both', which = 'major', labelsize = 10)
+#f1.tick_params(axis = 'both', which = 'major', labelsize = 10)
 # flip y axis
 plt.gca().invert_yaxis()
 # save
-plt.savefig('recovery_access.pdf',dpi=600,orientation='landscape',format='pdf',facecolor='w', edgecolor='w',transparent=True, bbox_inches="tight")
-plt.show()
-# code.interact(local=locals())
+fig_out = '/homedirs/man112/access_inequality_index/data/results/EDE_change_mean.pdf'.format()
+if os.path.isfile(fig_out):
+    os.remove(fig_out)
+plt.savefig(fig_out,dpi=600,orientation='landscape',format='pdf',facecolor='w', edgecolor='w',transparent=True, bbox_inches="tight")
+plt.clf()
+results.to_csv(r'/homedirs/man112/access_inequality_index/data/results/EDE_change.csv'.format())
+#code.interact(local=locals())
 db['con'].close()
