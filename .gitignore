@@ -12,3 +12,5 @@ __pycache__
 *.gdoc
 src/test.py
 inequality_function_test.py
+*.ai
+*.pdf

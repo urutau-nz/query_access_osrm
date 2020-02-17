@@ -18,6 +18,13 @@ file_name = 'food_des_{}'.format(beta)
 import utils
 from config import *
 import inequality_function
+import matplotlib
+matplotlib.rcParams['pdf.fonttype'] = 42
+matplotlib.rcParams['ps.fonttype'] = 42
+import matplotlib.style as style
+style.use('fivethirtyeight')
+w = 5
+h = w/1.618
 
 def main():
     '''Creates dataframe and adds data for each city before plotting and exporting CSV'''
@@ -226,8 +233,107 @@ def plot_cdf(data):
     fig_out = '/homedirs/man112/access_inequality_index/data/results/CDF_test.pdf'.format()
     if os.path.isfile(fig_out):
         os.remove(fig_out)
-    plt.savefig(fig_out, dpi=500, format='pdf', transparent=False)#, bbox_inches='tight')
+    # plt.savefig(fig_out, dpi=500, format='pdf', transparent=False)#, bbox_inches='tight')
+    # plt.clf()
+
+def plot_cdf_dems(data = None):
+    '''plots a cdf from a data frame'''
+    if not data:
+        # file_name = 'food_des_{}'.format(beta)
+        city, data = get_data()
+
+    for state in ['tx','il']:
+        for race in ['H7X001','H7X002','H7X003']:
+            df = data['{}_data'.format(state)].copy() #gets correct dataframe
+            pop_tot = df[race].sum()
+            df = df.sort_values(by='distance')
+            df['pop_perc'] = df[race].cumsum()/pop_tot*100 #percentage of pop
+            plt.plot(df.distance, df.pop_perc, label = state+'_'+race) #plot the cdf
+    plt.plot(np.arange(0,100,100/10000), 10000*[100], '--') #plot y=100% line
+    # labels
+    plt.ylabel('% Residents')
+    plt.xlabel('Distance to the nearest supermakrt (km)'.format())
+    plt.title('CDF: Distance to the nearest supermarket'.format(), loc='center')
+    plt.legend(loc='best')
+    # limits
+    plt.xlim([0,10])
+    plt.ylim([0,None])
+    # horizontal line at 0
+    plt.axhline(y = 0, color = 'black', linewidth = 1.3, alpha = .7)
+    # vertical line on left
+    # plt.set_xlim(left = 0, right = 10)
+    # background
+    # plt.set_facecolor('w')
+    # savefig
+    fig_out = '/homedirs/man112/access_inequality_index/fig/CDF_fooddesert_bestworst.pdf'.format()
+    if os.path.isfile(fig_out):
+        os.remove(fig_out)
+    plt.savefig(fig_out, dpi=500, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
     plt.clf()
+
+def plot_edes(data = None):
+    '''plots the ede and inequality indices'''
+    if not data:
+        file_name = 'food_des_{}'.format(beta)
+        data = pd.read_csv('/homedirs/man112/access_inequality_index/data/results/food_des/{}.csv'.format(file_name))
+
+    # sort the data by the KP EDE
+    data = data.sort_values(by='Kolm-Pollak EDE')
+    print(data)
+    # plot on a line graph
+    ax = plt.axes()
+    plt.locator_params(axis='y', nbins=4)
+    data.plot(x="City", y=["Kolm-Pollak EDE", "Atkinson EDE", "Atkinson Adjusted EDE", "Distribution Mean"],ax=ax)
+    plt.ylim([0, None])
+    plt.xticks(range(10),data.City)
+    plt.xticks(rotation=90)
+    plt.axhline(y = 0, color = 'black', linewidth = 1.3, alpha = .7)
+    fig_out = '/homedirs/man112/access_inequality_index/fig/ede_compare.pdf'.format()
+    plt.savefig(fig_out, dpi=500, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
+    plt.clf()
+    # plot the indices on another line graph
+    ax = plt.axes()
+    plt.locator_params(axis='y', nbins=3)
+    data.plot(x="City", y=["Kolm-Pollak Index", "Atkinson Index", "Atkinson Adjusted Index", "Distribution Coefficient of Variation", "Gini Index"],ax=ax)
+    plt.ylim([0, 1])
+    plt.xticks(range(10),data.City)
+    plt.xticks(rotation=90)
+    plt.axhline(y = 0, color = 'black', linewidth = 1.3, alpha = .7)
+    fig_out = '/homedirs/man112/access_inequality_index/fig/index_compare.pdf'.format()
+    plt.savefig(fig_out, dpi=500, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
+
+
+    #
+    # for state in ['tx','il']:
+    #     for race in ['H7X001','H7X002','H7X003']:
+    #         df = data['{}_data'.format(state)].copy() #gets correct dataframe
+    #         pop_tot = df[race].sum()
+    #         df = df.sort_values(by='distance')
+    #         df['pop_perc'] = df[race].cumsum()/pop_tot*100 #percentage of pop
+    #         plt.plot(df.distance, df.pop_perc, label = state+'_'+race) #plot the cdf
+    # plt.plot(np.arange(0,100,100/10000), 10000*[100], '--') #plot y=100% line
+    # # labels
+    # plt.ylabel('% Residents')
+    # plt.xlabel('Distance to the nearest supermakrt (km)'.format())
+    # plt.title('CDF: Distance to the nearest supermarket'.format(), loc='center')
+    # plt.legend(loc='best')
+    # # limits
+    # plt.xlim([0,10])
+    # plt.ylim([0,None])
+    # # horizontal line at 0
+    # plt.axhline(y = 0, color = 'black', linewidth = 1.3, alpha = .7)
+    # # vertical line on left
+    # # plt.set_xlim(left = 0, right = 10)
+    # # background
+    # # plt.set_facecolor('w')
+    # # savefig
+    # fig_out = '/homedirs/man112/access_inequality_index/fig/CDF_fooddesert_bestworst.pdf'.format()
+    # if os.path.isfile(fig_out):
+    #     os.remove(fig_out)
+    # plt.savefig(fig_out, dpi=500, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
+    # plt.clf()
+
+
 
 if __name__ == '__main__':
     main()

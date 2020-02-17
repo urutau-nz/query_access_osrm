@@ -13,7 +13,7 @@ from matplotlib import cm
 import pandas as pd
 import datetime
 import seaborn as sns
-import inequality_funtion_test
+import inequality_function
 data_dir = "/homedirs/man112/access_inequality_index/data/power/2016-hurricane-matthew/"
 # loop txt files and append to df
 df = pd.DataFrame(columns=['datetime', 'area', 'cust_out','cust_total','util'])
@@ -92,15 +92,15 @@ results = pd.DataFrame(columns=['util', 'mean', 'ede', 'index'])
 results['util'] = utilities
 results = results.set_index('util')
 
-kappa = inequality_funtion_test.calc_kappa(list(df_restor.time_restore), -0.5, list(df_restor.customers))
+kappa = inequality_function.calc_kappa(list(df_restor.time_restore), -0.5, list(df_restor.customers))
 print(kappa)
 for utility in utilities:
     df = df_restor.set_index('util')
     # sort by utility
     df = df.loc[utility]
     results.loc[utility, ['mean']] = np.average(list(df.time_restore), weights = list(df.customers))
-    results.loc[utility, ['ede']] = inequality_funtion_test.kolm_pollak_ede(list(df.time_restore), -0.5, kappa, list(df.customers))
-    results.loc[utility,['index']] = inequality_funtion_test.kolm_pollak_index(list(df.time_restore), -0.5, kappa, list(df.customers))
+    results.loc[utility, ['ede']] = inequality_function.kolm_pollak_ede(list(df.time_restore), -0.5, kappa, list(df.customers))
+    results.loc[utility,['index']] = inequality_function.kolm_pollak_index(list(df.time_restore), -0.5, kappa, list(df.customers))
 
 results.to_csv(r'/homedirs/man112/access_inequality_index/data/results/EDE_power.csv'.format())
 
