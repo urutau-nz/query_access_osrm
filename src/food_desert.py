@@ -13,6 +13,7 @@ beta = -0.5
 epsilon = 0.5
 states = ['md','fl', 'co', 'mi', 'la', 'ga', 'or', 'il', 'wa', 'tx']
 file_name = 'food_des_{}'.format(beta)
+weight_code = 'H7X001'
 
 # Imports
 import utils
@@ -36,10 +37,12 @@ def main():
     results = results.set_index('State')
     for state in states:
         # Gets the df for specific state
-        df = data['{}_data'.format(state)]
+        df = data['{}_data'.format(state)].copy()
+        # drop data that has 0 weight
+        df = df.iloc[np.array(df[weight_code]) > 0].copy()
         a = list(df.distance)
         at = list(1/df.distance)
-        weight = list(df.H7X001)
+        weight = list(df[weight_code])
         # adds the city name
         results.City = city
         # adds aversion params
@@ -58,7 +61,7 @@ def main():
     #plot_gini(data)
     #plot_hist(data)
     #plot_cdf(data)
-    results.to_csv(r'/homedirs/man112/access_inequality_index/data/results/{}.csv'.format(file_name))
+    results.to_csv('/homedirs/man112/access_inequality_index/data/results/food_des/{}_{}.csv'.format(file_name,weight_code))
 
 def get_data():
     '''fills a dictionary of dataframes for each state'''
@@ -275,22 +278,23 @@ def plot_edes(data = None):
     '''plots the ede and inequality indices'''
     if not data:
         file_name = 'food_des_{}'.format(beta)
-        data = pd.read_csv('/homedirs/man112/access_inequality_index/data/results/food_des/{}.csv'.format(file_name))
+        data = pd.read_csv('/homedirs/man112/access_inequality_index/data/results/food_des/{}_{}.csv'.format(file_name, weight_code))
 
     # sort the data by the KP EDE
     data = data.sort_values(by='Kolm-Pollak EDE')
-    print(data)
+    # print(data)
     # plot on a line graph
     ax = plt.axes()
     plt.locator_params(axis='y', nbins=4)
     data.plot(x="City", y=["Kolm-Pollak EDE", "Atkinson EDE", "Atkinson Adjusted EDE", "Distribution Mean"],ax=ax)
-    plt.ylim([0, None])
+    plt.ylim([0, 4])
     plt.xticks(range(10),data.City)
     plt.xticks(rotation=90)
     plt.axhline(y = 0, color = 'black', linewidth = 1.3, alpha = .7)
     fig_out = '/homedirs/man112/access_inequality_index/fig/ede_compare.pdf'.format()
     plt.savefig(fig_out, dpi=500, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
     plt.clf()
+    # plt.show()
     # plot the indices on another line graph
     ax = plt.axes()
     plt.locator_params(axis='y', nbins=3)
@@ -302,38 +306,57 @@ def plot_edes(data = None):
     fig_out = '/homedirs/man112/access_inequality_index/fig/index_compare.pdf'.format()
     plt.savefig(fig_out, dpi=500, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
 
+def plot_edes_dem():
+    '''plots the ede and inequality indices'''
 
-    #
-    # for state in ['tx','il']:
-    #     for race in ['H7X001','H7X002','H7X003']:
-    #         df = data['{}_data'.format(state)].copy() #gets correct dataframe
-    #         pop_tot = df[race].sum()
-    #         df = df.sort_values(by='distance')
-    #         df['pop_perc'] = df[race].cumsum()/pop_tot*100 #percentage of pop
-    #         plt.plot(df.distance, df.pop_perc, label = state+'_'+race) #plot the cdf
-    # plt.plot(np.arange(0,100,100/10000), 10000*[100], '--') #plot y=100% line
-    # # labels
-    # plt.ylabel('% Residents')
-    # plt.xlabel('Distance to the nearest supermakrt (km)'.format())
-    # plt.title('CDF: Distance to the nearest supermarket'.format(), loc='center')
-    # plt.legend(loc='best')
-    # # limits
-    # plt.xlim([0,10])
-    # plt.ylim([0,None])
-    # # horizontal line at 0
-    # plt.axhline(y = 0, color = 'black', linewidth = 1.3, alpha = .7)
-    # # vertical line on left
-    # # plt.set_xlim(left = 0, right = 10)
-    # # background
-    # # plt.set_facecolor('w')
-    # # savefig
-    # fig_out = '/homedirs/man112/access_inequality_index/fig/CDF_fooddesert_bestworst.pdf'.format()
-    # if os.path.isfile(fig_out):
-    #     os.remove(fig_out)
-    # plt.savefig(fig_out, dpi=500, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
-    # plt.clf()
+    # get the data
+    city, data = get_data() # data is a dictionary of dataframes for each state
+    kappa_data = get_kappa_data(data)
+    kappa = inequality_function.calc_kappa(kappa_data, beta) # kappa is based on the distances from ALL states and the beta provided
+    results = pd.DataFrame(np.nan, index=np.arange(10), columns=['State','City', 'KP_EDE_H7X001', 'KP_IE_H7X001', 'KP_EDE_H7X002', 'KP_IE_H7X002', 'KP_EDE_H7X003', 'KP_IE_H7X003','KP_EDE_H7X004', 'KP_IE_H7X004','KP_EDE_H7X005', 'KP_IE_H7X005'])
+    # adds the city name
+    results.State = states
+    results = results.set_index('State')
+    results.City = city
+    for state in states:
+        # Gets the df for specific state
+        df = data['{}_data'.format(state)].copy()
+        # loop demographic
+        for race in ['H7X001','H7X002','H7X003','H7X004','H7X005']:
+            # drop data that has 0 weight
+            dr = df.iloc[np.array(df[race]) > 0].copy()
+            a = list(dr.distance)
+            at = list(1/dr.distance)
+            weight = list(dr[race])
+            # adds all Kolm-Pollak metrics
+            results.loc[state, 'KP_EDE_{}'.format(race)], results.loc[state, 'KP_IE_{}'.format(race)] = inequality_function.kolm_pollak_ede(a, kappa = kappa, weight = weight), inequality_function.kolm_pollak_index(a, kappa = kappa, weight = weight)
 
-
+    print(results)
+    # sort the data by the KP EDE
+    results = results.sort_values(by='KP_EDE_H7X001')
+    # plot on a line graph
+    ax = plt.axes()
+    plt.locator_params(axis='y', nbins=4)
+    results.plot(x="City", y=["KP_EDE_H7X001", "KP_EDE_H7X002", "KP_EDE_H7X003"],ax=ax)
+    plt.ylim([0, None])
+    plt.xticks(range(10),results.City)
+    plt.xticks(rotation=90)
+    plt.axhline(y = 0, color = 'black', linewidth = 1.3, alpha = .7)
+    fig_out = '/homedirs/man112/access_inequality_index/fig/ede_race_compare.pdf'.format()
+    plt.savefig(fig_out, dpi=500, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
+    plt.clf()
+    # plt.show()
+    # plot the indices on another line graph
+    ax = plt.axes()
+    plt.locator_params(axis='y', nbins=3)
+    results.plot(x="City", y=["KP_IE_H7X001", "KP_IE_H7X002", "KP_IE_H7X003"],ax=ax)
+    plt.ylim([0, 1])
+    plt.xticks(range(10),results.City)
+    plt.xticks(rotation=90)
+    plt.axhline(y = 0, color = 'black', linewidth = 1.3, alpha = .7)
+    fig_out = '/homedirs/man112/access_inequality_index/fig/index_race_compare.pdf'.format()
+    # plt.show()
+    plt.savefig(fig_out, dpi=500, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
 
 if __name__ == '__main__':
     main()
