@@ -12,6 +12,7 @@ For given beta and states, will take data from SQL with population and distance 
 beta = -0.5
 epsilon = 0.5
 states = ['md','fl', 'co', 'mi', 'la', 'ga', 'or', 'il', 'wa', 'tx']
+cities = {'md':'baltimore','fl':'miami','co':'denver','mi':'detroit','la':'new orleans','ga':'atlanta','or':'portland','il':'chicago','wa':'seattle','tx':'houston'}
 file_name = 'food_des_{}'.format(beta)
 weight_code = 'H7X001'
 
@@ -215,29 +216,49 @@ def plot_hist(data):
     plt.savefig(fig_out, format='pdf')#, bbox_inches='tight')
     plt.clf()
 
-def plot_cdf(data):
+def plot_cdf(data=None):
     '''takes dictionary of dataframes with pop and dist. returns cdf'''
+    if data is None:
+        # file_name = 'food_des_{}'.format(beta)
+        city, data = get_data()
+    percentiles = pd.DataFrame()
     for state in states:
         df = data['{}_data'.format(state)] #gets correct dataframe
         pop_tot = df.H7X001.sum()
         df = df.sort_values(by='distance')
         df['pop_perc'] = df.H7X001.cumsum()/pop_tot*100 #percentage of pop
+        df['state'] = state
         plt.plot(df.distance, df.pop_perc, label = state) #plot the cdf
-    plt.plot(np.arange(0,100,100/10000), 10000*[100], '--') #plot y=100% line
+        percentiles = percentiles.append(df[['state','distance','pop_perc']], ignore_index=True)
+    # plt.plot(np.arange(0,100,100/10000), 10000*[100], '--') #plot y=100% line
     # labels
     plt.ylabel('% Residents')
-    plt.xlabel('Distance to the nearest supermakrt (km)'.format())
+    plt.xlabel('Distance to the nearest supermarket (km)'.format())
     plt.title('CDF: Distance to the nearest supermarket'.format(), loc='center')
     plt.legend(loc='best')
     # limits
     plt.xlim([0,15])
     plt.ylim([0,None])
     # savefig
-    fig_out = '/homedirs/man112/access_inequality_index/data/results/CDF_test.pdf'.format()
+    fig_out = '/homedirs/man112/access_inequality_index/data/results/food_des/CDF.pdf'.format()
     if os.path.isfile(fig_out):
         os.remove(fig_out)
-    # plt.savefig(fig_out, dpi=500, format='pdf', transparent=False)#, bbox_inches='tight')
+    plt.savefig(fig_out, dpi=500, format='pdf', transparent=False)#, bbox_inches='tight')
     # plt.clf()
+    # save the percentiles as a dataframe as well
+    percentiles['keep'] = False
+    for p in [10,50,75,90,95,100]:
+        percentiles['dif'] = (percentiles.pop_perc-p).abs()
+        percentiles.loc[percentiles.groupby('state')['dif'].idxmin(),'keep'] = True
+    print(percentiles)
+    percentiles = percentiles.loc[percentiles.keep,]
+    percentiles['pop_perc'] = percentiles['pop_perc'].round(0).apply(str)
+    percentiles['distance'] = percentiles['distance'].round(2)
+    percentiles = percentiles.drop_duplicates(["state", "pop_perc"])
+    percentiles = percentiles.pivot(index='state', columns='pop_perc', values='distance')
+    print(percentiles)
+    percentiles.to_csv('/homedirs/man112/access_inequality_index/data/results/food_des/distance_percentiles.csv')
+
 
 def plot_cdf_dems(data = None):
     '''plots a cdf from a data frame'''
@@ -246,17 +267,17 @@ def plot_cdf_dems(data = None):
         city, data = get_data()
 
     for state in ['tx','il']:
-        for race in ['H7X001','H7X002','H7X003']:
+        for race in ['H7X001','H7X002','H7X003','H7Y003']:
             df = data['{}_data'.format(state)].copy() #gets correct dataframe
             pop_tot = df[race].sum()
             df = df.sort_values(by='distance')
             df['pop_perc'] = df[race].cumsum()/pop_tot*100 #percentage of pop
             plt.plot(df.distance, df.pop_perc, label = state+'_'+race) #plot the cdf
-    plt.plot(np.arange(0,100,100/10000), 10000*[100], '--') #plot y=100% line
+    # plt.plot(np.arange(0,100,100/10000), 10000*[100], '--') #plot y=100% line
     # labels
     plt.ylabel('% Residents')
     plt.xlabel('Distance to the nearest supermakrt (km)'.format())
-    plt.title('CDF: Distance to the nearest supermarket'.format(), loc='center')
+    # plt.title('CDF: Distance to the nearest supermarket'.format(), loc='center')
     plt.legend(loc='best')
     # limits
     plt.xlim([0,10])
@@ -272,7 +293,7 @@ def plot_cdf_dems(data = None):
     if os.path.isfile(fig_out):
         os.remove(fig_out)
     plt.savefig(fig_out, dpi=500, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
-    plt.clf()
+    # plt.clf()
 
 def plot_edes(data = None):
     '''plots the ede and inequality indices'''
@@ -293,8 +314,9 @@ def plot_edes(data = None):
     plt.axhline(y = 0, color = 'black', linewidth = 1.3, alpha = .7)
     fig_out = '/homedirs/man112/access_inequality_index/fig/ede_compare.pdf'.format()
     plt.savefig(fig_out, dpi=500, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
+    plt.show()
     plt.clf()
-    # plt.show()
+
     # plot the indices on another line graph
     ax = plt.axes()
     plt.locator_params(axis='y', nbins=3)
@@ -305,6 +327,7 @@ def plot_edes(data = None):
     plt.axhline(y = 0, color = 'black', linewidth = 1.3, alpha = .7)
     fig_out = '/homedirs/man112/access_inequality_index/fig/index_compare.pdf'.format()
     plt.savefig(fig_out, dpi=500, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
+    plt.show()
 
 def plot_edes_dem():
     '''plots the ede and inequality indices'''
@@ -313,7 +336,7 @@ def plot_edes_dem():
     city, data = get_data() # data is a dictionary of dataframes for each state
     kappa_data = get_kappa_data(data)
     kappa = inequality_function.calc_kappa(kappa_data, beta) # kappa is based on the distances from ALL states and the beta provided
-    results = pd.DataFrame(np.nan, index=np.arange(10), columns=['State','City', 'KP_EDE_H7X001', 'KP_IE_H7X001', 'KP_EDE_H7X002', 'KP_IE_H7X002', 'KP_EDE_H7X003', 'KP_IE_H7X003','KP_EDE_H7X004', 'KP_IE_H7X004','KP_EDE_H7X005', 'KP_IE_H7X005'])
+    results = pd.DataFrame(np.nan, index=np.arange(10), columns=['State','City', 'KP_EDE_H7X001', 'KP_IE_H7X001', 'KP_EDE_H7X002', 'KP_IE_H7X002', 'KP_EDE_H7X003', 'KP_IE_H7X003','KP_EDE_H7X004', 'KP_IE_H7X004','KP_EDE_H7X005', 'KP_IE_H7X005','KP_EDE_H7Y003', 'KP_IE_H7Y003'])
     # adds the city name
     results.State = states
     results = results.set_index('State')
@@ -322,7 +345,7 @@ def plot_edes_dem():
         # Gets the df for specific state
         df = data['{}_data'.format(state)].copy()
         # loop demographic
-        for race in ['H7X001','H7X002','H7X003','H7X004','H7X005']:
+        for race in ['H7X001','H7X002','H7X003','H7X004','H7X005','H7Y003']:
             # drop data that has 0 weight
             dr = df.iloc[np.array(df[race]) > 0].copy()
             a = list(dr.distance)
@@ -332,24 +355,26 @@ def plot_edes_dem():
             results.loc[state, 'KP_EDE_{}'.format(race)], results.loc[state, 'KP_IE_{}'.format(race)] = inequality_function.kolm_pollak_ede(a, kappa = kappa, weight = weight), inequality_function.kolm_pollak_index(a, kappa = kappa, weight = weight)
 
     print(results)
+    results.to_csv('/homedirs/man112/access_inequality_index/data/results/food_des/ede_dems_{}.csv'.format(beta))
     # sort the data by the KP EDE
     results = results.sort_values(by='KP_EDE_H7X001')
     # plot on a line graph
     ax = plt.axes()
     plt.locator_params(axis='y', nbins=4)
-    results.plot(x="City", y=["KP_EDE_H7X001", "KP_EDE_H7X002", "KP_EDE_H7X003"],ax=ax)
+    results.plot(x="City", y=["KP_EDE_H7X001", "KP_EDE_H7X002", "KP_EDE_H7X003","KP_EDE_H7Y003"],ax=ax)
     plt.ylim([0, None])
     plt.xticks(range(10),results.City)
     plt.xticks(rotation=90)
     plt.axhline(y = 0, color = 'black', linewidth = 1.3, alpha = .7)
     fig_out = '/homedirs/man112/access_inequality_index/fig/ede_race_compare.pdf'.format()
     plt.savefig(fig_out, dpi=500, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
+    plt.show()
     plt.clf()
-    # plt.show()
+
     # plot the indices on another line graph
     ax = plt.axes()
     plt.locator_params(axis='y', nbins=3)
-    results.plot(x="City", y=["KP_IE_H7X001", "KP_IE_H7X002", "KP_IE_H7X003"],ax=ax)
+    results.plot(x="City", y=["KP_IE_H7X001", "KP_IE_H7X002", "KP_IE_H7X003", "KP_IE_H7Y003"],ax=ax)
     plt.ylim([0, 1])
     plt.xticks(range(10),results.City)
     plt.xticks(rotation=90)
@@ -357,6 +382,82 @@ def plot_edes_dem():
     fig_out = '/homedirs/man112/access_inequality_index/fig/index_race_compare.pdf'.format()
     # plt.show()
     plt.savefig(fig_out, dpi=500, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
+
+
+def sensitivity_aversion():
+    ''' plot how the EDE and IE changes with beta '''
+    # get the data
+    city, data = get_data() # data is a dictionary of dataframes for each state
+    kappa_data = get_kappa_data(data)
+    # initiate list
+    results = list()
+    # loop through beta values
+    for beta in np.concatenate(([-0.01,-0.25,-0.5,-0.75, -1.5, -2],np.logspace(0,1)*-1),axis=None):#[0,-0.25,-0.5,-0.75,-1,-2,-5,-10,-100]:
+        # calculate kappa from beta
+        kappa = inequality_function.calc_kappa(kappa_data, beta) # kappa is based on the distances from ALL states and the beta provided
+        # calculate the ede for each city
+        for state in states:#['il','tx','fl']:
+            # get the data subset
+            df = data['{}_data'.format(state)].copy()
+            a = list(df.distance)
+            weight = list(df['H7X001'])
+            # calculate the values
+            ede, ie = inequality_function.kolm_pollak_ede(a, kappa = kappa, weight = weight), inequality_function.kolm_pollak_index(a, kappa = kappa, weight = weight)
+            # add to list
+            new_result = [cities[state], beta, ede, ie]
+            results.append(new_result)
+    # make list of lists a dataframe
+    results = pd.DataFrame(results, columns = ['city','beta','ede','ie'])
+    results_ede = results.pivot(index='beta', columns='city', values='ede')
+    results_ie = results.pivot(index='beta', columns='city', values='ie')
+
+    print(results)
+
+    # plot the results
+    results_ede.plot()
+    plt.gca().invert_xaxis()
+    fig_out = '/homedirs/man112/access_inequality_index/fig/sensitivity_aversion.pdf'
+    plt.savefig(fig_out, dpi=800, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
+    # results_ie.plot()
+    # plt.gca().invert_xaxis()
+
+    # plot a selection of betas
+    results_beta = results.copy()
+    results_beta['beta'] = results_beta['beta'].round(2).apply(str)
+    results_beta = results_beta.pivot(index='city', columns='beta', values='ede')
+    results_beta = results_beta.sort_values(by='-0.5')
+    print(results_beta)
+    results_beta.plot(y=['-0.25','-0.5','-0.75','-1.0','-1.5','-2.0'])
+    plt.xticks(range(10),results_beta.index)
+    plt.xticks(rotation=90)
+    fig_out = '/homedirs/man112/access_inequality_index/fig/sensitivity_aversion_cities.pdf'
+    plt.savefig(fig_out, dpi=800, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
+
+
+def city_dems():
+    ''' get a table with information about the cities '''
+    city, data = get_data()
+    # initiate list
+    results = list()
+    # loop the states/cities
+    for state in states:
+        df = data['{}_data'.format(state)].copy()
+        pop_total = df['H7X001'].sum()
+        perc_white = df['H7X002'].sum()/pop_total*100
+        perc_black = df['H7X003'].sum()/pop_total*100
+        perc_nindian = df['H7X004'].sum()/pop_total*100
+        perc_asian = df['H7X005'].sum()/pop_total*100
+        perc_latin = df['H7Y003'].sum()/pop_total*100
+        new_result = [cities[state], pop_total, perc_white, perc_black, perc_nindian, perc_asian, perc_latin]
+        # add to results
+        results.append(new_result)
+    # make list to DataFrame
+    results = pd.DataFrame(results, columns=['City','Population','% White','% Black','% Am. Indian','% Asian','% Latino'])
+    results = results.round(1)
+    results = results.set_index('City')
+    results.to_csv('/homedirs/man112/access_inequality_index/data/results/food_des/city_dems.csv')
+    print(results)
+
 
 if __name__ == '__main__':
     main()

@@ -15,26 +15,25 @@ Output:
 import numpy as np
 from scipy.integrate import simps
 
-def kolm_pollak_ede(a, beta = -0.5, kappa = None, weight = None):
+def kolm_pollak_ede(a, beta = None, kappa = None, weight = None):
     '''returns the Kolm-Pollak EDE'''
-    if not kappa: # if kappa is not defined
+    a = np.asanyarray(a)
+
+    if kappa is None:
+        if beta is None:
+            raise TypeError("you must provide either a beta or kappa aversion parameter")
         kappa = calc_kappa(a, beta, weight)
-    if not weight:
+
+    if weight is None:
+        ede_sum = np.exp(a*-kappa).sum()
         N = len(a)
     else:
-        N = sum(weight) #sum of data
-    x_mean = np.average(a, weights = weight)
-    ede_sum = 0
-    count = 0 # used to index weightings
-    for x_n in a: # compue the sum of the ede eqn
-        if not weight:
-            ede_sum += np.exp(-kappa * x_n)
-        else:
-            ede_sum += np.exp(-kappa * x_n) * weight[count]
-            count += 1
+        ede_sum = np.multiply(np.exp(a*-kappa), weight).sum()
+        N = sum(weight) # for a weighted average
 
     ede = (-1 / kappa) * np.log(ede_sum / N)
     return(ede)
+
 
 def kolm_pollak_index(a, beta = -0.5, kappa = None, weight = None):
     if not kappa: # if kappa is not defined
