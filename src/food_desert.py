@@ -411,15 +411,17 @@ def sensitivity_aversion():
     results_ede = results.pivot(index='beta', columns='city', values='ede')
     results_ie = results.pivot(index='beta', columns='city', values='ie')
 
-    print(results)
+    # print(results)
 
     # plot the results
-    results_ede.plot()
+    ax = plt.axes()
+    plt.locator_params(axis='y', nbins=4)
+    results_ede.plot(ax=ax)
+    plt.ylim([0, 20])
     plt.gca().invert_xaxis()
     fig_out = '/homedirs/man112/access_inequality_index/fig/sensitivity_aversion.pdf'
     plt.savefig(fig_out, dpi=800, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
-    # results_ie.plot()
-    # plt.gca().invert_xaxis()
+    plt.clf()
 
     # plot a selection of betas
     results_beta = results.copy()
@@ -427,9 +429,13 @@ def sensitivity_aversion():
     results_beta = results_beta.pivot(index='city', columns='beta', values='ede')
     results_beta = results_beta.sort_values(by='-0.5')
     print(results_beta)
-    results_beta.plot(y=['-0.25','-0.5','-0.75','-1.0','-1.5','-2.0'])
+    ax = plt.axes()
+    plt.locator_params(axis='y', nbins=3)
+    results_beta.plot(y=['-0.25','-0.5','-0.75','-1.0','-1.5','-2.0'],ax=ax)
     plt.xticks(range(10),results_beta.index)
     plt.xticks(rotation=90)
+    plt.ylim([0, 9])
+    plt.yticks([0,3,6,9])
     fig_out = '/homedirs/man112/access_inequality_index/fig/sensitivity_aversion_cities.pdf'
     plt.savefig(fig_out, dpi=800, format='pdf', transparent=True, bbox_inches='tight',facecolor='w')
 
