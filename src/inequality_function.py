@@ -36,28 +36,17 @@ def kolm_pollak_ede(a, beta = None, kappa = None, weight = None):
 
 
 def kolm_pollak_index(a, beta = -0.5, kappa = None, weight = None):
-    if not kappa: # if kappa is not defined
-        kappa = calc_kappa(a, beta, weight)
+    '''returns the Kolm-Pollak Inequality Index'''
+    if weight is None:
+        x_mean = np.mean(a)
     else:
-        kappa = kappa
+        x_mean = np.average(a, weights = weight)
 
-    if not weight:
-        N = len(a)
-    else:
-        N = sum(weight) #sum of data
+    a = a - x_mean
 
-    x_mean = np.average(a, weights = weight)
-    index_sum = 0
-    count = 0 # used to index weightings
-    for x_n in a: # compue the sum of the ede eqn
-        if not weight:
-            index_sum += np.exp(-kappa * (x_n - x_mean))
-        else:
-            index_sum += np.exp(-kappa * (x_n - x_mean)) * weight[count]
-        count += 1
+    inequality_index = kolm_pollak_ede(a, beta = beta, kappa = kappa, weight = weight)
 
-    index = (-1 / kappa) * np.log(index_sum / N)
-    return(index)
+    return(inequality_index)
 
 def atkinson_adjusted_ede(a, beta = -0.5, weight = None):
     '''returns adjusted atkinson index'''
