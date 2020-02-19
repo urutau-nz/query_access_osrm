@@ -67,7 +67,10 @@ for area in df.area.unique():
         cust = row.cust_out
         # add more time
         time += 15 #min
-        # iterate customers out
+
+###
+# restoration of electricity
+###
 df_restor = pd.DataFrame(df_restor,columns=df_restor_head)
 df_restor.time_restore = df_restor.time_restore/60/24
 # check histograms by utility weighted by custs
@@ -76,7 +79,30 @@ for util in utilities:
     df_restor_util['time_restore'].plot(kind='hist', weights=df_restor_util.customers,alpha=0.5)
     # a = np.histogram(a=df_restor_util.time_restore, weights=df_restor_util.customers)
     # _ = plt.hist(a)
+
+#get ede for time to restore for each util
+#init results dataframe
+results = pd.DataFrame(columns=['util', 'mean', 'ede', 'ie'])
+# input utilities
+results['util'] = utilities
+results = results.set_index('util')
+
+kappa = inequality_function.calc_kappa(list(df_restor.time_restore), -0.5, list(df_restor.customers))
+print(kappa)
+for util in utilities:
+    df = df_restor.set_index('util').copy()
+    # sort by utility
+    df = df.loc[utility]
+    results.loc[util, ['mean']] = np.average(list(df.time_restore), weights = list(df.customers))
+    results.loc[util, ['ede']] = inequality_function.kolm_pollak_ede(list(df.time_restore), -0.5, kappa, list(df.customers))
+    results.loc[util,['ie']] = inequality_function.kolm_pollak_index(list(df.time_restore), -0.5, kappa, list(df.customers))
+
+results.to_csv(r'/homedirs/man112/access_inequality_index/data/results/power_recovery/EDE_restore.csv'.format())
+
+
+###
 # impact of Hurricane
+###
 df_impact = df.groupby(['area','util'])['perc'].max()
 df_impact = df_impact.reset_index()
 for util in utilities:
@@ -85,24 +111,6 @@ for util in utilities:
     # a = np.histogram(a=df_restor_util.time_restore, weights=df_restor_util.customers)
     # _ = plt.hist(a)
 
-#get ede for time to restore for each util
-#init results dataframe
-results = pd.DataFrame(columns=['util', 'mean', 'ede', 'index'])
-# input utilities
-results['util'] = utilities
-results = results.set_index('util')
-
-kappa = inequality_function.calc_kappa(list(df_restor.time_restore), -0.5, list(df_restor.customers))
-print(kappa)
-for utility in utilities:
-    df = df_restor.set_index('util')
-    # sort by utility
-    df = df.loc[utility]
-    results.loc[utility, ['mean']] = np.average(list(df.time_restore), weights = list(df.customers))
-    results.loc[utility, ['ede']] = inequality_function.kolm_pollak_ede(list(df.time_restore), -0.5, kappa, list(df.customers))
-    results.loc[utility,['index']] = inequality_function.kolm_pollak_index(list(df.time_restore), -0.5, kappa, list(df.customers))
-
-results.to_csv(r'/homedirs/man112/access_inequality_index/data/results/EDE_power.csv'.format())
 
 
 #code.interact(local=locals())
