@@ -67,44 +67,22 @@ for service in services:
 fig, ax1 = plt.subplots()
 ax2 = ax1.twinx()
 ax1.plot(results.days, results.EDE_kp_a)
-# flip the y axis
-ax1.invert_yaxis()
+ax2.plot(results.days, results.equal_kp_a, color='red')
 
-
-ax2.plot(results.days, results.equal_kp_a)
-# plt.plot(results.days, (results['mean'] - results['mean'].iloc[0]))
-
-# plt.title('EDE change over time: Wilmington access to supermarkets')
 ax1.set_xlabel('Days since landfall')
 ax1.set_ylabel('EDE (km)')
 ax2.set_ylabel('inequality index')
-ax1.set_ylim([0,8])
+ax1.set_ylim([0,10])
+ax1.set_yticks([0,2.5,5,7.5,10,12.5])
+ax2.set_ylim([0,1.25])
+ax2.set_yticks([0,0.25,0.5,0.75,1,1.25])
 ax1.set_xlim([-5,10])
-ax2.set_ylim([0,1])
 
-
-
-    #f1 = results.plot(x='days', y='mean', figsize = (w,h), legend = False, ax=ax)
-# plot the results
-#plt.plot(results.days, results.EDE_kp_a)
-# plot as difference from initial
-# horizontal line at 0
-#f1.axhline(y = 0, color = 'black', linewidth = 1.3, alpha = .7)
-# vertical line on left
-#if service == 'gas_station':
-#    f1.set_xlim(left = -5, right = 25)
-#    f1.set_ylim([0,1500])
-#else:
-#    f1.set_xlim(left = -5, right = 15)
-#    f1.set_ylim([0,6000])
-#f1.set_xlim(left = -5, right = 15)
-#f1.set_ylim([0,2])
-# axis labels
-#f1.tick_params(axis = 'both', which = 'major', labelsize = 10)
-# flip y axis
+# flip the y axis
+ax1.invert_yaxis()
 
 # save
-fig_out = '/homedirs/man112/access_inequality_index/data/results/EDE_change_mean.pdf'.format()
+fig_out = '/homedirs/man112/access_inequality_index/fig/supermarket_restore.pdf'
 if os.path.isfile(fig_out):
     os.remove(fig_out)
 plt.savefig(fig_out,dpi=600,orientation='landscape',format='pdf',facecolor='w', edgecolor='w',transparent=True, bbox_inches="tight")
