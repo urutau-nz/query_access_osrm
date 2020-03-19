@@ -3,7 +3,11 @@ Inputs:
     a = distribution of data, type=list
     weight (optional) = list of len(a)
     kappa (optional) = int < 0
-    beta (optional, default = -0.5) = int < 0
+    beta (optional, default = -0.5)
+        if the distribution is of an undesirable (e.g., exposure)
+            beta = int < 0 
+        if it is a desirable property (e.g., income) 
+            beta = int > 0 
     epsilon (optional, default = 0.5) = int > 0
 Output:
     Kolm-Pollak EDE & Index (kappa)
