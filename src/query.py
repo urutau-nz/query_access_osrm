@@ -164,7 +164,7 @@ def single_query(query):
     return(dist)
 
 
-def requests_retry_session(retries=10, backoff_factor=0.1, status_forcelist=(500, 502, 504), session=None):
+def requests_retry_session(retries=0, backoff_factor=0.1, status_forcelist=(500, 502, 504), session=None):
     '''
     When par ==True, issues with connecting to the docker, can change the retries to keep trying to connect
     '''
