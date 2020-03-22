@@ -124,6 +124,8 @@ def query_points(db, context):
     ###
     logger.info('Beginning to query {}'.format(context['city']))
     total_len = len(queries)
+
+    code.interact(local=locals())
     if par == True:
         # Query OSRM in parallel
         num_workers = np.int(mp.cpu_count() * par_frac)
