@@ -4,6 +4,7 @@ Query origins to dests in OSRM
 '''
 # user defined variables
 state = input('State: ')
+query_mode = input("Choose query mode [route, table]: ")
 par = True
 par_frac = 0.8
 
@@ -115,29 +116,17 @@ def query_points(db, context):
     origxdest = pd.DataFrame(list(itertools.product(orig_df.index, dest_df.index)), columns = ['id_orig','id_dest'])
     origxdest['distance'] = None
 
-    # build query list:
-    query_0 = np.full(fill_value = context['osrm_url'] + '/route/v1/driving/', shape=origxdest.shape[0], dtype = object)
-    # the query looks like this: '{}/route/v1/driving/{},{};{},{}?overview=false'.format(osrm_url, lon_o, lat_o, lon_d, lat_d)
-    queries = query_0 + np.array(orig_df.loc[origxdest['id_orig'].values]['x'].values, dtype = str) + ',' + np.array(orig_df.loc[origxdest['id_orig'].values]['y'].values, dtype = str) + ';' + np.array(dest_df.loc[origxdest['id_dest'].values]['lon'].values, dtype = str) + ',' + np.array(dest_df.loc[origxdest['id_dest'].values]['lat'].values, dtype = str) + '?overview=false'
-    ###
-    # loop through the queries
-    ###
-    logger.info('Beginning to query {}'.format(context['city']))
-    total_len = len(queries)
-    if par == True:
-        # Query OSRM in parallel
-        num_workers = np.int(mp.cpu_count() * par_frac)
-        distances = Parallel(n_jobs=num_workers)(delayed(single_query)(query) for query in tqdm(queries))
-        # input distance into df
-        origxdest['distance'] = distances
-    else:
-        for index, query in enumerate(tqdm(queries)):
-            # single query
-            r = requests.get(query)
-            # input distance into df
-            origxdest.loc[index,'distance'] = r.json()['routes'][0]['legs'][0]['distance']
-    logger.info('Querying complete')
+    #Use the table service so as to send only one request and a reply with all of the data
+    #Probably stick with MLD as pre-proccesing wont do much when changing things as CD only gets faster with good pre-processing
+    # https://github.com/Project-OSRM/osrm-backend/blob/master/docs/http.md#table-service
 
+
+    if(query_mode == "table"):
+        origxdest = execute_table_query(origxdest)
+    elif(query_mode == "route"):
+        origxdest = execute_route_query(origxdest)
+    else:
+        origxdest = execute_route_query(origxdest)
     # add df to sql
     logger.info('Writing data to SQL')
     origxdest.to_sql('distance', con=db['engine'], if_exists='replace', index=False, dtype={"distance":Float(), 'id_dest':Integer()})
@@ -182,7 +171,63 @@ def add_column_demograph(con):
     '''
     queries = ['ALTER TABLE demograph ADD COLUMN geoid10 CHAR(15)',
                 '']
+def execute_route_query(origxdest):
+    # build query list:
+    query_0 = np.full(fill_value = context['osrm_url'] + '/route/v1/driving/', shape=origxdest.shape[0], dtype = object)
+    # the query looks like this: '{}/route/v1/driving/{},{};{},{}?overview=false'.format(osrm_url, lon_o, lat_o, lon_d, lat_d)
+    queries = query_0 + np.array(orig_df.loc[origxdest['id_orig'].values]['x'].values, dtype = str) + ',' + np.array(orig_df.loc[origxdest['id_orig'].values]['y'].values, dtype = str) + ';' + np.array(dest_df.loc[origxdest['id_dest'].values]['lon'].values, dtype = str) + ',' + np.array(dest_df.loc[origxdest['id_dest'].values]['lat'].values, dtype = str) + '?overview=false'
+    ###
+    # loop through the queries
+    ###
+    logger.info('Beginning to query {}'.format(context['city']))
+    total_len = len(queries)
+    if par == True:
+        # Query OSRM in parallel
+        num_workers = np.int(mp.cpu_count() * par_frac)
+        distances = Parallel(n_jobs=num_workers)(delayed(single_query)(query) for query in tqdm(queries))
+        # input distance into df
+        origxdest['distance'] = distances
+    else:
 
+    
+        for index, query in enumerate(tqdm(queries)):
+            # single query
+            r = requests.get(query)
+            # input distance into df
+            origxdest.loc[index,'distance'] = r.json()['routes'][0]['legs'][0]['distance']
+    logger.info('Querying complete')
+    
+    return origxdest
+
+
+def execute_table_query(origxdest):
+    coordinate_pairs = origxdest.
+    #here we want a for loop of string comp to build the query with the table instead of creating shitloads of induvidual queries
+    iterator = 0
+    destination_string = "&destinations="
+    source_string = "?sources="
+    base_string = context['osrm_url'] + "table/v1/driving/"
+    for(pair in coordinate_pairs):
+        base_string += pair['id_orig'][x] + "," + pair['id_orig'][y] + ";"
+        source_string += str(iterator) + ";"
+        iterator += 1
+        base_string += pair["id_dest"][x] + "," + pair["id_dest"][y] + ";"
+        destination_string += str(iterator) + ";"
+        iterator += 1
+    #removes the semicolon at the end
+    destination_string = destination_string[:-1]
+    source_string = source_string[:-1]
+    base_string = base_string[:-1]
+
+    query_string = base_string + source_string + destination_string + "&annotation=distance"
+
+    #hopefully not too big of a data request
+    r = requests.get(query_string);
+    #need to process r here to get the required info
+    for index, pair in origxdest:
+        origxdest.loc[index, 'distance'] = r.json()["distance"][index]  
+
+    return origxdest
 
 
 
