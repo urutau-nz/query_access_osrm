@@ -208,7 +208,6 @@ def execute_table_query(origxdest):
     source_string = "?sources="
     base_string = context['osrm_url'] + "table/v1/driving/"
     for pair in coordinate_pairs :
-        print(pair)
         base_string += pair['id_orig'][x] + "," + pair['id_orig'][y] + ";"
         source_string += str(iterator) + ";"
         iterator += 1
