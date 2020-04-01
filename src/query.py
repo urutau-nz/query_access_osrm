@@ -124,9 +124,9 @@ def query_points(db, context):
     if(query_mode == "table"):
         origxdest = execute_table_query(origxdest)
     elif(query_mode == "route"):
-        origxdest = execute_route_query(origxdest)
+        origxdest = execute_route_query(origxdest, orig_df, dest_df)
     else:
-        origxdest = execute_route_query(origxdest)
+        origxdest = execute_route_query(origxdest, orig_df, dest_df)
     # add df to sql
     logger.info('Writing data to SQL')
     origxdest.to_sql('distance', con=db['engine'], if_exists='replace', index=False, dtype={"distance":Float(), 'id_dest':Integer()})
@@ -171,7 +171,7 @@ def add_column_demograph(con):
     '''
     queries = ['ALTER TABLE demograph ADD COLUMN geoid10 CHAR(15)',
                 '']
-def execute_route_query(origxdest):
+def execute_route_query(origxdest, orig_df, dest_df):
     # build query list:
     query_0 = np.full(fill_value = context['osrm_url'] + '/route/v1/driving/', shape=origxdest.shape[0], dtype = object)
     # the query looks like this: '{}/route/v1/driving/{},{};{},{}?overview=false'.format(osrm_url, lon_o, lat_o, lon_d, lat_d)
