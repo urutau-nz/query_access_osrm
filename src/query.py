@@ -201,13 +201,13 @@ def execute_route_query(origxdest):
 
 
 def execute_table_query(origxdest):
-    coordinate_pairs = origxdest.
+    coordinate_pairs = origxdest
     #here we want a for loop of string comp to build the query with the table instead of creating shitloads of induvidual queries
     iterator = 0
     destination_string = "&destinations="
     source_string = "?sources="
     base_string = context['osrm_url'] + "table/v1/driving/"
-    for(pair in coordinate_pairs):
+    for pair in coordinate_pairs :
         base_string += pair['id_orig'][x] + "," + pair['id_orig'][y] + ";"
         source_string += str(iterator) + ";"
         iterator += 1
@@ -222,7 +222,7 @@ def execute_table_query(origxdest):
     query_string = base_string + source_string + destination_string + "&annotation=distance"
 
     #hopefully not too big of a data request
-    r = requests.get(query_string);
+    r = requests.get(query_string)
     #need to process r here to get the required info
     for index, pair in origxdest:
         origxdest.loc[index, 'distance'] = r.json()["distance"][index]  
