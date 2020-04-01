@@ -3,10 +3,8 @@ Init the database
 Query origins to dests in OSRM
 '''
 # user defined variables
-state = 'md' 
-#input('State: ')
-query_mode = 'route' 
-#= input("Choose query mode [route, table]: ")
+state = input('State: ')
+query_mode = input("Choose query mode [route, table]: ")
 par = True
 par_frac = 0.8
 
@@ -191,14 +189,14 @@ def execute_route_query(origxdest):
         origxdest['distance'] = distances
     else:
 
-    
+
         for index, query in enumerate(tqdm(queries)):
             # single query
             r = requests.get(query)
             # input distance into df
             origxdest.loc[index,'distance'] = r.json()['routes'][0]['legs'][0]['distance']
     logger.info('Querying complete')
-    
+
     return origxdest
 
 
@@ -227,7 +225,7 @@ def execute_table_query(origxdest):
     r = requests.get(query_string)
     #need to process r here to get the required info
     for index, pair in origxdest:
-        origxdest.loc[index, 'distance'] = r.json()["distance"][index]  
+        origxdest.loc[index, 'distance'] = r.json()["distance"][index]
 
     return origxdest
 
