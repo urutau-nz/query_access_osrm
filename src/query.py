@@ -4,7 +4,8 @@ Query origins to dests in OSRM
 '''
 # user defined variables
 state = input('State: ')
-query_mode = input("Choose query mode [route, table]: ")
+#query_mode = input("Choose query mode [route, table]: ")
+query_mode = 'route'
 par = True
 par_frac = 0.8
 
