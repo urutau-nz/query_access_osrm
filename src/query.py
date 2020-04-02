@@ -207,7 +207,7 @@ def execute_table_query(origxdest):
     source_string = "?sources="
     base_string = context['osrm_url'] + "/table/v1/driving/"
     for pair in origxdest :
-        print(pair)
+        print(pair[0][1])
         #base_string += pair['id_orig'].values[x] + "," + pair['id_orig'][y] + ";"
         source_string += str(iterator) + ";"
         iterator += 1
