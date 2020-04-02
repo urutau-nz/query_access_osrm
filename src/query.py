@@ -208,10 +208,11 @@ def execute_table_query(origxdest):
     source_string = "?sources="
     base_string = context['osrm_url'] + "table/v1/driving/"
     for pair in coordinate_pairs :
-        base_string += pair['id_orig'][x] + "," + pair['id_orig'][y] + ";"
+        print(pair)
+        #base_string += pair['id_orig'].values[x] + "," + pair['id_orig'][y] + ";"
         source_string += str(iterator) + ";"
         iterator += 1
-        base_string += pair["id_dest"][x] + "," + pair["id_dest"][y] + ";"
+       # base_string += pair["id_dest"].values[x] + "," + pair["id_dest"][y] + ";"
         destination_string += str(iterator) + ";"
         iterator += 1
     #removes the semicolon at the end
