@@ -206,14 +206,15 @@ def execute_table_query(origxdest):
     destination_string = "&destinations="
     source_string = "?sources="
     base_string = context['osrm_url'] + "/table/v1/driving/"
-    for pair in origxdest :
-        print(pair[0][1])
-        #base_string += pair['id_orig'].values[x] + "," + pair['id_orig'][y] + ";"
+    for i in range(len(origxdest[0])) :
+        base_string += origxdest['id_orig'].values['x'][i] + "," + origxdest['id_orig'].values['y'][i] + ";"
         source_string += str(iterator) + ";"
         iterator += 1
-       # base_string += pair["id_dest"].values[x] + "," + pair["id_dest"][y] + ";"
+        base_string += origxdest["id_dest"].values['x'][i].value + "," + origxdest["id_dest"].values['y'][i].value + ";"
         destination_string += str(iterator) + ";"
         iterator += 1
+    
+    
     #removes the semicolon at the end
     destination_string = destination_string[:-1]
     source_string = source_string[:-1]
