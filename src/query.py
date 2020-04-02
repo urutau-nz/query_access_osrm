@@ -201,13 +201,12 @@ def execute_route_query(origxdest, orig_df, dest_df):
 
 
 def execute_table_query(origxdest):
-    coordinate_pairs = origxdest
     #here we want a for loop of string comp to build the query with the table instead of creating shitloads of induvidual queries
     iterator = 0
     destination_string = "&destinations="
     source_string = "?sources="
-    base_string = context['osrm_url'] + "table/v1/driving/"
-    for pair in coordinate_pairs :
+    base_string = context['osrm_url'] + "/table/v1/driving/"
+    for pair in origxdest :
         print(pair)
         #base_string += pair['id_orig'].values[x] + "," + pair['id_orig'][y] + ";"
         source_string += str(iterator) + ";"
