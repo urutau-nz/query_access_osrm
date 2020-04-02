@@ -203,7 +203,7 @@ def execute_route_query(origxdest, orig_df, dest_df):
 def execute_table_query(origxdest):
     #here we want a for loop of string comp to build the query with the table instead of creating shitloads of induvidual queries
     id_orig = origxdest['id_orig'].values
-    print(id_orig[100]['x'])
+    #print(id_orig.head())
     iterator = 0
     destination_string = "&destinations="
     source_string = "?sources="
@@ -215,8 +215,8 @@ def execute_table_query(origxdest):
         base_string += origxdest["id_dest"].values['x'][i].value + "," + origxdest["id_dest"].values['y'][i].value + ";"
         destination_string += str(iterator) + ";"
         iterator += 1
-    
-    
+
+
     #removes the semicolon at the end
     destination_string = destination_string[:-1]
     source_string = source_string[:-1]
