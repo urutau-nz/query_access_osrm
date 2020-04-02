@@ -99,6 +99,7 @@ def query_points(db, context):
     orig_df = gpd.GeoDataFrame.from_postgis(sql, db['con'], geom_col='geom')
     orig_df['x'] = orig_df.geom.centroid.x
     orig_df['y'] = orig_df.geom.centroid.y
+    print(orig_df.head())
     # drop duplicates
     orig_df.drop('geom',axis=1,inplace=True)
     orig_df.drop_duplicates(inplace=True)
@@ -203,7 +204,6 @@ def execute_route_query(origxdest, orig_df, dest_df):
 def execute_table_query(origxdest):
     #here we want a for loop of string comp to build the query with the table instead of creating shitloads of induvidual queries
     id_orig = origxdest['id_orig'].values
-    print(origxdest.head())
     iterator = 0
     destination_string = "&destinations="
     source_string = "?sources="
