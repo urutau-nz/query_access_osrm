@@ -11,6 +11,12 @@ data2 = np.random.binomial(20, p=0.5, size=100)
 # Initialize figure
 fig = go.Figure()
 
+
+def ecdf(x):
+    x = np.sort(x)
+    def result(v):
+        return np.searchsorted(x, v, side='right') / x.size
+    return result
 # Add Traces
 
 fig.add_scatter(x=np.unique(data1), y=ecdf(data1)(np.unique(data1)), name='data1',
