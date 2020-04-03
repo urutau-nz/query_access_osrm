@@ -228,8 +228,11 @@ def execute_table_query(origxdest, orig_df, dest_df):
     #hopefully not too big of a data request
     r = requests.get(query_string)
     #need to process r here to get the required info
-    for index, pair in origxdest:
-        origxdest.loc[index, 'distance'] = r.json()["distance"][index]
+    
+    print(r)
+    #too many values to unpack error
+    #for index, pair in origxdest:
+    #   origxdest.loc[index, 'distance'] = r.json()["distance"][index]
 
     return origxdest
 
