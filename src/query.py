@@ -210,10 +210,11 @@ def execute_table_query(origxdest, orig_df, dest_df):
     source_string = "?sources="
     base_string = context['osrm_url'] + "/table/v1/driving/"
     for i in range(len(origxdest['id_orig'])) :
-        base_string += origxdest['id_orig'].values['x'][i] + "," + origxdest['id_orig'].values['y'][i] + ";"
+        base_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
         source_string += str(iterator) + ";"
         iterator += 1
-        base_string += origxdest["id_dest"].values['x'][i].value + "," + origxdest["id_dest"].values['y'][i].value + ";"
+        base_string += str(dest_df.lon[i]) + "," + str(dest_df.lat[i]) + ";"
+        #base_string += origxdest["id_dest"].values['x'][i].value + "," + origxdest["id_dest"].values['y'][i].value + ";"
         destination_string += str(iterator) + ";"
         iterator += 1
 
