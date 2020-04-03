@@ -203,7 +203,7 @@ def execute_route_query(origxdest, orig_df, dest_df):
 
 def execute_table_query(origxdest, orig_df, dest_df):
     #here we want a for loop of string comp to build the query with the table instead of creating shitloads of induvidual queries
-    print(dest_df)
+    print(dest_df['lon'])
     print(dest_df[12])
     iterator = 0
     destination_string = "&destinations="
