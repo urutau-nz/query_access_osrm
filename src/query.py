@@ -123,7 +123,7 @@ def query_points(db, context):
 
 
     if(query_mode == "table"):
-        origxdest = execute_table_query(origxdest)
+        origxdest = execute_table_query(origxdest, orig_df, dest_df)
     elif(query_mode == "route"):
         origxdest = execute_route_query(origxdest, orig_df, dest_df)
     else:
@@ -203,7 +203,8 @@ def execute_route_query(origxdest, orig_df, dest_df):
 
 def execute_table_query(origxdest, orig_df, dest_df):
     #here we want a for loop of string comp to build the query with the table instead of creating shitloads of induvidual queries
-    print(orig_df[1])
+    print(orig_df.x[1])
+    print(orig_df.y[1])
     iterator = 0
     destination_string = "&destinations="
     source_string = "?sources="
