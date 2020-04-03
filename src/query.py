@@ -117,11 +117,6 @@ def query_points(db, context):
     origxdest = pd.DataFrame(list(itertools.product(orig_df.index, dest_df.index)), columns = ['id_orig','id_dest'])
     origxdest['distance'] = None
 
-    #Use the table service so as to send only one request and a reply with all of the data
-    #Probably stick with MLD as pre-proccesing wont do much when changing things as CD only gets faster with good pre-processing
-    # https://github.com/Project-OSRM/osrm-backend/blob/master/docs/http.md#table-service
-
-
     if(query_mode == "table"):
         origxdest = execute_table_query(origxdest, orig_df, dest_df)
     elif(query_mode == "route"):
@@ -202,7 +197,12 @@ def execute_route_query(origxdest, orig_df, dest_df):
 
 
 def execute_table_query(origxdest, orig_df, dest_df):
-    #here we want a for loop of string comp to build the query with the table instead of creating shitloads of induvidual queries
+    #Use the table service so as to send only one request and a reply with all of the data
+    #Probably stick with MLD as pre-proccesing wont do much when changing things as CD only gets faster with good pre-processing
+    # https://github.com/Project-OSRM/osrm-backend/blob/master/docs/http.md#table-service
+
+
+    #here we want a for loop of string comp to build the query with the table instead of creating lots of induvidual queries
     iterator = 0
     destination_string = "&destinations="
     source_string = "?sources="
@@ -229,7 +229,8 @@ def execute_table_query(origxdest, orig_df, dest_df):
     r = requests.get(query_string)
     #need to process r here to get the required info
     
-    print(r.json)
+    #getting 400 bad request response so will need to look further into the formatting
+    print(r.json())
     #too many values to unpack error
     #for index, pair in origxdest:
     #   origxdest.loc[index, 'distance'] = r.json()["distance"][index]
