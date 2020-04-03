@@ -207,7 +207,8 @@ def execute_table_query(origxdest, orig_df, dest_df):
     destination_string = "&destinations="
     source_string = "?sources="
     base_string = context['osrm_url'] + "/table/v1/driving/"
-    for i in range(len(origxdest['id_orig'])) :
+    #this needs to be made more robust
+    for i in range(len(dest_df)) :
         base_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
         source_string += str(iterator) + ";"
         iterator += 1
