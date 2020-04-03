@@ -117,13 +117,8 @@ def query_points(db, context):
     origxdest = pd.DataFrame(list(itertools.product(orig_df.index, dest_df.index)), columns = ['id_orig','id_dest'])
     origxdest['distance'] = None
 
-    #Use the table service so as to send only one request and a reply with all of the data
-    #Probably stick with MLD as pre-proccesing wont do much when changing things as CD only gets faster with good pre-processing
-    # https://github.com/Project-OSRM/osrm-backend/blob/master/docs/http.md#table-service
-
-
     if(query_mode == "table"):
-        origxdest = execute_table_query(origxdest)
+        origxdest = execute_table_query(origxdest, orig_df, dest_df)
     elif(query_mode == "route"):
         origxdest = execute_route_query(origxdest, orig_df, dest_df)
     else:
@@ -201,18 +196,24 @@ def execute_route_query(origxdest, orig_df, dest_df):
     return origxdest
 
 
-def execute_table_query(origxdest):
-    #here we want a for loop of string comp to build the query with the table instead of creating shitloads of induvidual queries
-    id_orig = origxdest['id_orig'].values
+def execute_table_query(origxdest, orig_df, dest_df):
+    #Use the table service so as to send only one request and a reply with all of the data
+    #Probably stick with MLD as pre-proccesing wont do much when changing things as CD only gets faster with good pre-processing
+    # https://github.com/Project-OSRM/osrm-backend/blob/master/docs/http.md#table-service
+
+
+    #here we want a for loop of string comp to build the query with the table instead of creating lots of induvidual queries
     iterator = 0
     destination_string = "&destinations="
     source_string = "?sources="
     base_string = context['osrm_url'] + "/table/v1/driving/"
-    for i in range(len(origxdest['id_orig'])) :
-        base_string += origxdest['id_orig'].values['x'][i] + "," + origxdest['id_orig'].values['y'][i] + ";"
+    #this needs to be made more robust
+    for i in range(len(dest_df)) :
+        base_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
         source_string += str(iterator) + ";"
         iterator += 1
-        base_string += origxdest["id_dest"].values['x'][i].value + "," + origxdest["id_dest"].values['y'][i].value + ";"
+        base_string += str(dest_df['lon'][i]) + "," + str(dest_df['lat'][i]) + ";"
+        #base_string += origxdest["id_dest"].values['x'][i].value + "," + origxdest["id_dest"].values['y'][i].value + ";"
         destination_string += str(iterator) + ";"
         iterator += 1
 
@@ -223,12 +224,16 @@ def execute_table_query(origxdest):
     base_string = base_string[:-1]
 
     query_string = base_string + source_string + destination_string + "&annotation=distance"
-
+    print(query_string)
     #hopefully not too big of a data request
     r = requests.get(query_string)
     #need to process r here to get the required info
-    for index, pair in origxdest:
-        origxdest.loc[index, 'distance'] = r.json()["distance"][index]
+    
+    #getting 400 bad request response so will need to look further into the formatting
+    print(r.json())
+    #too many values to unpack error
+    #for index, pair in origxdest:
+    #   origxdest.loc[index, 'distance'] = r.json()["distance"][index]
 
     return origxdest
 
