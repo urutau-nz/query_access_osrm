@@ -203,8 +203,6 @@ def execute_route_query(origxdest, orig_df, dest_df):
 
 def execute_table_query(origxdest, orig_df, dest_df):
     #here we want a for loop of string comp to build the query with the table instead of creating shitloads of induvidual queries
-    print(dest_df['lon'])
-    print(dest_df[12])
     iterator = 0
     destination_string = "&destinations="
     source_string = "?sources="
@@ -213,7 +211,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
         base_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
         source_string += str(iterator) + ";"
         iterator += 1
-        base_string += str(dest_df.lon[i]) + "," + str(dest_df.lat[i]) + ";"
+        base_string += str(dest_df['lon'][i]) + "," + str(dest_df['lat'][i]) + ";"
         #base_string += origxdest["id_dest"].values['x'][i].value + "," + origxdest["id_dest"].values['y'][i].value + ";"
         destination_string += str(iterator) + ";"
         iterator += 1
