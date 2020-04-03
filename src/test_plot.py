@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import plotly
 from statsmodels.distributions.empirical_distribution import ECDF
+from config import *
 
 # Load dataset
 data1 = np.random.binomial(15, p=0.5, size=100)
