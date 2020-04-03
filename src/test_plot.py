@@ -1,6 +1,8 @@
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
+import plotly
+from statsmodels.distributions.empirical_distribution import ECDF
 
 # Load dataset
 data1 = np.random.binomial(15, p=0.5, size=100)
