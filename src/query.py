@@ -166,6 +166,7 @@ def add_column_demograph(con):
     '''
     queries = ['ALTER TABLE demograph ADD COLUMN geoid10 CHAR(15)',
                 '']
+
 def execute_route_query(origxdest, orig_df, dest_df):
     # build query list:
     query_0 = np.full(fill_value = context['osrm_url'] + '/route/v1/driving/', shape=origxdest.shape[0], dtype = object)
@@ -206,20 +207,32 @@ def execute_table_query(origxdest, orig_df, dest_df):
     destination_string = "&destinations="
     source_string = "?sources="
     base_string = context['osrm_url'] + "/table/v1/driving/"
-    #this needs to be made more robust
-    for i in range(len(dest_df)) :
+
+    #this needs to be made more robust and efficient goddam
+
+    #add all coords to the query and store their index
+    orig_points_dict = {}
+    dest_points_dict = {}
+
+    for i in range(len(orig_df)):
+        base_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
+        base_string += str(dest_df['lon'][i]) + "," + str(dest_df['lat'][i]) + ";"
+
+'''
+    for i in range(len(orig_df)) :
         base_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
         source_string += str(iterator) + ";"
+        for j in range(len(dest_df)):
         iterator += 1
         base_string += str(dest_df['lon'][i]) + "," + str(dest_df['lat'][i]) + ";"
         #base_string += origxdest["id_dest"].values['x'][i].value + "," + origxdest["id_dest"].values['y'][i].value + ";"
         destination_string += str(iterator) + ";"
         iterator += 1
-
+'''
 
     #removes the semicolon at the end
-    destination_string = destination_string[:-1]
-    source_string = source_string[:-1]
+    #destination_string = destination_string[:-1]
+    #source_string = source_string[:-1]
     base_string = base_string[:-1]
 
     query_string = base_string + source_string + destination_string + "&annotation=distance"
