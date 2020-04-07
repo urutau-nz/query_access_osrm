@@ -124,7 +124,7 @@ def query_points(db, context):
         origxdest = execute_route_query(origxdest, orig_df, dest_df)
     # add df to sql
     logger.info('Writing data to SQL')
-    origxdest.to_sql('distance', con=db['engine'], if_exists='replace', index=False, dtype={"distance":Float(), 'id_dest':Integer()})
+    origxdest.to_sql('distance_test', con=db['engine'], if_exists='replace', index=False, dtype={"distance":Float(), 'id_dest':Integer()})
     # update indices
     queries = ['CREATE INDEX "dest_idx" ON distance ("id_dest");',
             'CREATE INDEX "orig_idx" ON distance ("id_orig");']
