@@ -216,6 +216,8 @@ def execute_table_query(origxdest, orig_df, dest_df):
 
     for i in range(len(orig_df)):
         base_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
+        
+    for i in range(len(dest_df)):    
         base_string += str(dest_df['lon'][i]) + "," + str(dest_df['lat'][i]) + ";"
 
 '''
@@ -233,6 +235,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
     #removes the semicolon at the end
     #destination_string = destination_string[:-1]
     #source_string = source_string[:-1]
+    
     base_string = base_string[:-1]
 
     query_string = base_string + source_string + destination_string + "&annotation=distance"
