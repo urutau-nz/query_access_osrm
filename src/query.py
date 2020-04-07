@@ -210,7 +210,12 @@ def execute_table_query(origxdest, orig_df, dest_df):
 
     #this needs to be made more robust and efficient goddam
 
-    #add all coords to the query and store their index
+    dest_string = ""
+    for j in range(len(dest_df)):
+        #now add each dest in the string
+        dest_string += str(dest_df['lon'][j]) + "," + str(dest_df['lat'][j]) + ";"
+
+    dest_string = dest_string[:-1]
 
     query_list = []
 
@@ -218,12 +223,9 @@ def execute_table_query(origxdest, orig_df, dest_df):
         query_list.append(base_string)
         #add orig in position 0 of the query string
         query_list[i] += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
-        for j in range(len(dest_df)):
-            #now add each dest in the string
-            query_list[i] += str(dest_df['lon'][j]) + "," + str(dest_df['lat'][j]) + ";"
+        query_list[i] += dest_string
         #now define the orig and dest bits and extra stuff
         #remove the semicolon
-        query_list[i] = query_list[i][:-1]
         query_list[i] += "?sources=0&annotation=distance"
 
     print(query_list)
