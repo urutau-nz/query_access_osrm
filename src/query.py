@@ -229,6 +229,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
         query_list[i] += "?sources=0&annotation=distance"
 
     #print(query_list)
+    print(query_list[0])
     print(len(query_list))
     #now iterate through the queries
     #hopefully not too big of a data request
