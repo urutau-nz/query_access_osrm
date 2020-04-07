@@ -236,7 +236,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
     for table_query_string in query_list:
         response = requests.get(table_query_string)
         #now to proccess the response
-        print(response)
+        print(response.json())
     #need to process r here to get the required info
 
     
