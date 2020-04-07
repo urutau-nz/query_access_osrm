@@ -238,8 +238,8 @@ def execute_table_query(origxdest, orig_df, dest_df):
     
 
 
-    query_string = base_string + "&annotation=distance"
-    # + source_string + destination_string
+    query_string = base_string
+    # + source_string + destination_string + "&annotation=distance"
     print(query_string)
     #hopefully not too big of a data request
     r = requests.get(query_string)
