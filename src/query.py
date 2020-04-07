@@ -212,41 +212,29 @@ def execute_table_query(origxdest, orig_df, dest_df):
 
     #add all coords to the query and store their index
 
+    query_list = []
 
     for i in range(len(orig_df)):
-        base_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
-    
-    base_string += str(dest_df['lon'][0]) + "," + str(dest_df['lat'][0]) + ";"
-
-    '''
-    for i in range(len(orig_df)) :
-        base_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
-        source_string += str(iterator) + ";"
+        query_list.append(base_string)
+        #add orig in position 0 of the query string
+        query_list[i] += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
         for j in range(len(dest_df)):
-        iterator += 1
-        base_string += str(dest_df['lon'][i]) + "," + str(dest_df['lat'][i]) + ";"
-        #base_string += origxdest["id_dest"].values['x'][i].value + "," + origxdest["id_dest"].values['y'][i].value + ";"
-        destination_string += str(iterator) + ";"
-        iterator += 1
-    '''
+            #now add each dest in the string
+            query_list[i] += str(dest_df['lon'][j]) + "," + str(dest_df['lat'][j]) + ";"
+        #now define the orig and dest bits and extra stuff
+        #remove the semicolon
+        query_list[i] = query_list[i][:-1]
+        query_list[i] += "?sources=0&annotation=distance"
 
-    base_string = base_string[:-1]
-
-    #removes the semicolon at the end
-    #destination_string = destination_string[:-1]
-    #source_string = source_string[:-1]
-    
-
-
-    query_string = base_string
-    # + source_string + destination_string + "&annotation=distance"
-    print(query_string)
+    print(query_list)
+    print(len(query_list))
+    #now iterate through the queries
     #hopefully not too big of a data request
-    r = requests.get(query_string)
+    #r = requests.get(query_string)
     #need to process r here to get the required info
 
     #getting 400 bad request response so will need to look further into the formatting
-    print(r.json())
+    #print(r.json())
     #too many values to unpack error
     #for index, pair in origxdest:
     #   origxdest.loc[index, 'distance'] = r.json()["distance"][index]
