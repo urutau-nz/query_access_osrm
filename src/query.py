@@ -231,17 +231,18 @@ def execute_table_query(origxdest, orig_df, dest_df):
     #print(query_list)
     print(query_list[0])
     print(len(query_list))
-    #now iterate through the queries
-    #hopefully not too big of a data request
     #r = requests.get(query_string)
+    
+    for table_query_string in query_list:
+        response = requests.get(table_query_string)
+        #now to proccess the response
+        print(response)
     #need to process r here to get the required info
 
-    #getting 400 bad request response so will need to look further into the formatting
+    
     #print(r.json())
     #too many values to unpack error
-    #for index, pair in origxdest:
-    #   origxdest.loc[index, 'distance'] = r.json()["distance"][index]
-
+    
     return origxdest
 
 
