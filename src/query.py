@@ -212,11 +212,11 @@ def execute_table_query(origxdest, orig_df, dest_df):
 
     #add all coords to the query and store their index
 
+
     for i in range(len(orig_df)):
         base_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
-        
-    for i in range(len(dest_df)):    
-        base_string += str(dest_df['lon'][i]) + "," + str(dest_df['lat'][i]) + ";"
+    
+    base_string += str(dest_df['lon'][0]) + "," + str(dest_df['lat'][0]) + ";"
 
     '''
     for i in range(len(orig_df)) :
