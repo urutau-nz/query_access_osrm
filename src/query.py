@@ -3,7 +3,8 @@ Init the database
 Query origins to dests in OSRM
 '''
 # user defined variables
-state = input('State: ')
+#state = input('State: ')
+state = 'test'
 query_mode = input("Choose query mode [route, table]: ")
 par = True
 par_frac = 0.8
@@ -226,7 +227,8 @@ def execute_table_query(origxdest, orig_df, dest_df):
         query_list[i] += dest_string
         #now define the orig and dest bits and extra stuff
         #remove the semicolon
-        query_list[i] += "?sources=0&annotation=distance"
+        query_list[i] += "?sources=0"
+        #&annotation=distance
 
     #print(query_list)
     print(query_list[0])
