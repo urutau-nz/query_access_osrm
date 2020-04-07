@@ -99,7 +99,6 @@ def query_points(db, context):
     orig_df = gpd.GeoDataFrame.from_postgis(sql, db['con'], geom_col='geom')
     orig_df['x'] = orig_df.geom.centroid.x
     orig_df['y'] = orig_df.geom.centroid.y
-    print(orig_df.x)
     # drop duplicates
     orig_df.drop('geom',axis=1,inplace=True)
     orig_df.drop_duplicates(inplace=True)
@@ -228,7 +227,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
     #hopefully not too big of a data request
     r = requests.get(query_string)
     #need to process r here to get the required info
-    
+
     #getting 400 bad request response so will need to look further into the formatting
     print(r.json())
     #too many values to unpack error
