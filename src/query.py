@@ -211,8 +211,6 @@ def execute_table_query(origxdest, orig_df, dest_df):
     #this needs to be made more robust and efficient goddam
 
     #add all coords to the query and store their index
-    orig_points_dict = {}
-    dest_points_dict = {}
 
     for i in range(len(orig_df)):
         base_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
@@ -240,7 +238,8 @@ def execute_table_query(origxdest, orig_df, dest_df):
     
 
 
-    query_string = base_string + source_string + destination_string + "&annotation=distance"
+    query_string = base_string + "&annotation=distance"
+    # + source_string + destination_string
     print(query_string)
     #hopefully not too big of a data request
     r = requests.get(query_string)
