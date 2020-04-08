@@ -197,7 +197,7 @@ def execute_route_query(origxdest, orig_df, dest_df):
 
 
 def execute_table_query(origxdest, orig_df, dest_df):
-    #Use the table service so as to send only one request and a reply with all of the data
+    #Use the table service so as to reduce the amount of requests sent
     #Probably stick with MLD as pre-proccesing wont do much when changing things as CD only gets faster with good pre-processing
     # https://github.com/Project-OSRM/osrm-backend/blob/master/docs/http.md#table-service
 
@@ -226,8 +226,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
         query_list[i] += dest_string
         #now define the orig and dest bits and extra stuff
         #remove the semicolon
-        query_list[i] += "?sources=0"
-        #&annotation=distance
+        query_list[i] += "?sources=0&annotation=distance"
 
     #print(query_list)
     print(query_list[0])
@@ -238,7 +237,9 @@ def execute_table_query(origxdest, orig_df, dest_df):
         response = requests.get(table_query_string)
         #now to proccess the response
         print(response.json())
-        print(table_query_string[3836:3840])
+        print(response.elapsed.total_seconds())
+        break
+        #origxdest.loc("thing to locate", 'distance') = response.json()
     #need to process r here to get the required info
 
     
