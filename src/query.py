@@ -220,32 +220,42 @@ def execute_table_query(origxdest, orig_df, dest_df):
     query_list = []
 
     for i in range(len(orig_df)):
-        query_list.append(base_string)
+        temp_query_wrapper = QueryWrapper(base_string, orig_df.x[i], orig_df.y[i])
         #add orig in position 0 of the query string
-        query_list[i] += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
-        query_list[i] += dest_string
+        temp_query_wrapper.base_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
+        temp_query_wrapper.base_string += dest_string
         #now define the orig and dest bits and extra stuff
         #remove the semicolon
-        query_list[i] += "?sources=0"
+        temp_query_wrapper.base_string += "?sources=0"
         #&annotation=distance
+        query_list.append(temp_query_wrapper)
 
     #print(query_list)
     print(len(query_list))
     #r = requests.get(query_string)
+
     query_count = 0
     elapsed_time = 0
     remaining_time = 0
     average_response_time = 0
 
-    for table_query_string in query_list:
-        response = requests.get(table_query_string)
-        #now to proccess the response
+    #new dataframe for saving results
+    
+    for query_wrapper in query_list:
+        response = requests.get(query_wrapper.query_string)
+    
+        #logging
         elapsed_time += response.elapsed.total_seconds()
         query_count += 1
         average_response_time = query_count/elapsed_time
         remaining_time = (len(query_list) - query_count) * average_response_time
         print("Elapsed time: {}, Remaining time(Approx): {}, Completed: {}/{}".format(elapsed_time, remaining_time, query_count, len(query_list)))
-        #for(dest_string in response.json()['destinations']):
+        
+        #now to proccess the response
+        for(dest_string in response.json()['destinations']):
+            #locate the pair
+            origxdest.loc((origxdest['id_orig'].value['x'] == query_wrapper.orig_loc_x) & (origxdest['id_orig'].value['y'] == query_wrapper.orig_loc_y) & (origxdest['id_dest'].value['lon'] == dest_string['location'][0])& (origxdest['id_dest'].value['lat'] == dest_string['location'][1]))['distance'] = dest_string['distance']
+            #enter the value
         #now we have a list of all distances we were given
         
         
@@ -253,8 +263,12 @@ def execute_table_query(origxdest, orig_df, dest_df):
     
     return origxdest
 
-
-
+class QueryWrapper:
+    
+    def __init__(self, query_string, orig_loc_x, orig_loc_y):
+        self.query_string = query_string
+        self.orig_loc_x = orig_loc_x
+        self.orig_loc_y = orig_loc_y
 
 if __name__ == "__main__":
     logger.info('query.py code invoked')
