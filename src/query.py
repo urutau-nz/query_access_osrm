@@ -230,22 +230,26 @@ def execute_table_query(origxdest, orig_df, dest_df):
         #&annotation=distance
 
     #print(query_list)
-    print(query_list[0])
     print(len(query_list))
     #r = requests.get(query_string)
-    
+    query_count = 0
+    elapsed_time = 0
+    remaining_time = 0
+    average_response_time = 0
+
     for table_query_string in query_list:
         response = requests.get(table_query_string)
         #now to proccess the response
-        print(response.json())
-        print(response.elapsed.total_seconds())
-        break
+        elapsed_time += response.elapsed.total_seconds()
+        query_count += 1
+        average_response_time = query_count/elapsed_time
+        remaining_time = (len(query_list) - query_count) * average_response_time
+        print("Elapsed time: {}, Remaining time(Approx): {}, Completed: {}/{}".format(elapsed_time, remaining_time, query_count, len(query_list)))
+        for(dest_string in response.json()['destinations']):
+            #now we have a list of all distances we were given
+        
+        que
         #origxdest.loc("thing to locate", 'distance') = response.json()
-    #need to process r here to get the required info
-
-    
-    #print(r.json())
-    #too many values to unpack error
     
     return origxdest
 
