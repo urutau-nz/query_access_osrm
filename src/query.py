@@ -248,8 +248,8 @@ def execute_table_query(origxdest, orig_df, dest_df):
         elapsed_time += response.elapsed.total_seconds()
         query_count += 1
         average_response_time = query_count/elapsed_time
-        remaining_time = (len(query_list) - query_count) * average_response_time
-        print("Elapsed time: {}, Remaining time(Approx): {}, Completed: {}/{}".format(elapsed_time, remaining_time, query_count, len(query_list)))
+        #remaining_time = (len(query_list) - query_count) * average_response_time
+        #print("Elapsed time: {}, Remaining time(Approx): {}, Completed: {}/{}".format(elapsed_time, remaining_time, query_count, len(query_list)))
         
         #now to proccess the response
         for dest_string in response.json()['destinations'] :
