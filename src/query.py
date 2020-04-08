@@ -245,10 +245,10 @@ def execute_table_query(origxdest, orig_df, dest_df):
         average_response_time = query_count/elapsed_time
         remaining_time = (len(query_list) - query_count) * average_response_time
         print("Elapsed time: {}, Remaining time(Approx): {}, Completed: {}/{}".format(elapsed_time, remaining_time, query_count, len(query_list)))
-        for(dest_string in response.json()['destinations']):
-            #now we have a list of all distances we were given
+        #for(dest_string in response.json()['destinations']):
+        #now we have a list of all distances we were given
         
-        que
+        
         #origxdest.loc("thing to locate", 'distance') = response.json()
     
     return origxdest
