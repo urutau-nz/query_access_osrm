@@ -239,8 +239,8 @@ def execute_table_query(origxdest, orig_df, dest_df):
     remaining_time = 0
     average_response_time = 0
 
-    #new dataframe for saving results
-    
+    print(origxdest['id_orig'])
+
     for query_wrapper in query_list:
         response = requests.get(query_wrapper.query_string)
     
@@ -254,7 +254,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
         #now to proccess the response
         for dest_string in response.json()['destinations'] :
             #locate the pair
-            origxdest.loc((origxdest['id_orig']['x'] == query_wrapper.orig_loc_x) & (origxdest['id_orig']['y'] == query_wrapper.orig_loc_y) & (origxdest['id_dest']['lon'] == dest_string['location'][0])& (origxdest['id_dest']['lat'] == dest_string['location'][1]))['distance'] = dest_string['distance']
+            #origxdest.loc((origxdest['id_orig']['x'] == query_wrapper.orig_loc_x) & (origxdest['id_orig']['y'] == query_wrapper.orig_loc_y) & (origxdest['id_dest']['lon'] == dest_string['location'][0])& (origxdest['id_dest']['lat'] == dest_string['location'][1]))['distance'] = dest_string['distance']
             #enter the value
         #now we have a list of all distances we were given
         
