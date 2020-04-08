@@ -202,10 +202,6 @@ def execute_table_query(origxdest, orig_df, dest_df):
     # https://github.com/Project-OSRM/osrm-backend/blob/master/docs/http.md#table-service
 
 
-    #here we want a for loop of string comp to build the query with the table instead of creating lots of induvidual queries
-    iterator = 0
-    destination_string = "&destinations="
-    source_string = "?sources="
     base_string = context['osrm_url'] + "/table/v1/driving/"
 
     #this needs to be made more robust and efficient goddam
@@ -254,8 +250,8 @@ def execute_table_query(origxdest, orig_df, dest_df):
         #now to proccess the response
         for dest_string in response.json()['destinations'] :
             #locate the pair
-            print(dest_string['distance'])
-            #origxdest.loc((origxdest['id_orig']['x'] == query_wrapper.orig_loc_x) & (origxdest['id_orig']['y'] == query_wrapper.orig_loc_y) & (origxdest['id_dest']['lon'] == dest_string['location'][0])& (origxdest['id_dest']['lat'] == dest_string['location'][1]))['distance'] = dest_string['distance']
+            #print(dest_string['distance'])
+            origxdest.loc((origxdest['id_orig']['x'] == query_wrapper.orig_loc_x) & (origxdest['id_orig']['y'] == query_wrapper.orig_loc_y) & (origxdest['id_dest']['lon'] == dest_string['location'][0])& (origxdest['id_dest']['lat'] == dest_string['location'][1]))['distance'] = dest_string['distance']
             #enter the value
         #now we have a list of all distances we were given
         
