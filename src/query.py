@@ -237,6 +237,10 @@ def execute_table_query(origxdest, orig_df, dest_df):
 
     print(origxdest['id_orig'])
 
+    #temp_data = {"orig_x":[], 'orig_y':[], 'dest_x': [], 'dest_y':[], 'distance':[]}
+    #temp_origxdest = pd.DataFrame(temp_data, columns=['orig_x', 'orig_y', 'dest_x', 'dest_y', 'distance'])
+    temp_origxdest = []
+
     for query_wrapper in query_list:
         response = requests.get(query_wrapper.query_string)
     
@@ -249,15 +253,18 @@ def execute_table_query(origxdest, orig_df, dest_df):
         
         #now to proccess the response
         for dest_string in response.json()['destinations'] :
+            #this is temp
+            temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][0], dest_string['distance']])
+
+
             #locate the pair
             #print(dest_string['distance'])
-            origxdest.loc((origxdest['id_orig']['x'] == query_wrapper.orig_loc_x) & (origxdest['id_orig']['y'] == query_wrapper.orig_loc_y) & (origxdest['id_dest']['lon'] == dest_string['location'][0])& (origxdest['id_dest']['lat'] == dest_string['location'][1]))['distance'] = dest_string['distance']
+            #origxdest.loc((origxdest['id_orig'] == query_wrapper.orig_loc_x) & (origxdest['id_orig']['y'] == query_wrapper.orig_loc_y) & (origxdest['id_dest']['lon'] == dest_string['location'][0])& (origxdest['id_dest']['lat'] == dest_string['location'][1]))['distance'] = dest_string['distance']
             #enter the value
         #now we have a list of all distances we were given
         
-        
         #origxdest.loc("thing to locate", 'distance') = response.json()
-    
+    print(temp_origxdest)
     return origxdest
 
 class QueryWrapper:
