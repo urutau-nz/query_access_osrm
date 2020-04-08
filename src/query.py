@@ -241,7 +241,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
     #temp_origxdest = pd.DataFrame(temp_data, columns=['orig_x', 'orig_y', 'dest_x', 'dest_y', 'distance'])
     temp_origxdest = []
 
-    for query_wrapper in query_list:
+    for query_wrapper in tqdm(query_list):
         response = requests.get(query_wrapper.query_string)
     
         #logging
@@ -264,7 +264,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
         #now we have a list of all distances we were given
         
         #origxdest.loc("thing to locate", 'distance') = response.json()
-    print(temp_origxdest)
+    #print(temp_origxdest)
     return origxdest
 
 class QueryWrapper:
