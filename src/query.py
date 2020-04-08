@@ -252,7 +252,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
         print("Elapsed time: {}, Remaining time(Approx): {}, Completed: {}/{}".format(elapsed_time, remaining_time, query_count, len(query_list)))
         
         #now to proccess the response
-        for(dest_string in response.json()['destinations']):
+        for dest_string in response.json()['destinations'] :
             #locate the pair
             origxdest.loc((origxdest['id_orig'].value['x'] == query_wrapper.orig_loc_x) & (origxdest['id_orig'].value['y'] == query_wrapper.orig_loc_y) & (origxdest['id_dest'].value['lon'] == dest_string['location'][0])& (origxdest['id_dest'].value['lat'] == dest_string['location'][1]))['distance'] = dest_string['distance']
             #enter the value
