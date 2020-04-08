@@ -222,11 +222,11 @@ def execute_table_query(origxdest, orig_df, dest_df):
     for i in range(len(orig_df)):
         temp_query_wrapper = QueryWrapper(base_string, orig_df.x[i], orig_df.y[i])
         #add orig in position 0 of the query string
-        temp_query_wrapper.base_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
-        temp_query_wrapper.base_string += dest_string
+        temp_query_wrapper.query_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
+        temp_query_wrapper.query_string += dest_string
         #now define the orig and dest bits and extra stuff
         #remove the semicolon
-        temp_query_wrapper.base_string += "?sources=0"
+        temp_query_wrapper.query_string += "?sources=0"
         #&annotation=distance
         query_list.append(temp_query_wrapper)
 
