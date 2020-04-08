@@ -226,7 +226,8 @@ def execute_table_query(origxdest, orig_df, dest_df):
         query_list[i] += dest_string
         #now define the orig and dest bits and extra stuff
         #remove the semicolon
-        query_list[i] += "?sources=0&annotation=distance"
+        query_list[i] += "?sources=0"
+        #&annotation=distance
 
     #print(query_list)
     print(query_list[0])
