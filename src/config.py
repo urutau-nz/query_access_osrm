@@ -115,7 +115,7 @@ def cfg_init(state):
         context['osrm_url'] = 'http://localhost:6013'
         context['services'] = ['supermarket','hospital']
     elif state == 'test':
-        db['name'] = 'osrm-test'
+        db['name'] = 'access_la'
         context['city_code'] = 'new'
         context['osrm_url'] = 'http://localhost:6014'
         context['city'] = 'New_Orleans'
