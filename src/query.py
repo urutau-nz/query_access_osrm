@@ -255,7 +255,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
         for dest_string in response.json()['destinations'] :
             #this is temp
             temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][0], dest_string['distance']])
-
+            print("Loc X: {}, Loc Y: {}, dest X: {}, dest Y{}".format(query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][0]))
 
             #locate the pair
             #print(dest_string['distance'])
