@@ -6,3 +6,5 @@
 import requests
 
 response = requests.get("http://localhost:6014/route/v1/driving/{},{};{},{}".format(-90.071392618565, 30.01270094914956, -90.116577, -90.116577))
+
+print(response)
