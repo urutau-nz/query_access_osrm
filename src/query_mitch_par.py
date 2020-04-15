@@ -238,11 +238,10 @@ def req(query_wrapper):
     response = requests.get(query_wrapper.query_string)
     temp_origxdest = []
         #now to proccess the response
-    for dest_string in response.json()['destinations'] :
+    for dest_string in response.json()['distances'] :
         #this is temp
         #temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][1], dest_string['distance']])
-        temp_origxdest.append(dest_string['distance'])
-    print(temp_origxdest)
+        temp_origxdest.append(dest_string)
 
         #locate the pair
         #print(dest_string['distance'])
