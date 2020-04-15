@@ -235,9 +235,10 @@ def execute_table_query(origxdest, orig_df, dest_df):
 
 def req(query_wrapper):
     #for query_wrapper in tqdm(query_list):
-    response = requests_retry_session(retries=100, backoff_factor=0.01, status_forcelist=(500, 502, 504), session=None).get(query_wrapper.query_string)
-    #response = requests.get(query_wrapper.query_string)
-    temp_dist = response.json()['distances'][0][1:]
+    #response = requests_retry_session(retries=100, backoff_factor=0.01, status_forcelist=(500, 502, 504), session=None).get(query_wrapper.query_string)
+    response = requests.get(query_wrapper.query_string)
+    temp_dist = response.json()#['distances'][0][1:]
+    print(temp_dist)
     #temp_origxdest = []
         #now to proccess the response
     #for dest_string in response.json()['distances'] :
