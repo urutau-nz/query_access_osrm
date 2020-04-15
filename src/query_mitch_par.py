@@ -205,17 +205,33 @@ def execute_table_query(origxdest, orig_df, dest_df):
     base_string = context['osrm_url'] + "/table/v1/driving/"
 
     #this needs to be made more robust and efficient goddam
+    #init dataframe for results
+    df = pd.DataFrame(columns=['orig_loc','orig_id','dest_loc','dest_id','dist','duration'])
+    #init list for destination co-ords
+    dest_locs = []
+    dest_ids = []
 
     dest_string = ""
     for j in range(len(dest_df)):
         #now add each dest in the string
         dest_string += str(dest_df['lon'][j]) + "," + str(dest_df['lat'][j]) + ";"
+        dest_locs.append(str(dest_df['lon'][j]) + "," + str(dest_df['lat'][j]))
+        dest_ids.append(j)
 
     dest_string = dest_string[:-1]
+
+    df['dest_loc'] = len(orig_df)*dest_locs
+    df['dest_id'] = len(orig_df)*dest_ids
+
 
     query_list = []
 
     for i in range(len(orig_df)):
+        orig_loc = str(orig_df.x[i]) + "," + str(orig_df.y[i])
+        temp_orig_locs = len(dest_df)*[str(orig_loc)]
+        temp_orig_ids = len(dest_df)*[i]
+        df['orig_loc'].append(pd.Series(temp_orig_locs))
+        df['orig_id'].append(pd.Series(temp_orig_ids))
         temp_query_wrapper = QueryWrapper(base_string, orig_df.x[i], orig_df.y[i])
         #add orig in position 0 of the query string
         temp_query_wrapper.query_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
@@ -231,6 +247,13 @@ def execute_table_query(origxdest, orig_df, dest_df):
         # Query OSRM in parallel
         num_workers = np.int(mp.cpu_count() * par_frac)
         results = Parallel(n_jobs=num_workers)(delayed(req)(query_wrapper) for query_wrapper in tqdm(query_list))
+    dists = []
+    durs = []
+    for orig in results:
+        dists = dists + orig[0]
+        durs = durs + orig[1]
+    df['dist'] = dists
+    df['duration'] = durs
     code.interact(local=locals())
 
 def req(query_wrapper):
