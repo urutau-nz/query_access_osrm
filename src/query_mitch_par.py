@@ -3,8 +3,8 @@ Init the database
 Query origins to dests in OSRM
 '''
 # user defined variables
-state = input('State: ')
-query_mode = input("Choose query mode [route, table]: ")
+state = 'fl' #input('State: ')
+query_mode = 'table' #input("Choose query mode [route, table]: ")
 par = True
 par_frac = 0.8
 
