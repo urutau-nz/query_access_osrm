@@ -253,7 +253,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
     for orig in results:
         dists = dists + orig[0]
         durs = durs + orig[1]
-    origxdest['dist'] = dists
+    origxdest['distance'] = dists
     origxdest['duration'] = durs
     code.interact(local=locals())
 
