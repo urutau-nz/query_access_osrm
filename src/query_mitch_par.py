@@ -122,7 +122,7 @@ def query_points(db, context):
     logger.info('Writing data to SQL')
     origxdest.to_sql('distance_duration', con=db['engine'], if_exists='replace', index=False, dtype={"distance":Float(), "duration":Float(), 'id_dest':Integer()})
     # update indices
-    queries = ['CREATE INDEX "dest_idx" ON distance ("id_dest");','CREATE INDEX "orig_idx" ON distance ("id_orig");']
+    queries = ['CREATE INDEX "dest_idx" ON distance_duration ("id_dest");','CREATE INDEX "orig_idx" ON distance_duration ("id_orig");']
     for q in queries:
         cursor.execute(q)
 
@@ -191,26 +191,9 @@ def execute_table_query(origxdest, orig_df, dest_df):
     return(origxdest)
 
 def req(query_wrapper):
-    #for query_wrapper in tqdm(query_list):
-    #response = requests_retry_session(retries=100, backoff_factor=0.01, status_forcelist=(500, 502, 504), session=None).get(query_wrapper.query_string)
     response = requests.get(query_wrapper.query_string)
     temp_dist = response.json()['distances'][0][1:]
     temp_dur = response.json()['durations'][0][1:]
-    #temp_origxdest = []
-        #now to proccess the response
-    #for dest_string in response.json()['distances'] :
-        #this is temp
-        #temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][1], dest_string['distance']])
-        #temp_origxdest.append(dest_string)
-
-        #locate the pair
-        #print(dest_string['distance'])
-        #origxdest.loc((origxdest['id_orig'] == query_wrapper.orig_loc_x) & (origxdest['id_orig']['y'] == query_wrapper.orig_loc_y) & (origxdest['id_dest']['lon'] == dest_string['location'][0])& (origxdest['id_dest']['lat'] == dest_string['location'][1]))['distance'] = dest_string['distance']
-            #enter the value
-        #now we have a list of all distances we were given
-
-        #origxdest.loc("thing to locate", 'distance') = response.json()
-    #print(temp_origxdest)
     return temp_dist, temp_dur
 
 class QueryWrapper:
