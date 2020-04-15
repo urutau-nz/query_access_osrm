@@ -242,7 +242,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
 
     #interact with code to visualise
     #what happens if we make 1 iteration of querylist worth 2 or 3... dests?
-    code.interact(local=locals())
+    #code.interact(local=locals())
     if par == True:
         # Query OSRM in parallel
         num_workers = np.int(mp.cpu_count() * par_frac)
@@ -258,7 +258,7 @@ def req(query_wrapper):
         #this is temp
         #temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][1], dest_string['distance']])
         temp_origxdest.append(dest_string['distance'])
-    #print(temp_origxdest)
+    print(temp_origxdest)
 
         #locate the pair
         #print(dest_string['distance'])
@@ -268,7 +268,7 @@ def req(query_wrapper):
 
         #origxdest.loc("thing to locate", 'distance') = response.json()
     #print(temp_origxdest)
-    #return origxdest
+    return temp_origxdest
 
 class QueryWrapper:
 
