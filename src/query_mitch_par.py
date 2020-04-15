@@ -201,7 +201,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
     #Probably stick with MLD as pre-proccesing wont do much when changing things as CD only gets faster with good pre-processing
     # https://github.com/Project-OSRM/osrm-backend/blob/master/docs/http.md#table-service
 
-
+# the query looks like this: '{}/route/v1/driving/{},{};{},{}?overview=false'.format(osrm_url, lon_o, lat_o, lon_d, lat_d)
     base_string = context['osrm_url'] + "/table/v1/driving/"
 
     #this needs to be made more robust and efficient goddam
@@ -222,7 +222,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
         temp_query_wrapper.query_string += dest_string
         #now define the orig and dest bits and extra stuff
         #remove the semicolon
-        temp_query_wrapper.query_string += "?sources=0"
+        temp_query_wrapper.query_string += "?overview=false"
         #&annotation=distance
         query_list.append(temp_query_wrapper)
 
