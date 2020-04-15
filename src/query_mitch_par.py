@@ -222,7 +222,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
         temp_query_wrapper.query_string += dest_string
         #now define the orig and dest bits and extra stuff
         #remove the semicolon
-        temp_query_wrapper.query_string += "annotations=duration,distance?sources=0"
+        temp_query_wrapper.query_string += "?annotations=duration,distance&sources=0"
         #&annotation=distance
         query_list.append(temp_query_wrapper)
 
@@ -237,8 +237,7 @@ def req(query_wrapper):
     #for query_wrapper in tqdm(query_list):
     #response = requests_retry_session(retries=100, backoff_factor=0.01, status_forcelist=(500, 502, 504), session=None).get(query_wrapper.query_string)
     response = requests.get(query_wrapper.query_string)
-    temp_dist = response.json()#['distances'][0][1:]
-    print(temp_dist)
+    temp_dist = response.json()['distances'][0][1:]
     #temp_origxdest = []
         #now to proccess the response
     #for dest_string in response.json()['distances'] :
