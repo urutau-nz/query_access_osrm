@@ -230,7 +230,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
         temp_orig_locs = len(dest_df)*[str(orig_loc)]
         temp_orig_ids = len(dest_df)*[i]
         df['orig_loc'].append(pd.Series(temp_orig_locs))
-        df['orig_id'].append(temp_orig_ids)
+        df['orig_id'].append(pd.Series(temp_orig_ids))
         temp_query_wrapper = QueryWrapper(base_string, orig_df.x[i], orig_df.y[i])
         #add orig in position 0 of the query string
         temp_query_wrapper.query_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
