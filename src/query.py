@@ -222,7 +222,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
         temp_query_wrapper.query_string += dest_string
         #now define the orig and dest bits and extra stuff
         #remove the semicolon
-        temp_query_wrapper.query_string += "?sources=0"
+        temp_query_wrapper.query_string += "?annotations=distance&sources=0"
         #&annotation=distance
         query_list.append(temp_query_wrapper)
 
@@ -243,23 +243,17 @@ def execute_table_query(origxdest, orig_df, dest_df):
 
     #interact with code to visualise
     #what happens if we make 1 iteration of querylist worth 2 or 3... dests?
-    code.interact(local=locals())
+    #code.interact(local=locals())
 
     for query_wrapper in tqdm(query_list):
         response = requests.get(query_wrapper.query_string)
 
-        #logging
-        elapsed_time += response.elapsed.total_seconds()
-        query_count += 1
-        average_response_time = query_count/elapsed_time
-        #remaining_time = (len(query_list) - query_count) * average_response_time
-        #print("Elapsed time: {}, Remaining time(Approx): {}, Completed: {}/{}".format(elapsed_time, remaining_time, query_count, len(query_list)))
-
         #now to proccess the response
-        for dest_string in response.json()['destinations'] :
+        #for dest_string in response.json()['destinations'] :
             #this is temp
-            temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][1], dest_string['distance']])
-
+        temp_origxdest.append(response.json()['distances'][0][1:])
+            #temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][1], dest_string['distance']])
+    code.interact(local=locals())
 
             #locate the pair
             #print(dest_string['distance'])
