@@ -241,16 +241,19 @@ def execute_table_query(origxdest, orig_df, dest_df):
     #temp_origxdest = pd.DataFrame(temp_data, columns=['orig_x', 'orig_y', 'dest_x', 'dest_y', 'distance'])
     temp_origxdest = []
 
+    #interact with code to visualise
+    code.interact(local=locals())
+
     for query_wrapper in tqdm(query_list):
         response = requests.get(query_wrapper.query_string)
-    
+
         #logging
         elapsed_time += response.elapsed.total_seconds()
         query_count += 1
         average_response_time = query_count/elapsed_time
         #remaining_time = (len(query_list) - query_count) * average_response_time
         #print("Elapsed time: {}, Remaining time(Approx): {}, Completed: {}/{}".format(elapsed_time, remaining_time, query_count, len(query_list)))
-        
+
         #now to proccess the response
         for dest_string in response.json()['destinations'] :
             #this is temp
@@ -262,13 +265,13 @@ def execute_table_query(origxdest, orig_df, dest_df):
             #origxdest.loc((origxdest['id_orig'] == query_wrapper.orig_loc_x) & (origxdest['id_orig']['y'] == query_wrapper.orig_loc_y) & (origxdest['id_dest']['lon'] == dest_string['location'][0])& (origxdest['id_dest']['lat'] == dest_string['location'][1]))['distance'] = dest_string['distance']
             #enter the value
         #now we have a list of all distances we were given
-        
+
         #origxdest.loc("thing to locate", 'distance') = response.json()
     #print(temp_origxdest)
     return origxdest
 
 class QueryWrapper:
-    
+
     def __init__(self, query_string, orig_loc_x, orig_loc_y):
         self.query_string = query_string
         self.orig_loc_x = orig_loc_x
