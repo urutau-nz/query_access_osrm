@@ -3,10 +3,9 @@ Init the database
 Query origins to dests in OSRM
 '''
 # user defined variables
-state = 'fl' #input('State: ')
-query_mode = 'table' #input("Choose query mode [route, table]: ")
+state = input('State: ')
 par = True
-par_frac = 0.8
+par_frac = 0.9
 
 import utils
 from config import *
@@ -117,15 +116,11 @@ def query_points(db, context):
     origxdest['distance'] = None
     origxdest['duration'] = None
 
-    if(query_mode == "table"):
-        origxdest = execute_table_query(origxdest, orig_df, dest_df)
-    elif(query_mode == "route"):
-        origxdest = execute_route_query(origxdest, orig_df, dest_df)
-    else:
-        origxdest = execute_route_query(origxdest, orig_df, dest_df)
+    origxdest = execute_table_query(origxdest, orig_df, dest_df)
+
     # add df to sql
     logger.info('Writing data to SQL')
-    origxdest.to_sql('distance_test', con=db['engine'], if_exists='replace', index=False, dtype={"distance":Float(), 'id_dest':Integer()})
+    origxdest.to_sql('distance_duration', con=db['engine'], if_exists='replace', index=False, dtype={"distance":Float(), "duration":Float(), 'id_dest':Integer()})
     # update indices
     queries = ['CREATE INDEX "dest_idx" ON distance ("id_dest");',
             'CREATE INDEX "orig_idx" ON distance ("id_orig");']
@@ -135,66 +130,6 @@ def query_points(db, context):
     # commit to db
     db['con'].commit()
     logger.info('Distances written successfully to SQL')
-
-
-def single_query(query):
-    '''
-    this is for if we want it parallel
-    query a value and add to the table
-    '''
-    # query
-    # dist = requests.get(query).json()['routes'][0]['legs'][0]['distance']
-    dist = requests_retry_session(retries=100, backoff_factor=0.01, status_forcelist=(500, 502, 504), session=None).get(query).json()['routes'][0]['legs'][0]['distance']
-    # dist = r.json()['routes'][0]['legs'][0]['distance']
-    return(dist)
-
-
-def requests_retry_session(retries=0, backoff_factor=0.1, status_forcelist=(500, 502, 504), session=None):
-    '''
-    When par ==True, issues with connecting to the docker, can change the retries to keep trying to connect
-    '''
-    session = session or requests.Session()
-    retry = Retry(total=retries, read=retries, connect=retries, backoff_factor=backoff_factor, status_forcelist=status_forcelist)
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
-    return session
-
-
-def add_column_demograph(con):
-    '''
-    Add a useful geoid10 column to join data with
-    '''
-    queries = ['ALTER TABLE demograph ADD COLUMN geoid10 CHAR(15)',
-                '']
-
-def execute_route_query(origxdest, orig_df, dest_df):
-    # build query list:
-    query_0 = np.full(fill_value = context['osrm_url'] + '/route/v1/driving/', shape=origxdest.shape[0], dtype = object)
-    # the query looks like this: '{}/route/v1/driving/{},{};{},{}?overview=false'.format(osrm_url, lon_o, lat_o, lon_d, lat_d)
-    queries = query_0 + np.array(orig_df.loc[origxdest['id_orig'].values]['x'].values, dtype = str) + ',' + np.array(orig_df.loc[origxdest['id_orig'].values]['y'].values, dtype = str) + ';' + np.array(dest_df.loc[origxdest['id_dest'].values]['lon'].values, dtype = str) + ',' + np.array(dest_df.loc[origxdest['id_dest'].values]['lat'].values, dtype = str) + '?overview=false'
-    ###
-    # loop through the queries
-    ###
-    logger.info('Beginning to query {}'.format(context['city']))
-    total_len = len(queries)
-    if par == True:
-        # Query OSRM in parallel
-        num_workers = np.int(mp.cpu_count() * par_frac)
-        distances = Parallel(n_jobs=num_workers)(delayed(single_query)(query) for query in tqdm(queries))
-        # input distance into df
-        origxdest['distance'] = distances
-    else:
-
-
-        for index, query in enumerate(tqdm(queries)):
-            # single query
-            r = requests.get(query)
-            # input distance into df
-            origxdest.loc[index,'distance'] = r.json()['routes'][0]['legs'][0]['distance']
-    logger.info('Querying complete')
-
-    return origxdest
 
 
 def execute_table_query(origxdest, orig_df, dest_df):
@@ -210,14 +145,12 @@ def execute_table_query(origxdest, orig_df, dest_df):
     df = pd.DataFrame(columns=['orig_loc','orig_id','dest_loc','dest_id','dist','duration'])
     #init list for destination co-ords
     dest_locs = []
-    dest_ids = []
 
     dest_string = ""
     for j in range(len(dest_df)):
         #now add each dest in the string
         dest_string += str(dest_df['lon'][j]) + "," + str(dest_df['lat'][j]) + ";"
         dest_locs.append(str(dest_df['lon'][j]) + "," + str(dest_df['lat'][j]))
-        dest_ids.append(j)
 
     dest_string = dest_string[:-1]
 
@@ -255,7 +188,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
         durs = durs + orig[1]
     origxdest['distance'] = dists
     origxdest['duration'] = durs
-    code.interact(local=locals())
+    return(origxdest)
 
 def req(query_wrapper):
     #for query_wrapper in tqdm(query_list):
