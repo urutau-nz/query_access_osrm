@@ -256,10 +256,10 @@ def req(query_wrapper):
     for dest_string in response.json()['destinations'] :
         #this is temp
         temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][1], dest_string['distance']])
-
+    code.interact(local=locals())
         #locate the pair
         #print(dest_string['distance'])
-        origxdest.loc((origxdest['id_orig'] == query_wrapper.orig_loc_x) & (origxdest['id_orig']['y'] == query_wrapper.orig_loc_y) & (origxdest['id_dest']['lon'] == dest_string['location'][0])& (origxdest['id_dest']['lat'] == dest_string['location'][1]))['distance'] = dest_string['distance']
+        #origxdest.loc((origxdest['id_orig'] == query_wrapper.orig_loc_x) & (origxdest['id_orig']['y'] == query_wrapper.orig_loc_y) & (origxdest['id_dest']['lon'] == dest_string['location'][0])& (origxdest['id_dest']['lat'] == dest_string['location'][1]))['distance'] = dest_string['distance']
             #enter the value
         #now we have a list of all distances we were given
 
