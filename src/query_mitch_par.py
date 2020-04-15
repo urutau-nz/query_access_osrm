@@ -27,7 +27,6 @@ def main(db, context):
     '''
     set up the db tables I need for the querying
     '''
-
     # init the destination tables
     #create_dest_table(db)
 
@@ -116,13 +115,14 @@ def query_points(db, context):
     origxdest['distance'] = None
     origxdest['duration'] = None
 
+    # df of durations, distances, ids, and co-ordinates
     origxdest = execute_table_query(origxdest, orig_df, dest_df)
 
     # add df to sql
     logger.info('Writing data to SQL')
     origxdest.to_sql('distance_duration', con=db['engine'], if_exists='replace', index=False, dtype={"distance":Float(), "duration":Float(), 'id_dest':Integer()})
     # update indices
-    #queries = ['CREATE INDEX "dest_idx" ON distance ("id_dest");','CREATE INDEX "orig_idx" ON distance ("id_orig");']
+    queries = ['CREATE INDEX "dest_idx" ON distance ("id_dest");','CREATE INDEX "orig_idx" ON distance ("id_orig");']
     for q in queries:
         cursor.execute(q)
 
@@ -133,52 +133,53 @@ def query_points(db, context):
 
 def execute_table_query(origxdest, orig_df, dest_df):
     #Use the table service so as to reduce the amount of requests sent
-    #Probably stick with MLD as pre-proccesing wont do much when changing things as CD only gets faster with good pre-processing
     # https://github.com/Project-OSRM/osrm-backend/blob/master/docs/http.md#table-service
 
-# the query looks like this: '{}/route/v1/driving/{},{};{},{}?overview=false'.format(osrm_url, lon_o, lat_o, lon_d, lat_d)
-    base_string = context['osrm_url'] + "/table/v1/driving/"
-
-    #this needs to be made more robust and efficient goddam
-    #init dataframe for results
-    df = pd.DataFrame(columns=['orig_loc','orig_id','dest_loc','dest_id','dist','duration'])
-    #init list for destination co-ords
+    #init list for destination & origin co-ords
     dest_locs = []
+    orig_locs = []
 
+    #create query string
+    # the query looks like this: '{}/route/v1/driving/{},{};{},{}?overview=false'.format(osrm_url, lon_o, lat_o, lon_d, lat_d)
+    base_string = context['osrm_url'] + "/table/v1/driving/"
     dest_string = ""
+    #make queries for each orig, this single table query has all destinations
     for j in range(len(dest_df)):
         #now add each dest in the string
         dest_string += str(dest_df['lon'][j]) + "," + str(dest_df['lat'][j]) + ";"
+        #get list of destination co-ordinates
         dest_locs.append(str(dest_df['lon'][j]) + "," + str(dest_df['lat'][j]))
 
+    #remove last semi colon
     dest_string = dest_string[:-1]
-
+    #fill column of destination co-ords
     origxdest['dest_loc'] = len(orig_df)*dest_locs
-    orig_locs = []
-
+    #init list for query objects
     query_list = []
-
+    #create the query strings
     for i in range(len(orig_df)):
-        orig_loc = str(orig_df.x[i]) + "," + str(orig_df.y[i])
-        temp_orig_locs = len(dest_df)*[str(orig_loc)]
+        #list of orig co-ords
+        temp_orig_locs = len(dest_df)*[str(orig_df.x[i]) + "," + str(orig_df.y[i])]
         orig_locs = orig_locs + temp_orig_locs
+        #make query string
         temp_query_wrapper = QueryWrapper(base_string, orig_df.x[i], orig_df.y[i])
         #add orig in position 0 of the query string
         temp_query_wrapper.query_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
+        #add destinations to query too
         temp_query_wrapper.query_string += dest_string
-        #now define the orig and dest bits and extra stuff
-        #remove the semicolon
+        #returns matrix of durations in seconds and distances in meters. Sources=0 indicates that the orig co-ord is in index 0
         temp_query_wrapper.query_string += "?annotations=duration,distance&sources=0"
-        #&annotation=distance
+        #append query string
         query_list.append(temp_query_wrapper)
 
+    #fill column with orig co-ords
     origxdest['orig_loc'] = orig_locs
 
-
-    #code.interact(local=locals())
+    # Table Query OSRM in parallel
     if par == True:
-        # Query OSRM in parallel
+        #define cpu usage
         num_workers = np.int(mp.cpu_count() * par_frac)
+        #gets list of tuples which contain 1list of distances and 1list
         results = Parallel(n_jobs=num_workers)(delayed(req)(query_wrapper) for query_wrapper in tqdm(query_list))
     dists = []
     durs = []
