@@ -230,7 +230,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
     if par == True:
         # Query OSRM in parallel
         num_workers = np.int(mp.cpu_count() * par_frac)
-        dist, dur = Parallel(n_jobs=num_workers)(delayed(req)(query_wrapper) for query_wrapper in tqdm(query_list))
+        results = Parallel(n_jobs=num_workers)(delayed(req)(query_wrapper) for query_wrapper in tqdm(query_list))
     code.interact(local=locals())
 
 def req(query_wrapper):
