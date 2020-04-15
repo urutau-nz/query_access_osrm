@@ -226,7 +226,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
         #&annotation=distance
         query_list.append(temp_query_wrapper)
 
-    #code.interact(local=locals())
+    code.interact(local=locals())
     if par == True:
         # Query OSRM in parallel
         num_workers = np.int(mp.cpu_count() * par_frac)
