@@ -5,7 +5,7 @@
 #Loc X: -90.071392618565, Loc Y: 30.01270094914956, dest X: -90.385078, dest Y29.901669
 import requests
 
-response = requests.get("http://localhost:6014/route/v1/driving/{},{};{},{}&annotations=true&steps=true".format(-90.071392618565, 30.01270094914956, -90.385078, 29.901669))
+response = requests.get("http://localhost:6014/route/v1/driving/{},{};{},{}?annotations=true&steps=true".format(-90.071392618565, 30.01270094914956, -90.385078, 29.901669))
 
 #http://project-osrm.org/docs/v5.15.2/api/?language=Python#waypoint-object
 
