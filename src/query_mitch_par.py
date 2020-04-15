@@ -255,7 +255,8 @@ def req(query_wrapper):
         #now to proccess the response
     for dest_string in response.json()['destinations'] :
         #this is temp
-        temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][1], dest_string['distance']])
+        #temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][1], dest_string['distance']])
+        temp_orig_dest.append(dest_string['distance'])
         print(temp_origxdest)
         #locate the pair
         #print(dest_string['distance'])
@@ -265,7 +266,7 @@ def req(query_wrapper):
 
         #origxdest.loc("thing to locate", 'distance') = response.json()
     #print(temp_origxdest)
-    return origxdest
+    #return origxdest
 
 class QueryWrapper:
 
