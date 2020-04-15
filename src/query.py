@@ -226,7 +226,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
     query_list = []
 
     for i in range(len(orig_df)):
-        temp_orig_locs = len(dest_df)*[orig_df.x[i]) + "," + str(orig_df.y[i])]
+        temp_orig_locs = len(dest_df)*[str(orig_df.x[i]) + "," + str(orig_df.y[i])]
         temp_orig_ids = len(dest_df)*[i]
         df['orig_loc'].append(temp_orig_locs)
         df['orig_id'].append(temp_orig_ids)
