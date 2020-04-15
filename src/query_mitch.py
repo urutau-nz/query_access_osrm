@@ -244,21 +244,19 @@ def execute_table_query(origxdest, orig_df, dest_df):
     #interact with code to visualise
     #what happens if we make 1 iteration of querylist worth 2 or 3... dests?
     code.interact(local=locals())
+    if par == True:
+        # Query OSRM in parallel
+        num_workers = np.int(mp.cpu_count() * par_frac)
+        distances = Parallel(n_jobs=num_workers)(delayed(req)(query_list) for query_wrapper in tqdm(query_list))
 
-    for query_wrapper in tqdm(query_list):
-        response = requests.get(query_wrapper.query_string)
-
-        #logging
-        elapsed_time += response.elapsed.total_seconds()
-        query_count += 1
-        average_response_time = query_count/elapsed_time
-        #remaining_time = (len(query_list) - query_count) * average_response_time
-        #print("Elapsed time: {}, Remaining time(Approx): {}, Completed: {}/{}".format(elapsed_time, remaining_time, query_count, len(query_list)))
+def req(query_list):
+    #for query_wrapper in tqdm(query_list):
+    response = requests.get(query_wrapper.query_string)
 
         #now to proccess the response
-        for dest_string in response.json()['destinations'] :
+        #for dest_string in response.json()['destinations'] :
             #this is temp
-            temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][1], dest_string['distance']])
+            #temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][1], dest_string['distance']])
 
 
             #locate the pair
@@ -269,7 +267,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
 
         #origxdest.loc("thing to locate", 'distance') = response.json()
     #print(temp_origxdest)
-    return origxdest
+    #return origxdest
 
 class QueryWrapper:
 
