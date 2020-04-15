@@ -247,9 +247,9 @@ def execute_table_query(origxdest, orig_df, dest_df):
     if par == True:
         # Query OSRM in parallel
         num_workers = np.int(mp.cpu_count() * par_frac)
-        distances = Parallel(n_jobs=num_workers)(delayed(req)(query_list) for query_wrapper in tqdm(query_list))
+        distances = Parallel(n_jobs=num_workers)(delayed(req)(query_wrapper) for query_wrapper in tqdm(query_list))
 
-def req(query_list):
+def req(query_wrapper):
     #for query_wrapper in tqdm(query_list):
     response = requests.get(query_wrapper.query_string)
 
