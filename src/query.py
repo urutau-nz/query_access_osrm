@@ -18,6 +18,7 @@ import shapely
 from geoalchemy2 import Geometry, WKTElement
 import requests
 from sqlalchemy.types import Float, Integer
+import pandas as pd
 if par == True:
     import multiprocessing as mp
     from joblib import Parallel, delayed
@@ -201,7 +202,11 @@ def execute_table_query(origxdest, orig_df, dest_df):
     #Probably stick with MLD as pre-proccesing wont do much when changing things as CD only gets faster with good pre-processing
     # https://github.com/Project-OSRM/osrm-backend/blob/master/docs/http.md#table-service
 
-
+    #init dataframe for results
+    df = pd.DataFrame(columns=['orig_loc','orig_id','dest_loc','dest_id','dist','duration'])
+    #init list for destination co-ords
+    dest_locs = []
+    dest_ids = []
     base_string = context['osrm_url'] + "/table/v1/driving/"
 
     #this needs to be made more robust and efficient goddam
@@ -210,12 +215,21 @@ def execute_table_query(origxdest, orig_df, dest_df):
     for j in range(len(dest_df)):
         #now add each dest in the string
         dest_string += str(dest_df['lon'][j]) + "," + str(dest_df['lat'][j]) + ";"
-
+        dest_locs.append(dest_string)
+        dest_ids.append(j)
     dest_string = dest_string[:-1]
+
+    #add dest_co-ords to df
+    df['dest_loc'] = len(orig_df)*dest_locs
+    df['dest_id'] = len(orig_df)*dest_ids
 
     query_list = []
 
     for i in range(len(orig_df)):
+        temp_orig_locs = len(dest_df)*[orig_df.x[i]) + "," + str(orig_df.y[i])]
+        temp_orig_ids = len(dest_df)*[i]
+        df['orig_loc'].append(temp_orig_locs)
+        df['orig_id'].append(temp_orig_ids)
         temp_query_wrapper = QueryWrapper(base_string, orig_df.x[i], orig_df.y[i])
         #add orig in position 0 of the query string
         temp_query_wrapper.query_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
@@ -239,7 +253,8 @@ def execute_table_query(origxdest, orig_df, dest_df):
 
     #temp_data = {"orig_x":[], 'orig_y':[], 'dest_x': [], 'dest_y':[], 'distance':[]}
     #temp_origxdest = pd.DataFrame(temp_data, columns=['orig_x', 'orig_y', 'dest_x', 'dest_y', 'distance'])
-    temp_origxdest = []
+    temp_origxdest_dist = []
+    temp_origxdest_dur = []
 
     #interact with code to visualise
     #what happens if we make 1 iteration of querylist worth 2 or 3... dests?
@@ -251,8 +266,11 @@ def execute_table_query(origxdest, orig_df, dest_df):
         #now to proccess the response
         #for dest_string in response.json()['destinations'] :
             #this is temp
-        temp_origxdest.append(response.json()['distances'][0][1:])
+        temp_origxdest_dist.append(response.json()['distances'][0][1:])
+        temp_origxdest_dur.append(response.json()['durations'][0][1:])
             #temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][1], dest_string['distance']])
+    df['dist'] = temp_origxdest_dist.append(response.json()['distances'][0][1:])
+    df['duration'] = temp_origxdest_dur.append(response.json()['durations'][0][1:])
     code.interact(local=locals())
 
             #locate the pair
