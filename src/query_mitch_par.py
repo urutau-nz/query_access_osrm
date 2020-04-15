@@ -222,7 +222,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
         temp_query_wrapper.query_string += dest_string
         #now define the orig and dest bits and extra stuff
         #remove the semicolon
-        temp_query_wrapper.query_string += "annotations=distance?sources=0"
+        temp_query_wrapper.query_string += "annotations=duration,distance?sources=0"
         #&annotation=distance
         query_list.append(temp_query_wrapper)
 
