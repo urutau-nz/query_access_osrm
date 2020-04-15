@@ -121,6 +121,8 @@ def query_points(db, context):
     # add df to sql
     logger.info('Writing data to SQL')
     origxdest.to_sql('distance_duration', con=db['engine'], if_exists='replace', index=False, dtype={"distance":Float(), "duration":Float(), 'id_dest':Integer()})
+    logger.info('Distances written successfully to SQL')
+    logger.info('Updating indices on SQL')
     # update indices
     queries = ['CREATE INDEX "dest_idx" ON distance_duration ("id_dest");','CREATE INDEX "orig_idx" ON distance_duration ("id_orig");']
     for q in queries:
@@ -128,7 +130,7 @@ def query_points(db, context):
 
     # commit to db
     db['con'].commit()
-    logger.info('Distances written successfully to SQL')
+    logger.info('Query Complete')
 
 
 def execute_table_query(origxdest, orig_df, dest_df):
