@@ -241,16 +241,6 @@ def execute_table_query(origxdest, orig_df, dest_df):
         #&annotation=distance
         query_list.append(temp_query_wrapper)
 
-    #print(query_list)
-    print(len(query_list))
-    #r = requests.get(query_string)
-
-    query_count = 0
-    elapsed_time = 0
-    remaining_time = 0
-    average_response_time = 0
-
-    print(origxdest['id_orig'])
 
     #temp_data = {"orig_x":[], 'orig_y':[], 'dest_x': [], 'dest_y':[], 'distance':[]}
     #temp_origxdest = pd.DataFrame(temp_data, columns=['orig_x', 'orig_y', 'dest_x', 'dest_y', 'distance'])
@@ -270,8 +260,8 @@ def execute_table_query(origxdest, orig_df, dest_df):
         temp_origxdest_dist.append(response.json()['distances'][0][1:])
         temp_origxdest_dur.append(response.json()['durations'][0][1:])
             #temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][1], dest_string['distance']])
-    df['dist'] = temp_origxdest_dist.append(response.json()['distances'][0][1:])
-    df['duration'] = temp_origxdest_dur.append(response.json()['durations'][0][1:])
+    df['dist'] = temp_origxdest_dist
+    df['duration'] = temp_origxdest_dur
     code.interact(local=locals())
 
             #locate the pair
