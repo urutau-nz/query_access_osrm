@@ -226,7 +226,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
         #&annotation=distance
         query_list.append(temp_query_wrapper)
 
-    code.interact(local=locals())
+    #code.interact(local=locals())
     if par == True:
         # Query OSRM in parallel
         num_workers = np.int(mp.cpu_count() * par_frac)
@@ -236,12 +236,13 @@ def execute_table_query(origxdest, orig_df, dest_df):
 def req(query_wrapper):
     #for query_wrapper in tqdm(query_list):
     response = requests.get(query_wrapper.query_string)
-    temp_origxdest = []
+    temp_dist = response.json()['distances'][0][1:]
+    #temp_origxdest = []
         #now to proccess the response
-    for dest_string in response.json()['distances'] :
+    #for dest_string in response.json()['distances'] :
         #this is temp
         #temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][1], dest_string['distance']])
-        temp_origxdest.append(dest_string)
+        #temp_origxdest.append(dest_string)
 
         #locate the pair
         #print(dest_string['distance'])
@@ -251,7 +252,7 @@ def req(query_wrapper):
 
         #origxdest.loc("thing to locate", 'distance') = response.json()
     #print(temp_origxdest)
-    return temp_origxdest
+    return temp_dist
 
 class QueryWrapper:
 
