@@ -252,6 +252,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
 def req(query_wrapper):
     #for query_wrapper in tqdm(query_list):
     response = requests.get(query_wrapper.query_string)
+    return(response)
 
         #now to proccess the response
         #for dest_string in response.json()['destinations'] :
