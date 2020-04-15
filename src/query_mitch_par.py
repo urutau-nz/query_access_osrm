@@ -222,26 +222,10 @@ def execute_table_query(origxdest, orig_df, dest_df):
         temp_query_wrapper.query_string += dest_string
         #now define the orig and dest bits and extra stuff
         #remove the semicolon
-        temp_query_wrapper.query_string += "?annotations=distance"
+        temp_query_wrapper.query_string += "?sources=0"
         #&annotation=distance
         query_list.append(temp_query_wrapper)
 
-    #print(query_list)
-    print(len(query_list))
-    #r = requests.get(query_string)
-
-    query_count = 0
-    elapsed_time = 0
-    remaining_time = 0
-    average_response_time = 0
-
-    print(origxdest['id_orig'])
-
-    #temp_data = {"orig_x":[], 'orig_y':[], 'dest_x': [], 'dest_y':[], 'distance':[]}
-    #temp_origxdest = pd.DataFrame(temp_data, columns=['orig_x', 'orig_y', 'dest_x', 'dest_y', 'distance'])
-
-    #interact with code to visualise
-    #what happens if we make 1 iteration of querylist worth 2 or 3... dests?
     #code.interact(local=locals())
     if par == True:
         # Query OSRM in parallel
@@ -258,7 +242,7 @@ def req(query_wrapper):
         #this is temp
         #temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][1], dest_string['distance']])
         temp_origxdest.append(dest_string['distance'])
-    #print(temp_origxdest)
+    print(temp_origxdest)
 
         #locate the pair
         #print(dest_string['distance'])
