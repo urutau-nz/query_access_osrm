@@ -243,7 +243,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
 
     #interact with code to visualise
     #what happens if we make 1 iteration of querylist worth 2 or 3... dests?
-    code.interact(local=locals())
+    #code.interact(local=locals())
     if par == True:
         # Query OSRM in parallel
         num_workers = np.int(mp.cpu_count() * par_frac)
