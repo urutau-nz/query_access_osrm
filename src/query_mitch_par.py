@@ -242,12 +242,13 @@ def execute_table_query(origxdest, orig_df, dest_df):
 
     #interact with code to visualise
     #what happens if we make 1 iteration of querylist worth 2 or 3... dests?
-    #code.interact(local=locals())
+    code.interact(local=locals())
     if par == True:
         # Query OSRM in parallel
         num_workers = np.int(mp.cpu_count() * par_frac)
         distances = Parallel(n_jobs=num_workers)(delayed(req)(query_wrapper) for query_wrapper in tqdm(query_list))
     code.interact(local=locals())
+
 def req(query_wrapper):
     #for query_wrapper in tqdm(query_list):
     response = requests.get(query_wrapper.query_string)
@@ -257,7 +258,8 @@ def req(query_wrapper):
         #this is temp
         #temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][1], dest_string['distance']])
         temp_origxdest.append(dest_string['distance'])
-        print(temp_origxdest)
+    #print(temp_origxdest)
+
         #locate the pair
         #print(dest_string['distance'])
         #origxdest.loc((origxdest['id_orig'] == query_wrapper.orig_loc_x) & (origxdest['id_orig']['y'] == query_wrapper.orig_loc_y) & (origxdest['id_dest']['lon'] == dest_string['location'][0])& (origxdest['id_dest']['lat'] == dest_string['location'][1]))['distance'] = dest_string['distance']
