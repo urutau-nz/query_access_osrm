@@ -260,6 +260,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
         temp_origxdest_dist.append(response.json()['distances'][0][1:])
         temp_origxdest_dur.append(response.json()['durations'][0][1:])
             #temp_origxdest.append([query_wrapper.orig_loc_x, query_wrapper.orig_loc_y, dest_string['location'][0], dest_string['location'][1], dest_string['distance']])
+    code.interact(local=locals())
     df['dist'] = temp_origxdest_dist
     df['duration'] = temp_origxdest_dur
     code.interact(local=locals())
