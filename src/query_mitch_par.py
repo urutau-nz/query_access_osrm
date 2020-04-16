@@ -176,7 +176,7 @@ def execute_table_query(origxdest, orig_df, dest_df):
 
     #fill column with orig co-ords
     origxdest['orig_loc'] = orig_locs
-    #code.interact(local=locals())
+    code.interact(local=locals())
     # Table Query OSRM in parallel
     if par == True:
         #define cpu usage

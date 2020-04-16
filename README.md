@@ -3,3 +3,4 @@
 
 
 psql -h 132.181.102.2 -p 5001 -U postgres -W
+#code.interact(local=locals())
