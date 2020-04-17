@@ -14,7 +14,7 @@ cd $4
 echo change directory to $PWD
 
 echo "downloading files . . . "
-rm $1-latest*
+rm -f $1-latest*
 wget -N http://download.geofabrik.de/north-america/us/$1-latest.osm.pbf
 
 docker run -t -v $4:/data osrm/osrm-backend osrm-extract -p /opt/$3.lua /data/$1-latest.osm.pbf
