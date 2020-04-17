@@ -9,4 +9,4 @@ port = context['port']
 transport_mode = 'car'
 directory = '/homedirs/man112/osm_data'
 
-subprocess.check_call(['./init_osrm.sh', state_name, port, transport_mode, directory, state])
+subprocess.check_call(['/bin/bash', 'init_osrm.sh', state_name, port, transport_mode, directory, state])
