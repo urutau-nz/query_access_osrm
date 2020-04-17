@@ -11,8 +11,10 @@ import utils
 from config import *
 db, context = cfg_init(state)
 logger = logging.getLogger(__name__)
+import math
 import os.path
 import osgeo.ogr
+import io
 import shapely
 from geoalchemy2 import Geometry, WKTElement
 import requests
@@ -120,11 +122,15 @@ def query_points(db, context):
 
     # add df to sql
     logger.info('Writing data to SQL')
-    origxdest.to_sql('distance_duration', con=db['engine'], if_exists='replace', index=False, dtype={"distance":Float(), "duration":Float(), 'id_dest':Integer()})
+    write_to_postgres(origxdest, db, 'distance_duration')
+    # origxdest.to_sql('distance_duration', con=db['engine'], if_exists='replace', index=False, dtype={"distance":Float(), "duration":Float(), 'id_dest':Integer()}, method='multi')
     logger.info('Distances written successfully to SQL')
     logger.info('Updating indices on SQL')
     # update indices
-    queries = ['CREATE INDEX "dest_idx" ON distance_duration ("id_dest");','CREATE INDEX "orig_idx" ON distance_duration ("id_orig");']
+    queries = [
+                'CREATE INDEX "dest_idx" ON distance_duration ("id_dest");',
+                'CREATE INDEX "orig_idx" ON distance_duration ("id_orig");'
+                ]
     for q in queries:
         cursor.execute(q)
 
@@ -132,65 +138,89 @@ def query_points(db, context):
     db['con'].commit()
     logger.info('Query Complete')
 
+def write_to_postgres(df, db, table_name):
+    ''' quickly write to a postgres database
+        from https://stackoverflow.com/a/47984180/5890574'''
+
+    df.head(0).to_sql(table_name, db['engine'], if_exists='replace',index=False) #truncates the table
+
+    conn = db['engine'].raw_connection()
+    cur = conn.cursor()
+    output = io.StringIO()
+    df.to_csv(output, sep='\t', header=False, index=False)
+    output.seek(0)
+    cur.copy_from(output, table_name, null="") # null values become ''
+    conn.commit()
+
 
 def execute_table_query(origxdest, orig_df, dest_df):
-    #Use the table service so as to reduce the amount of requests sent
+    # Use the table service so as to reduce the amount of requests sent
     # https://github.com/Project-OSRM/osrm-backend/blob/master/docs/http.md#table-service
 
+    batch_limit = 10000
+
+    dest_n = len(dest_df)
+    orig_n = len(orig_df)
+    orig_per_batch = int(batch_limit/dest_n)
+    batch_n = math.ceil(orig_n/orig_per_batch)
+
     #create query string
-    # the query looks like this: '{}/route/v1/driving/{},{};{},{}?overview=false'.format(osrm_url, lon_o, lat_o, lon_d, lat_d)
     base_string = context['osrm_url'] + "/table/v1/driving/"
+
+    # make a string of all the destination coordinates
     dest_string = ""
-    #make queries for each orig, this single table query has all destinations
-    for j in range(len(dest_df)):
+    for j in range(dest_n):
         #now add each dest in the string
         dest_string += str(dest_df['lon'][j]) + "," + str(dest_df['lat'][j]) + ";"
-
     #remove last semi colon
     dest_string = dest_string[:-1]
-    #init list for query objects
-    query_list = []
-    #create the query strings
-    for i in range(len(orig_df)):
-        #make query string
-        temp_query_wrapper = QueryWrapper(base_string, orig_df.x[i], orig_df.y[i])
-        #add orig in position 0 of the query string
-        temp_query_wrapper.query_string += str(orig_df.x[i]) + "," + str(orig_df.y[i]) + ";"
-        #add destinations to query too
-        temp_query_wrapper.query_string += dest_string
-        #returns matrix of durations in seconds and distances in meters. Sources=0 indicates that the orig co-ord is in index 0
-        temp_query_wrapper.query_string += "?annotations=duration,distance&sources=0"
-        #append query string
-        query_list.append(temp_query_wrapper)
 
-    #code.interact(local=locals())
-    # Table Query OSRM in parallel
+    # options string
+    options_string_base = '?annotations=duration,distance'
+
+    # loop through the sets of
+    orig_sets = [(i, min(i+orig_per_batch, orig_n)) for i in range(0,orig_n,orig_per_batch)]
+
+    # create a list of queries
+    query_list = []
+    for i in orig_sets:
+        # make a string of all the origin coordinates
+        orig_string = ""
+        orig_ids = range(i[0],i[1])
+        for j in orig_ids:
+            #now add each dest in the string
+            orig_string += str(orig_df.x[j]) + "," + str(orig_df.y[j]) + ";"
+        # make a string of the number of the sources
+        source_str = '&sources=' + str(list(range(len(orig_ids))))[1:-1].replace(' ','').replace(',',';')
+        # make the string for the destinations
+        dest_idx_str = '&destinations=' + str(list(range(len(orig_ids), len(orig_ids)+len(dest_df))))[1:-1].replace(' ','').replace(',',';')
+        # combine and create the query string
+        options_string = options_string_base + source_str + dest_idx_str
+        query_string = base_string + orig_string + dest_string + options_string
+        # append to list of queries
+        query_list.append(query_string)
+
+    # # Table Query OSRM in parallel
     if par == True:
         #define cpu usage
         num_workers = np.int(mp.cpu_count() * par_frac)
         #gets list of tuples which contain 1list of distances and 1list
-        results = Parallel(n_jobs=num_workers)(delayed(req)(query_wrapper) for query_wrapper in tqdm(query_list))
-    dists = []
-    durs = []
-    for orig in results:
-        dists = dists + orig[0]
-        durs = durs + orig[1]
+        results = Parallel(n_jobs=num_workers)(delayed(req)(query_string) for query_string in tqdm(query_list))
+
+    # get the results in the right format
+    dists = [l for orig in results for l in orig[0]]
+    durs = [l for orig in results for l in orig[1]]
     origxdest['distance'] = dists
     origxdest['duration'] = durs
+
     return(origxdest)
 
-def req(query_wrapper):
-    response = requests.get(query_wrapper.query_string).json()
-    temp_dist = response['distances'][0][1:]
-    temp_dur = response['durations'][0][1:]
+def req(query_string):
+    response = requests.get(query_string).json()
+    temp_dist = [item for sublist in response['distances'] for item in sublist]
+    temp_dur = [item for sublist in response['durations'] for item in sublist]
     return temp_dist, temp_dur
 
-class QueryWrapper:
-
-    def __init__(self, query_string, orig_loc_x, orig_loc_y):
-        self.query_string = query_string
-        self.orig_loc_x = orig_loc_x
-        self.orig_loc_y = orig_loc_y
 
 if __name__ == "__main__":
     logger.info('query.py code invoked')
