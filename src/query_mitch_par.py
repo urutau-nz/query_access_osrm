@@ -118,7 +118,7 @@ def query_points(db, context):
     origxdest['duration'] = None
 
     # df of durations, distances, ids, and co-ordinates
-    origxdest = execute_table_query(origxdest, orig_df, dest_df)
+    origxdest = execute_table_query(origxdest, orig_df, dest_df, context)
 
     # add df to sql
     logger.info('Writing data to SQL')
@@ -153,7 +153,7 @@ def write_to_postgres(df, db, table_name):
     conn.commit()
 
 
-def execute_table_query(origxdest, orig_df, dest_df):
+def execute_table_query(origxdest, orig_df, dest_df, context):
     # Use the table service so as to reduce the amount of requests sent
     # https://github.com/Project-OSRM/osrm-backend/blob/master/docs/http.md#table-service
 
