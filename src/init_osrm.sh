@@ -12,7 +12,9 @@ docker rm osrm-$5
 cd $4
 
 echo $PWD
+echo change directory to $PWD
 
+echo "downloading files . . . "
 rm $1-latest*
 wget -N http://download.geofabrik.de/north-america/us/$1-latest.osm.pbf
 
@@ -21,3 +23,4 @@ docker run -t -v $4:/data osrm/osrm-backend osrm-partition /data/$1-latest.osrm
 docker run -t -v $4:/data osrm/osrm-backend osrm-customize /data/$1-latest.osrm
 
 docker run --name osrm-$5 -t -i -p $2:5000 -v $4:/data osrm/osrm-backend osrm-routed --algorithm mld --max-table-size 100000 /data/$1-latest.osrm
+echo ". . . docker initialized . . ."
