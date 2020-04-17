@@ -3,13 +3,11 @@ Init the database
 Query origins to dests in OSRM
 '''
 # user defined variables
-state = input('State: ')
 par = True
 par_frac = 0.9
 
 import utils
 from config import *
-db, context = cfg_init(state)
 logger = logging.getLogger(__name__)
 import math
 import os.path
@@ -25,10 +23,12 @@ if par == True:
     from requests.adapters import HTTPAdapter
     from requests.packages.urllib3.util.retry import Retry
 
-def main(db, context):
+def main(state):
     '''
     set up the db tables I need for the querying
     '''
+    db, context = cfg_init(state)
+
     # init the destination tables
     #create_dest_table(db)
 
@@ -223,5 +223,6 @@ def req(query_string):
 
 
 if __name__ == "__main__":
+    state = input('State: ')
     logger.info('query.py code invoked')
-    main(db, context)
+    main(state)
