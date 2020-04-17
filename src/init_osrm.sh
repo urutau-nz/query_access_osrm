@@ -11,6 +11,7 @@ docker rm osrm-$5
 
 cd $4
 
+echo $PWD
 echo change directory to $PWD
 
 echo "downloading files . . . "

@@ -16,6 +16,7 @@ def main(state):
 
     subprocess.check_call(['/bin/bash', 'init_osrm.sh', state_name, port, transport_mode, directory, state])
 
+
 if __name__ == "__main__":
     state = input('State: ')
     main(state)
