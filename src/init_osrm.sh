@@ -9,11 +9,12 @@ echo "state code: $5"
 docker stop osrm-$5
 docker rm osrm-$5
 
+cd $4
+
+wget http://download.geofabrik.de/north-america/us/$3-latest.osm.pbf
+
 docker run -t -v $4:/data osrm/osrm-backend osrm-extract -p /opt/$3.lua /data/$1-latest.osm.pbf
 docker run -t -v $4:/data osrm/osrm-backend osrm-partition /data/$1-latest.osrm
 docker run -t -v $4:/data osrm/osrm-backend osrm-customize /data/$1-latest.osrm
 
 docker run --name osrm-$5 -t -i -p $2:5000 -v $4:/data osrm/osrm-backend osrm-routed --algorithm mld --max-table-size 100000 /data/$1-latest.osrm
-
-process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-output, error = process.communicate()
