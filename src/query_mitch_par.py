@@ -137,10 +137,6 @@ def execute_table_query(origxdest, orig_df, dest_df):
     #Use the table service so as to reduce the amount of requests sent
     # https://github.com/Project-OSRM/osrm-backend/blob/master/docs/http.md#table-service
 
-    #init list for destination & origin co-ords
-    #dest_locs = []
-    #orig_locs = []
-
     #create query string
     # the query looks like this: '{}/route/v1/driving/{},{};{},{}?overview=false'.format(osrm_url, lon_o, lat_o, lon_d, lat_d)
     base_string = context['osrm_url'] + "/table/v1/driving/"
@@ -149,20 +145,13 @@ def execute_table_query(origxdest, orig_df, dest_df):
     for j in range(len(dest_df)):
         #now add each dest in the string
         dest_string += str(dest_df['lon'][j]) + "," + str(dest_df['lat'][j]) + ";"
-        #get list of destination co-ordinates
-        #dest_locs.append(str(dest_df['lon'][j]) + "," + str(dest_df['lat'][j]))
 
     #remove last semi colon
     dest_string = dest_string[:-1]
-    #fill column of destination co-ords
-    #origxdest['dest_loc'] = len(orig_df)*dest_locs
     #init list for query objects
     query_list = []
     #create the query strings
     for i in range(len(orig_df)):
-        #list of orig co-ords
-        #temp_orig_locs = len(dest_df)*[str(orig_df.x[i]) + "," + str(orig_df.y[i])]
-        #orig_locs = orig_locs + temp_orig_locs
         #make query string
         temp_query_wrapper = QueryWrapper(base_string, orig_df.x[i], orig_df.y[i])
         #add orig in position 0 of the query string
@@ -174,8 +163,6 @@ def execute_table_query(origxdest, orig_df, dest_df):
         #append query string
         query_list.append(temp_query_wrapper)
 
-    #fill column with orig co-ords
-    #origxdest['orig_loc'] = orig_locs
     #code.interact(local=locals())
     # Table Query OSRM in parallel
     if par == True:
@@ -183,7 +170,6 @@ def execute_table_query(origxdest, orig_df, dest_df):
         num_workers = np.int(mp.cpu_count() * par_frac)
         #gets list of tuples which contain 1list of distances and 1list
         results = Parallel(n_jobs=num_workers)(delayed(req)(query_wrapper) for query_wrapper in tqdm(query_list))
-    code.interact(local=locals())
     dists = []
     durs = []
     for orig in results:
@@ -191,22 +177,14 @@ def execute_table_query(origxdest, orig_df, dest_df):
         durs = durs + orig[1]
     origxdest['distance'] = dists
     origxdest['duration'] = durs
+    code.interact(local=locals())
     return(origxdest)
 
 def req(query_wrapper):
     response = requests.get(query_wrapper.query_string).json()
-    dists = response['distances'][0][1:]
-    durs = response['durations'][0][1:]
-    locs = []
-    for i in response['destinations']:
-        locs.append(i['location'])
-    df = pd.DataFrame()
-    df['dest_loc'] = locs[1:]
-    df['distance'] = dists
-    df['duration'] = durs
-    df['orig_y'] = response['sources'][0]['location'][1]
-    df['orig_x'] = response['sources'][0]['location'][0]
-    return df
+    temp_dist = response['distances'][0][1:]
+    temp_dur = response['durations'][0][1:]
+    return temp_dist, temp_dur
 
 class QueryWrapper:
 
