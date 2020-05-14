@@ -11,7 +11,7 @@ def main(state):
 
     state_name = context['state']
     port = context['port']
-    transport_mode = 'car'
+    transport_mode = 'foot'
     directory = '/homedirs/man112/osm_data'
 
     subprocess.check_call(['/bin/bash', 'init_osrm.sh', state_name, port, transport_mode, directory, state])
