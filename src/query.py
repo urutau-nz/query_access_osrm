@@ -207,6 +207,10 @@ def execute_table_query(origxdest, orig_df, dest_df, context):
         num_workers = np.int(mp.cpu_count() * par_frac)
         #gets list of tuples which contain 1list of distances and 1list
         results = Parallel(n_jobs=num_workers)(delayed(req)(query_string) for query_string in tqdm(query_list))
+    else:
+        results = []
+        for query_string in tqdm(query_list):
+             results.append(req(query_string))
 
     # get the results in the right format
     dists = [l for orig in results for l in orig[0]]
