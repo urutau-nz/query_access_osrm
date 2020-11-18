@@ -54,7 +54,7 @@ munch==2.5.0
 nbconvert==5.6.1
 nbformat==5.0.5
 netifaces==0.10.4
-notebook==6.0.3
+notebook==6.1.5
 numpy==1.18.2
 oauthlib==2.0.6
 PAM==0.4.2
