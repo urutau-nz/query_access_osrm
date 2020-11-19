@@ -43,7 +43,7 @@ def cfg_init(state):
         context['city_code'] = 'bal'
         context['city'] = 'Baltimore'
         context['state'] = 'maryland'
-        context['country'] = 'usa'
+        context['continent'] = 'usa'
         # url to the osrm routing machine
         context['port'] = '6003'
         context['services'] = ['supermarket', 'school', 'hospital', 'library']
@@ -52,7 +52,7 @@ def cfg_init(state):
         context['city_code'] = 'sea'
         context['city'] = 'Seattle'
         context['state'] = 'washington'
-        context['country'] = 'usa'
+        context['continent'] = 'usa'
         # url to the osrm routing machine
         context['port'] = '6004'
         context['services'] = ['supermarket', 'school', 'hospital', 'library']
@@ -61,7 +61,7 @@ def cfg_init(state):
         context['city_code'] = 'wil'
         context['city'] = 'wilmington'
         context['state'] = 'north-carolina'
-        context['country'] = 'usa'
+        context['continent'] = 'usa'
         # url to the osrm routing machine
         context['port'] = '6002'
         context['services'] = ['super_market_operating', 'gas_station']
@@ -70,7 +70,7 @@ def cfg_init(state):
         context['city_code'] = 'chi'
         context['city'] = 'Chicago'
         context['state'] = 'illinois'
-        context['country'] = 'usa'
+        context['continent'] = 'usa'
         context['port'] = '6005'
         context['services'] = ['supermarket']
     elif state == 'tx':
@@ -78,7 +78,7 @@ def cfg_init(state):
         context['city_code'] = 'hou'
         context['city'] = 'Houston'
         context['state'] = 'texas'
-        context['country'] = 'usa'
+        context['continent'] = 'usa'
         context['port'] = '6006'
         context['services'] = ['supermarket']
         context['services'] = ['supermarket']
@@ -87,7 +87,7 @@ def cfg_init(state):
         context['city_code'] = 'por'
         context['city'] = 'Portland'
         context['state'] = 'oregon'
-        context['country'] = 'usa'
+        context['continent'] = 'usa'
         context['port'] = '6007'
         context['services'] = ['supermarket']
     elif state == 'ga':
@@ -95,7 +95,7 @@ def cfg_init(state):
         context['city_code'] = 'atl'
         context['city'] = 'Atlanta'
         context['state'] = 'georgia'
-        context['country'] = 'usa'
+        context['continent'] = 'usa'
         context['port'] = '6008'
         context['services'] = ['supermarket']
     elif state == 'la':
@@ -103,7 +103,7 @@ def cfg_init(state):
         context['city_code'] = 'new'
         context['city'] = 'New_Orleans'
         context['state'] = 'louisiana'
-        context['country'] = 'usa'
+        context['continent'] = 'usa'
         context['port'] = '6009'
         context['services'] = ['supermarket']
     elif state == 'mi':
@@ -111,7 +111,7 @@ def cfg_init(state):
         context['city_code'] = 'det'
         context['city'] = 'Detroit'
         context['state'] = 'michigan'
-        context['country'] = 'usa'
+        context['continent'] = 'usa'
         context['port'] = '6010'
         context['services'] = ['supermarket']
     elif state == 'co':
@@ -119,7 +119,7 @@ def cfg_init(state):
         context['city_code'] = 'den'
         context['city'] = 'Denver'
         context['state'] = 'colorado'
-        context['country'] = 'usa'
+        context['continent'] = 'usa'
         context['port'] = '6011'
         context['services'] = ['supermarket']
     elif state == 'fl':
@@ -127,7 +127,7 @@ def cfg_init(state):
         context['city_code'] = 'mia'
         context['city'] = 'Miami'
         context['state'] = 'florida'
-        context['country'] = 'usa'
+        context['continent'] = 'usa'
         context['port'] = '6012'
         context['services'] = ['supermarket']
     elif state == 'ca':
@@ -135,7 +135,7 @@ def cfg_init(state):
         context['city_code'] = 'san'
         context['city'] = 'San_Francisco'
         context['state'] = 'california'
-        context['country'] = 'usa'
+        context['continent'] = 'usa'
         context['port'] = '6013'
         context['services'] = ['supermarket','hospital']
     elif state == 'test':
@@ -143,7 +143,7 @@ def cfg_init(state):
         context['city_code'] = 'new'
         context['port'] = '6014'
         context['city'] = 'New_Orleans'
-        context['country'] = 'usa'
+        context['continent'] = 'usa'
         context['state'] = 'louisiana'
         context['services'] = ['supermarket']
 
