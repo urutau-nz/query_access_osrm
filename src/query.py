@@ -32,7 +32,7 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
 ############## Main ##############
-def main(state):
+def main():
     '''
     gathers context and runs functions based on 'script_mode'
     '''
