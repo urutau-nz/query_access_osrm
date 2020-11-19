@@ -5,6 +5,7 @@ echo "port: $2"
 echo "transport mode: $3"
 echo "directory: $4"
 echo "state code: $5"
+echo "continent: $6"
 
 docker stop osrm-$5
 docker rm osrm-$5
@@ -16,7 +17,7 @@ echo change directory to $PWD
 
 echo "downloading files . . . "
 rm -f $1-latest*
-wget -N http://download.geofabrik.de/north-america/us/$1-latest.osm.pbf
+wget -N http://download.geofabrik.de/$6/$1-latest.osm.pbf
 
 docker run -t -v $4:/data osrm/osrm-backend osrm-extract -p /opt/$3.lua /data/$1-latest.osm.pbf
 docker run -t -v $4:/data osrm/osrm-backend osrm-partition /data/$1-latest.osrm

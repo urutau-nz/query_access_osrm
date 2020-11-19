@@ -1,7 +1,9 @@
 import subprocess
 from config import *
 
-def main(state):
+mode_dict = {'driving':'car','walking':'foot','cycling':'bicycle'}
+
+def main(state, context, mode):
     ''' run the shell script that
     - removes the existing docker
     - downloads the osrm files
@@ -10,13 +12,14 @@ def main(state):
     context = cfg_init(state)[1]
 
     state_name = context['state']
-    port = context['port']
-    transport_mode = 'foot'
+    continent = context['continent']
+    port = context['osrm_url'][-4:]
+    transport_mode = mode_dict[mode]
     directory = '/homedirs/man112/osm_data'
 
-    subprocess.check_call(['/bin/bash', 'init_osrm.sh', state_name, port, transport_mode, directory, state])
+    if sim == True:
+        subprocess.call(['/bin/bash', '/homedirs/man112/monte_christchurch/src/init_osrm_sim.sh', state_name, port, transport_mode, directory, state, continent])
 
-
-if __name__ == "__main__":
-    state = input('State: ')
-    main(state)
+# if __name__ == "__main__":
+#     state = input('State: ')
+#     main(state)
