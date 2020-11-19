@@ -228,3 +228,6 @@ def write_to_postgres(df, db, table_name, indices=True):
     db['con'].commit()
 
     conn.commit()
+
+if __name__ == '__main__':
+    main()
