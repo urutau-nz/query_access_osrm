@@ -55,7 +55,7 @@ def main():
     db['con'].close()
 
 ############## Query Points ##############
-def query_points(closed_ids, db, context):
+def query_points(db, context):
     '''
     query OSRM for distances between origins and destinations
     '''
@@ -75,7 +75,7 @@ def query_points(closed_ids, db, context):
     if context['country'] == 'nz':
         orig_df.sort_values(by=['sa12018_v1'], inplace=True)
         orig_df = orig_df.set_index('sa12018_v1')
-    elif context['country'] == 'usa':
+    elif context['country'] == 'us' or 'usa':
         orig_df = orig_df.set_index('geoid10')
         orig_df.sort_values(by=['geoid10'], inplace=True)
     # get list of destination ids
