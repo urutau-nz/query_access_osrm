@@ -21,6 +21,7 @@ from joblib import Parallel, delayed
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 import yaml
+import subprocess
 
 ############## Set up ##############
 config_filename = input('Insert Config Filename (filename.yml): ')
