@@ -11,6 +11,8 @@ script_mode = 'query' #'setup'
 transport_mode = 'driving' #'walking'
 ## Percent of CPU cores to use
 par_frac = 0.9
+## SQL Table Name
+table_name = 'nov_test'
 
 ############## Imports ##############
 # Scripts
@@ -49,7 +51,7 @@ def main():
         # query the distances
         origxdest = query_points(db, context)
         # add df to sql
-        write_to_postgres(origxdest, db, 'distance')
+        write_to_postgres(origxdest, db, table_name)
 
     # close the connection
     db['con'].close()
@@ -217,8 +219,8 @@ def write_to_postgres(df, db, table_name, indices=True):
     # update indices
     if indices == True:
         queries = [
-                    'CREATE INDEX "dest_idx" ON baseline_distance ("id_dest");',
-                    'CREATE INDEX "orig_idx" ON baseline_distance ("id_orig");'
+                    'CREATE INDEX "dest_idx" ON {} ("id_dest");'.format(table_name),
+                    'CREATE INDEX "orig_idx" ON {} ("id_orig");'.format(table_name)
                     ]
         for q in queries:
             cur.execute(q)
