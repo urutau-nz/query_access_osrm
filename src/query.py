@@ -230,7 +230,7 @@ def write_to_postgres(df, db, table_name, indices=True):
         for q in queries:
             cur.execute(q)
 
-    commit to db
+    #commit to db
     db['con'].commit()
 
     conn.commit()
