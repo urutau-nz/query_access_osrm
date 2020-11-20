@@ -48,7 +48,7 @@ def main():
     gathers context and runs functions based on 'script_mode'
     '''
     # gather data and context
-    db, context = cfg_init(state)
+    db = cfg_init(state)
 
     if script_mode == 'setup':
         # init the destination tables

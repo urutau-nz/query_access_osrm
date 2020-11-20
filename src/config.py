@@ -41,4 +41,4 @@ def cfg_init(state):
     db['engine'] = create_engine('postgresql+psycopg2://postgres:' + db['passw'] + '@' + db['host'] + '/' + db['name'] + '?port=' + db['port'])
     db['address'] = "host=" + db['host'] + " dbname=" + db['name'] + " user=postgres password='"+ db['passw'] + "' port=" + db['port']
     db['con'] = psycopg2.connect(db['address'])
-    return(db, context)
+    return(db)
