@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-echo "state code: $1"
+echo "Removing Docker Container"
 
 docker stop osrm-$1
 docker rm osrm-$1

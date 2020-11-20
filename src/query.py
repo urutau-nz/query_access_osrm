@@ -25,7 +25,7 @@ import subprocess
 
 ############## Set up ##############
 config_filename = input('Insert Config Filename (filename.yml): ')
-if 'yml' in config_filename == False:
+if ('yml' in config_filename) == False:
     config_filename = config_filename + '.yml'
 
 with open(r'/homedirs/man112/access_query_osrm/config/{}'.format(config_filename)) as file:
