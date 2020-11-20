@@ -216,14 +216,14 @@ def write_to_postgres(df, db, table_name, indices=True):
     output.seek(0)
     cur.copy_from(output, table_name, null="") # null values become ''
 
-    # update indices
-    if indices == True:
-        queries = [
-                    'CREATE INDEX "dest_idx" ON {} ("id_dest");'.format(table_name),
-                    'CREATE INDEX "orig_idx" ON {} ("id_orig");'.format(table_name)
-                    ]
-        for q in queries:
-            cur.execute(q)
+    # # update indices
+    # if indices == True:
+    #     queries = [
+    #                 'CREATE INDEX "dest_idx" ON {} ("id_dest");'.format(table_name),
+    #                 'CREATE INDEX "orig_idx" ON {} ("id_orig");'.format(table_name)
+    #                 ]
+    #     for q in queries:
+    #         cur.execute(q)
 
     # commit to db
     db['con'].commit()
