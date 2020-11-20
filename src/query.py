@@ -4,7 +4,7 @@ Query origins to dests in OSRM
 '''
 ############## Imports ##############
 # Scripts
-import utils
+#import utils
 from config import *
 import init_osrm
 # Packages
