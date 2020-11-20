@@ -158,6 +158,16 @@ def cfg_init(state):
         context['country']  = 'us'
         context['state'] = 'louisiana'
         context['services'] = ['supermarket']
+    elif state == 'ch':
+        db['name'] = 'monte_christchurch'
+        context['state'] = 'new-zealand'
+        context['city_code'] = 'chc'
+        context['city'] = 'christchurch'
+        context['country'] = 'nz'
+        context['continent'] = 'australia-oceania'
+        # url to the osrm routing machine
+        context['osrm_url'] = 'http://localhost:6015'
+        context['services'] = ['medical_clinic', 'primary_school', 'supermarket']
 
     context['osrm_url'] = 'http://localhost:' + context['port']
     # connect to database

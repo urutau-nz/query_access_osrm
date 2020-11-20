@@ -5,6 +5,8 @@ Query origins to dests in OSRM
 ############## User Defined Variables ##############
 ## Location (based on code within 'config.py')
 state = 'wa'
+## Services
+services = ['supermarket']
 ## Function Use ('query' = access query, 'setup' = create dest table - make sure to check 'types')
 script_mode = 'query' #'setup'
 ## Routing type
@@ -83,6 +85,9 @@ def query_points(db, context):
     # get list of destination ids
     sql = "SELECT * FROM destinations"
     dest_df = gpd.GeoDataFrame.from_postgis(sql, db['con'], geom_col='geom')
+    dest_df = dest_df.set_index('dest_type')
+    dest_df = dest_df.loc[services]
+    dest_df = dest_df.reset_index()
 
     dest_df = dest_df.set_index('id')
     dest_df['lon'] = dest_df.geom.centroid.x
