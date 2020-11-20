@@ -2,20 +2,6 @@
 Init the database
 Query origins to dests in OSRM
 '''
-############## User Defined Variables ##############
-## Location (based on code within 'config.py')
-state = 'wa'
-## Services
-services = ['supermarket']
-## Function Use ('query' = access query, 'setup' = create dest table - make sure to check 'types')
-script_mode = 'query' #'setup'
-## Routing type
-transport_mode = 'driving' #'walking'
-## Percent of CPU cores to use
-par_frac = 0.9
-## SQL Table Name
-table_name = 'nov_test'
-
 ############## Imports ##############
 # Scripts
 import utils
@@ -34,6 +20,26 @@ import multiprocessing as mp
 from joblib import Parallel, delayed
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
+import yaml
+
+############## Set up ##############
+config_filename = input('Insert Config Filename (filename.yml): ')
+if 'yml' in config_filename == False:
+    config_filename = config_filename + '.yml'
+
+with open(r'/homedirs/man112/access_query_osrm/config/{}'.format(config_filename)) as file:
+    # The FullLoader parameter handles the conversion from YAML
+    # scalar values to Python the dictionary format
+    ymldict = yaml.load(file)
+
+script_mode = ymldict['script_mode']
+state = ymldict['state']
+services = ymldict['services']
+transport_mode = ymldict['transport_mode']
+par_frac = ymldict['par_frac']
+table_name = ymldict['table_name']
+port = ymldict['port']
+context = ymldict['context']
 
 ############## Main ##############
 def main():
@@ -54,6 +60,8 @@ def main():
         origxdest = query_points(db, context)
         # add df to sql
         write_to_postgres(origxdest, db, table_name)
+        # Close the docker
+        subprocess.call(['/bin/bash', '/homedirs/man112/access_query_osrm/src/close_docker.sh', state])
 
     # close the connection
     db['con'].close()
@@ -199,8 +207,8 @@ def create_dest_table(db):
 
     # update indices
     cursor = con.cursor()
-    queries = ['CREATE INDEX "dest_id" ON destinations ("id");',
-            'CREATE INDEX "dest_type" ON destinations ("dest_type");']
+    queries = ['CREATE INDEX "destinations_id" ON destinations ("id");',
+            'CREATE INDEX "destinations_type" ON destinations ("dest_type");']
     for q in queries:
         cursor.execute(q)
 
@@ -224,8 +232,8 @@ def write_to_postgres(df, db, table_name, indices=True):
     # update indices
     if indices == True:
         queries = [
-                    'CREATE INDEX "{}_dest_idx" ON {} ("id_dest");'.format(table_name, table_name),
-                    'CREATE INDEX "{}_orig_idx" ON {} ("id_orig");'.format(table_name, table_name)
+                    'CREATE INDEX "{}_dest_id" ON {} ("id_dest");'.format(table_name, table_name),
+                    'CREATE INDEX "{}_orig_id" ON {} ("id_orig");'.format(table_name, table_name)
                     ]
         for q in queries:
             cur.execute(q)
