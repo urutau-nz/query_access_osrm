@@ -37,8 +37,6 @@ def cfg_init(state):
     db['passw'] = open('pass.txt', 'r').read().strip('\n')
     db['host'] = '132.181.102.2'
     db['port'] = '5001'
-    # city information
-    context['osrm_url'] = 'http://localhost:' + context['port']
     # connect to database
     db['engine'] = create_engine('postgresql+psycopg2://postgres:' + db['passw'] + '@' + db['host'] + '/' + db['name'] + '?port=' + db['port'])
     db['address'] = "host=" + db['host'] + " dbname=" + db['name'] + " user=postgres password='"+ db['passw'] + "' port=" + db['port']

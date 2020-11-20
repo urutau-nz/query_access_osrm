@@ -40,6 +40,7 @@ par_frac = ymldict['par_frac']
 table_name = ymldict['table_name']
 port = ymldict['port']
 context = ymldict['context']
+context['osrm_url'] = 'http://localhost:' + port
 
 ############## Main ##############
 def main():
