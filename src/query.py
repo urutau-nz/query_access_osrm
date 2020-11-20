@@ -82,7 +82,6 @@ def query_points(db, context):
     sql = "SELECT * FROM destinations"
     dest_df = gpd.GeoDataFrame.from_postgis(sql, db['con'], geom_col='geom')
 
-    dest_df = dest_df.loc[~dest_df['id'].isin(closed_ids)]
     dest_df = dest_df.set_index('id')
     dest_df['lon'] = dest_df.geom.centroid.x
     dest_df['lat'] = dest_df.geom.centroid.y
