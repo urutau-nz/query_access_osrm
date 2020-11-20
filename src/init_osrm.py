@@ -9,7 +9,6 @@ def main(state, context, mode):
     - downloads the osrm files
     - establishes the osrm routing docker
     '''
-    context = cfg_init(state)[1]
 
     state_name = context['state']
     continent = context['continent']
