@@ -14,10 +14,10 @@ def main(state, context, mode):
     state_name = context['state']
     continent = context['continent']
     port = context['osrm_url'][-4:]
-    transport_mode = 'car' #mode_dict[mode]
+    transport_mode = mode_dict[mode]
     directory = '/homedirs/man112/osm_data'
 
-    subprocess.call(['/bin/bash', '/homedirs/man112/monte_christchurch/src/init_osrm.sh', state_name, port, transport_mode, directory, state, continent])
+    subprocess.call(['/bin/bash', '/homedirs/man112/access_query_osrm/src/init_osrm.sh', state_name, port, transport_mode, directory, state, continent])
 
 
 
