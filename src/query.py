@@ -224,8 +224,8 @@ def write_to_postgres(df, db, table_name, indices=True):
     # update indices
     if indices == True:
         queries = [
-                    'CREATE INDEX "dest_idx" ON {} ("id_dest");'.format(table_name),
-                    'CREATE INDEX "orig_idx" ON {} ("id_orig");'.format(table_name)
+                    'CREATE INDEX "{}_dest_idx" ON {} ("id_dest");'.format(table_name, table_name),
+                    'CREATE INDEX "{}_orig_idx" ON {} ("id_orig");'.format(table_name, table_name)
                     ]
         for q in queries:
             cur.execute(q)
