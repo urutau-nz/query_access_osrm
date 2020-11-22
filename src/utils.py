@@ -4,9 +4,8 @@ General functions that support the project
 -
 '''
 # user defined variables
-state = 'wa'
 from config import *
-db, context = cfg_init(state)
+db = cfg_init(state)
 
 import yagmail
 
