@@ -174,7 +174,7 @@ def execute_table_query(origxdest, orig_df, dest_df, context):
 ############## Read JSON ##############
 def req(query_string):
     response = requests.get(query_string).json()
-    temp_dist = [item for sublist in response['distances'] for item in sublist]
+    temp_dist = [item for sublist in response['{}s'.format(metric)] for item in sublist]
     return temp_dist
 
 ############## Create Destination Table in SQL ##############
