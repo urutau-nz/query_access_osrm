@@ -1,0 +1,33 @@
+# Do you want to query access or setup the destination table? ['query', 'setup'] TYPE: str
+script_mode: 'query'
+
+# State code (e.g. 'wa' for Washington, Seattle), this selects the SQL database, 'access_{state}' TYPE: str
+state: 'wa'
+
+# Which services do you want to evalaute? (must match 'dest_type' name from destination matix, unless script_mode='setup') TYPE: lst of str's
+services: ['supermarket', 'library']
+
+# What mode of transport are you evaluating? ['driving', 'walking', 'cycling'] TYPE: str
+transport_mode: 'driving'
+
+# What metric would you like to evaluate? ['duration', 'distance'] TYPE: str
+metric: 'distance'
+
+# What percent of CPU cores would you like to utilise? [0.0 - 1.0] TYPE: float
+par_frac: 0.9
+
+# What name would save the distance matrix as? TYPE: str
+table_name: 'nov_test'
+
+# What port would you like to run the docker on? (This is where the OSRM will run) TYPE: str
+port: '6010'
+# Do you want the port closed after use? [True, False] TYPE: bool
+close_port: False
+
+# For logging information and downloading the latest OSM data (Check continent/country/state for the osm.pbf download link from https://download.geofabrik.de/north-america/us.html) TYPE: str
+context:
+    city: 'Seattle'
+    city_code: 'sea'
+    state: 'washington'
+    country: 'us'
+    continent: 'north-america'

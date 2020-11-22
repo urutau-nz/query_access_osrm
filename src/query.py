@@ -186,7 +186,7 @@ def create_dest_table(db):
     con = db['con']
     engine = db['engine']
     # destinations and locations
-    types = ['supermarket', 'hospital']
+    types = services
     # import the csv's
     gdf = gpd.GeoDataFrame()
     for dest_type in types:
