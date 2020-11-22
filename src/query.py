@@ -42,6 +42,8 @@ table_name = ymldict['table_name']
 port = ymldict['port']
 context = ymldict['context']
 context['osrm_url'] = 'http://localhost:' + port
+close_port = ymldict['close_port']
+metric = ymldict['metric']
 
 ############## Main ##############
 def main():
@@ -63,7 +65,8 @@ def main():
         # add df to sql
         write_to_postgres(origxdest, db, table_name)
         # Close the docker
-        subprocess.call(['/bin/bash', '/homedirs/man112/access_query_osrm/src/close_docker.sh', state])
+        if close_port == True:
+            subprocess.call(['/bin/bash', '/homedirs/man112/access_query_osrm/src/close_docker.sh', state])
 
     # close the connection
     db['con'].close()
@@ -104,10 +107,10 @@ def query_points(db, context):
     dest_df['lat'] = dest_df.geom.centroid.y
     # list of origxdest pairs
     origxdest = pd.DataFrame(list(itertools.product(orig_df.index, dest_df.index)), columns = ['id_orig', 'id_dest'])
-    origxdest['distance'] = None
+    if metric == 'distance' or 'duration':
+        origxdest['{}'.format(metric)] = None
     origxdest['dest_type'] = len(orig_df)*list(dest_df['dest_type'])
     # df of durations, distances, ids, and co-ordinates
-
     origxdest = execute_table_query(origxdest, orig_df, dest_df, context)
     return origxdest
 
@@ -135,7 +138,7 @@ def execute_table_query(origxdest, orig_df, dest_df, context):
     dest_string = dest_string[:-1]
 
     # options string ('?annotations=duration,distance' will give distance and duration)
-    options_string_base = '?annotations=distance' #'?annotations=duration,distance'
+    options_string_base = '?annotations={}'.format(metric) #'?annotations=duration,distance'
     # loop through the sets of
     orig_sets = [(i, min(i+orig_per_batch, orig_n)) for i in range(0,orig_n,orig_per_batch)]
 
@@ -164,8 +167,8 @@ def execute_table_query(origxdest, orig_df, dest_df, context):
     results = Parallel(n_jobs=num_workers)(delayed(req)(query_string) for query_string in query_list)
     # get the results in the right format
     #dists = [l for orig in results for l in orig[0]] was giving errors so i rewrote
-    dists = [result for query in results for result in query]
-    origxdest['distance'] = dists
+    formed_results = [result for query in results for result in query]
+    origxdest['{}'.format(metric)] = formed_results
     return(origxdest)
 
 ############## Read JSON ##############
