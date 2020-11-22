@@ -105,7 +105,7 @@ def query_points(db, context):
     # list of origxdest pairs
     origxdest = pd.DataFrame(list(itertools.product(orig_df.index, dest_df.index)), columns = ['id_orig', 'id_dest'])
     origxdest['distance'] = None
-    code.interact(local=locals())
+    origxdest['dest_type'] = len(orig_df)*list(dest_df['dest_type'])
     # df of durations, distances, ids, and co-ordinates
 
     origxdest = execute_table_query(origxdest, orig_df, dest_df, context)
