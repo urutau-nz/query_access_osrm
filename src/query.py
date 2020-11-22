@@ -103,7 +103,7 @@ def query_points(db, context):
     dest_df['lon'] = dest_df.geom.centroid.x
     dest_df['lat'] = dest_df.geom.centroid.y
     # list of origxdest pairs
-    origxdest = pd.DataFrame(list(itertools.product(orig_df.index, dest_df.index)), columns = ['id_orig','id_dest'])
+    origxdest = pd.DataFrame(list(itertools.product(orig_df.index, dest_df.index)), columns = ['id_orig', 'id_dest', 'dest_type'])
     origxdest['distance'] = None
     # df of durations, distances, ids, and co-ordinates
 
