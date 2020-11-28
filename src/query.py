@@ -4,7 +4,6 @@ Query origins to dests in OSRM
 '''
 ############## Imports ##############
 # Scripts
-#import utils
 from config import *
 import init_osrm
 # Packages
@@ -20,38 +19,14 @@ import multiprocessing as mp
 from joblib import Parallel, delayed
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-import yaml
-import subprocess
-
-############## Set up ##############
-config_filename = input('Insert Config Filename (filename.yml): ')
-if ('yml' in config_filename) == False:
-    config_filename = config_filename + '.yml'
-
-with open(r'/homedirs/man112/access_query_osrm/config/{}'.format(config_filename)) as file:
-    # The FullLoader parameter handles the conversion from YAML
-    # scalar values to Python the dictionary format
-    ymldict = yaml.load(file)
-
-script_mode = ymldict['script_mode']
-state = ymldict['state']
-services = ymldict['services']
-transport_mode = ymldict['transport_mode']
-par_frac = ymldict['par_frac']
-table_name = ymldict['table_name']
-port = ymldict['port']
-context = ymldict['context']
-context['osrm_url'] = 'http://localhost:' + port
-close_port = ymldict['close_port']
-metric = ymldict['metric']
 
 ############## Main ##############
-def main():
+def main(config):
     '''
     gathers context and runs functions based on 'script_mode'
     '''
     # gather data and context
-    db = cfg_init(state)
+    db = init_db(config)
 
     if script_mode == 'setup':
         # init the destination tables
@@ -70,6 +45,20 @@ def main():
 
     # close the connection
     db['con'].close()
+
+def init_db(config):
+    # SQL connection
+    db = dict()
+    db['name'] = 'access_{}'.format(state)
+    db['passw'] = open('pass.txt', 'r').read().strip('\n')
+    db['host'] = '132.181.102.2'
+    db['port'] = '5001'
+    # connect to database
+    db['engine'] = create_engine('postgresql+psycopg2://postgres:' + db['passw'] + '@' + db['host'] + '/' + db['name'] + '?port=' + db['port'])
+    db['address'] = "host=" + db['host'] + " dbname=" + db['name'] + " user=postgres password='"+ db['passw'] + "' port=" + db['port']
+    db['con'] = psycopg2.connect(db['address'])
+    return(db)
+
 
 ############## Query Points ##############
 def query_points(db, context):
@@ -92,7 +81,7 @@ def query_points(db, context):
     if context['country'] == 'nz':
         orig_df.sort_values(by=['sa12018_v1'], inplace=True)
         orig_df = orig_df.set_index('sa12018_v1')
-    elif context['country'] == 'us' or 'usa':
+    elif context['country'] in ('us','usa'):
         orig_df = orig_df.set_index('geoid10')
         orig_df.sort_values(by=['geoid10'], inplace=True)
     # get list of destination ids

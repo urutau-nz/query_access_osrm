@@ -1,26 +1,23 @@
 import subprocess
-from config import *
 
-mode_dict = {'driving':'car','walking':'foot','cycling':'bicycle'}
 
-def main(state, context, mode):
+
+def main(config):
     ''' run the shell script that
     - removes the existing docker
     - downloads the osrm files
     - establishes the osrm routing docker
     '''
+    # transport mode options
+    mode_dict = {'driving':'car','walking':'foot','cycling':'bicycle'}
 
-    state_name = context['state']
-    continent = context['continent']
-    country = context['country']
-    port = context['osrm_url'][-4:]
-    transport_mode = mode_dict[mode]
-    directory = '/homedirs/man112/osm_data'
+    # pull the variables from the config file
+    state_name = config['OSM']['state']
+    continent = config['OSM']['continent']
+    country = config['OSM']['country']
+    port = config['OSRM']['port']
+    transport_mode = mode_dict[config['transport_mode']]
+    directory = config['OSM']['data_directory']
 
+    # in shell, download the data and init the OSRM server
     subprocess.call(['/bin/bash', '/homedirs/man112/access_query_osrm/src/init_osrm.sh', state_name, port, transport_mode, directory, state, continent, country])
-
-
-
-# if __name__ == "__main__":
-#     state = input('State: ')
-#     main(state)
