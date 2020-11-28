@@ -37,6 +37,8 @@ As an example, you can push a shapefile to PostGreSQL DB using this command
 The code we provide automatically downloads the OpenStreetMap (OSM) data and intiates the OSRM server based on that network.
 If you wish, you can then use the code to query a large number of origin-destination pairs.
 
+You will need to update the config.yaml file to tell the code what region you want to download. Check the [geofabrik site](http://download.geofabrik.de/) for the right name formatting.
+
 ### Test
 If you have a OSRM server running, you can test it through a URL request (either in the browser or command line).
 It should be of this form `http://localhost:5000/route/v1/walking/-75.556521,39.746364;-75.545551,39.747228?overview=false
