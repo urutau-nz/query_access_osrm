@@ -39,7 +39,6 @@ def main(config, logger):
                         'docker run -t -v {}:/data osrm/osrm-backend osrm-extract -p /opt/{}.lua /data/{}-latest.osm.pbf'.format(directory, transport_mode, state_name),
                         'docker run -t -v {}:/data osrm/osrm-backend osrm-partition /data/{}-latest.osrm'.format(directory, state_name),
                         'docker run -t -v {}:/data osrm/osrm-backend osrm-customize /data/{}-latest.osrm'.format(directory, state_name),
-                        'docker run -d --name osrm-{} -t -i -p {}:5000 -v {}:/data osrm/osrm-backend osrm-routed --algorithm mld --max-table-size 100000 /data/{}-latest.osrm'.format(state, port, directory, state_name),
                         ]
         for com in shell_commands:
             subprocess.run(com.split(), stdout=open(os.devnull, 'wb'))
