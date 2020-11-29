@@ -29,7 +29,7 @@ def multi_regions():
 
 def query_osrm(config_filename):
     # import config file
-    with open('./config/{}.yaml'.format(config_filename)) as file:
+    with open('./src/config/{}.yaml'.format(config_filename)) as file:
         config = yaml.load(file)
 
     # initialize the OSRM server
