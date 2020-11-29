@@ -1,6 +1,5 @@
 import init_osrm
 import query
-from config import *
 # logging
 import logging
 logging.basicConfig(
@@ -30,7 +29,7 @@ def multi_regions():
 
 def query_osrm(config_filename):
     # import config file
-    with open(r'/homedirs/man112/access_query_osrm/config/{}.yaml'.format(config_filename)) as file:
+    with open('./config/{}.yaml'.format(config_filename)) as file:
         config = yaml.load(file)
 
     # initialize the OSRM server
@@ -41,8 +40,15 @@ def query_osrm(config_filename):
 
     # shutdown the OSRM server
     if config['OSRM']['shutdown']:
-        subprocess.call(['/bin/bash', '/homedirs/man112/access_query_osrm/src/close_docker.sh', state])
-
+        shell_commands = [
+                            'echo "Removing Docker Container"',
+                            'docker stop osrm-{}'.format(config['location']['state']),
+                            'docker rm osrm-{}'.format(config['location']['state']),
+                            'echo "Docker Container Removed"'
+                            ]
+        for com in shell_commands:
+            com = com.split()
+            subprocess.run(com)
 
 if __name__ == '__main__':
     single_region()

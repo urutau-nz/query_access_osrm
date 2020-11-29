@@ -1,22 +1,31 @@
 '''
 Init the database
-Query origins to dests in OSRM
+Query origin-destination pairs using OSRM
 '''
 ############## Imports ##############
-# Scripts
-from config import *
-import init_osrm
 # Packages
 import math
 import os.path
-import osgeo.ogr
 import io
+import numpy as np
+import pandas as pd
+import itertools
+from datetime import datetime
+# functions - geospatial
+import osgeo.ogr
+import geopandas as gpd
 import shapely
 from geoalchemy2 import Geometry, WKTElement
-import requests
+# functions - data management
+import psycopg2
 from sqlalchemy.types import Float, Integer
+from sqlalchemy.engine import create_engine
+# functions - parallel
 import multiprocessing as mp
 from joblib import Parallel, delayed
+from tqdm import tqdm
+# functions - requests
+import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
@@ -28,20 +37,14 @@ def main(config):
     # gather data and context
     db = init_db(config)
 
-    if script_mode == 'setup':
+    if config['script_mode'] == 'setup':
         # init the destination tables
         create_dest_table(db, config)
-
-    elif script_mode == 'query':
-        # set up docker
-        init_osrm.main(config)
+    elif config['script_mode'] == 'query':
         # query the distances
         origxdest = query_points(db, config)
         # add df to sql
         write_to_postgres(origxdest, db)
-        # Close the docker
-        if close_port == True:
-            subprocess.call(['/bin/bash', '/homedirs/man112/access_query_osrm/src/close_docker.sh', state])
 
     # close the connection
     db['con'].close()
@@ -87,7 +90,7 @@ def query_points(db, config):
     sql = "SELECT * FROM destinations"
     dest_df = gpd.GeoDataFrame.from_postgis(sql, db['con'], geom_col='geom')
     dest_df = dest_df.set_index('dest_type')
-    dest_df = dest_df.loc[services]
+    dest_df = dest_df.loc[config['services']]
     dest_df = dest_df.reset_index()
 
     dest_df = dest_df.set_index('id')
@@ -114,7 +117,8 @@ def execute_table_query(origxdest, orig_df, dest_df, config):
     batch_n = math.ceil(orig_n/orig_per_batch)
 
     #create query string
-    base_string = context['osrm_url'] + "/table/v1/{}/".format(transport_mode)
+    osrm_url = config['OSRM']['host'] + ':' + config['OSRM']['port']
+    base_string = osrm_url + "/table/v1/{}/".format(config['transport_mode'])
 
     # make a string of all the destination coordinates
     dest_string = ""
@@ -129,7 +133,7 @@ def execute_table_query(origxdest, orig_df, dest_df, config):
     if len(config['metric']) == 2:
         options_string_base = '?annotations=duration,distance'
     else:
-        options_string_base = '?annotations={}'.format(metric[0]) #'?annotations=duration,distance'
+        options_string_base = '?annotations={}'.format(config['metric'][0]) #'?annotations=duration,distance'
     # loop through the sets of
     orig_sets = [(i, min(i+orig_per_batch, orig_n)) for i in range(0,orig_n,orig_per_batch)]
 
@@ -153,24 +157,32 @@ def execute_table_query(origxdest, orig_df, dest_df, config):
         query_list.append(query_string)
     # # Table Query OSRM in parallel
     #define cpu usage
-    num_workers = np.int(mp.cpu_count() * par_frac)
+    num_workers = np.int(mp.cpu_count() * config['par_frac'])
     #gets list of tuples which contain 1list of distances and 1list
-    results = Parallel(n_jobs=num_workers)(delayed(req)(query_string) for query_string in query_list)
+    print('{} - Querying the origin-destination pairs:'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+    results = Parallel(n_jobs=num_workers)(delayed(req)(query_string, config) for query_string in tqdm(query_list))
+    print('{} - Querying complete.'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
     # get the results in the right format
     if len(config['metric']) == 2:
         dists = [l for orig in results for l in orig[0]]
         durs = [l for orig in results for l in orig[1]]
         origxdest['distance'] = dists
         origxdest['duration'] = durs
-    # formed_results = [result for query in results for result in query]
-    # origxdest['{}'.format(metric)] = formed_results
+    else:
+        formed_results = [result for query in results for result in query]
+        origxdest['{}'.format(config['metric'][0])] = formed_results
     return(origxdest)
 
 ############## Read JSON ##############
-def req(query_string):
+def req(query_string, config):
     response = requests.get(query_string).json()
-    temp_dist = [item for sublist in response['{}s'.format(metric)] for item in sublist]
-    return temp_dist
+    if len(config['metric']) == 2:
+        temp_dist = [item for sublist in response['distances'] for item in sublist]
+        temp_dur = [item for sublist in response['durations'] for item in sublist]
+        return temp_dist, temp_dur
+    else:
+        return [item for sublist in response['{}s'.format(config['metric'][0])] for item in sublist]
+
 
 ############## Create Destination Table in SQL ##############
 def create_dest_table(db, config):
@@ -234,8 +246,8 @@ def write_to_postgres(df, db, indices=True):
     # update indices
     if indices == True:
         queries = [
-                    'CREATE INDEX "{}_dest_id" ON {} ("id_dest");'.format(db['table_name']),
-                    'CREATE INDEX "{}_orig_id" ON {} ("id_orig");'.format(db['table_name'])
+                    'CREATE INDEX "{0}_dest_id" ON {0} ("id_dest");'.format(db['table_name']),
+                    'CREATE INDEX "{0}_orig_id" ON {0} ("id_orig");'.format(db['table_name'])
                     ]
         for q in queries:
             cur.execute(q)
@@ -244,7 +256,7 @@ def write_to_postgres(df, db, indices=True):
     db['con'].commit()
 
     conn.commit()
-    print('Successfully saved to SQL as "{}"'.format(table_name))
+    print('Successfully saved to SQL as "{}"'.format(db['table_name']))
 
 
 if __name__ == '__main__':

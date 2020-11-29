@@ -12,7 +12,7 @@ transport_mode: driving
 # What metric would you like to evaluate? comment one out, leaving in list TYPE: str
 metric:
   - distance
-  # - duration
+  - duration
 
 # What percent of CPU cores would you like to utilise? [0.0 - 1.0] TYPE: float
 par_frac: 0.9
@@ -20,7 +20,7 @@ par_frac: 0.9
 # What name would save the distance matrix as? TYPE: str
 SQL:
   table_name: nov_test
-  port: 5001
+  port: '5001'
   host: 132.181.102.2
 
 
@@ -29,6 +29,7 @@ location:
     city_code: sea
     # State code (e.g. 'wa' for Washington, Seattle), this selects the SQL database, 'access_{state}' TYPE: str
     state: wa
+    country: us
 
 # For logging information and downloading the latest OSM data (Check continent/country/state for the osm.pbf download link from https://download.geofabrik.de/north-america/us.html) TYPE: str
 OSM:
@@ -36,10 +37,10 @@ OSM:
     country: us
     continent: north-america
     # where do you want your OSM data saved
-    data_directory: /homedirs/man112/osm_data
+    data_directory: /homedirs/tml62/osm
 
 OSRM:
     host: http://localhost
-    port: 6010
+    port: '6010'
     # Do you want the port closed after use? [True, False] TYPE: bool
-    shutdown: False
+    shutdown: True

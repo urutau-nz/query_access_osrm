@@ -1,11 +1,13 @@
 # Querying OSRM to determine proximity
 
+## Check our [blog post at Urutau.](https://urutau.co.nz/how-to/osrm/)
+
 This code can be used to calculate the open street map (OSM) network distance between a set of origins and a set of destinations.
 
 The steps are
 1. Set up an OSRM docker
 1. (optional) Create a SQL database for where your results will be stored (instructions below)
-1. (optional) Download the origin and destination coordinates. These need to be added to the SQL
+1. (optional) Download the origin and destination cogit stordinates. These need to be added to the SQL
 1. Create a config.yaml file
 1. Run `main.py`
 
