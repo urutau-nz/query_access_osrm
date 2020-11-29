@@ -28,6 +28,13 @@ from tqdm import tqdm
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
+# functions - logging
+import logging
+logging.basicConfig(
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger(__name__)
 
 ############## Main ##############
 def main(config):
@@ -42,12 +49,14 @@ def main(config):
         create_dest_table(db, config)
     elif config['script_mode'] == 'query':
         # query the distances
+        logger.info('Querying invoked for {} in {}'.format(config['transport_mode'], config['location']['state']))
         origxdest = query_points(db, config)
         # add df to sql
         write_to_postgres(origxdest, db)
 
     # close the connection
     db['con'].close()
+    logger.info('Database connection closed')
 
 def init_db(config):
     # SQL connection
@@ -58,6 +67,7 @@ def init_db(config):
     db['engine'] = create_engine('postgresql+psycopg2://postgres:' + db['passw'] + '@' + db['host'] + '/' + db['name'] + '?port=' + db['port'])
     db['address'] = "host=" + db['host'] + " dbname=" + db['name'] + " user=postgres password='"+ db['passw'] + "' port=" + db['port']
     db['con'] = psycopg2.connect(db['address'])
+    logger.info('Database connection established')
     return(db)
 
 
@@ -159,9 +169,9 @@ def execute_table_query(origxdest, orig_df, dest_df, config):
     #define cpu usage
     num_workers = np.int(mp.cpu_count() * config['par_frac'])
     #gets list of tuples which contain 1list of distances and 1list
-    print('{} - Querying the origin-destination pairs:'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+    logger.info('Querying the origin-destination pairs:')
     results = Parallel(n_jobs=num_workers)(delayed(req)(query_string, config) for query_string in tqdm(query_list))
-    print('{} - Querying complete.'.format(datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+    logger.info('Querying complete.')
     # get the results in the right format
     if len(config['metric']) == 2:
         dists = [l for orig in results for l in orig[0]]
@@ -234,6 +244,7 @@ def write_to_postgres(df, db, indices=True):
     ''' quickly write to a postgres database
         from https://stackoverflow.com/a/47984180/5890574'''
 
+    logger.info('Writing data to SQL')
     df.head(0).to_sql(db['table_name'], db['engine'], if_exists='replace',index=False) #truncates the table
 
     conn = db['engine'].raw_connection()
@@ -242,8 +253,10 @@ def write_to_postgres(df, db, indices=True):
     df.to_csv(output, sep='\t', header=False, index=False)
     output.seek(0)
     cur.copy_from(output, db['table_name'], null="") # null values become ''
+    logger.info('Distances written successfully to SQL as "{}"'.format(db['table_name']))
 
     # update indices
+    logger.info('Updating indices on SQL')
     if indices == True:
         queries = [
                     'CREATE INDEX "{0}_dest_id" ON {0} ("id_dest");'.format(db['table_name']),
@@ -252,11 +265,7 @@ def write_to_postgres(df, db, indices=True):
         for q in queries:
             cur.execute(q)
 
-    #commit to db
-    db['con'].commit()
-
     conn.commit()
-    print('Successfully saved to SQL as "{}"'.format(db['table_name']))
 
 
 if __name__ == '__main__':

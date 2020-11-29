@@ -1,13 +1,14 @@
 import init_osrm
 import query
-# logging
+import yaml
+import subprocess
+# functions - logging
 import logging
 logging.basicConfig(
     format='%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S')
-import yaml
-import subprocess
+logger = logging.getLogger(__name__)
 
 def single_region():
     # establish config filename
@@ -33,7 +34,9 @@ def query_osrm(config_filename):
         config = yaml.load(file)
 
     # initialize the OSRM server
-    init_osrm.main(config)
+    logger.info('Initialize the OSRM server for {} to {} in {}'.format(config['transport_mode'], config['services'],config['location']['city']))
+    init_osrm.main(config, logger)
+    logger.info('OSRM server initialized')
 
     # query the OSRM server
     query.main(config)
@@ -41,14 +44,13 @@ def query_osrm(config_filename):
     # shutdown the OSRM server
     if config['OSRM']['shutdown']:
         shell_commands = [
-                            'echo "Removing Docker Container"',
                             'docker stop osrm-{}'.format(config['location']['state']),
                             'docker rm osrm-{}'.format(config['location']['state']),
-                            'echo "Docker Container Removed"'
                             ]
         for com in shell_commands:
             com = com.split()
             subprocess.run(com)
+    logger.info('OSRM server shutdown and removed')
 
 if __name__ == '__main__':
     single_region()

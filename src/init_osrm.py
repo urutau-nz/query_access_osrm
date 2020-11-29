@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-def main(config):
+def main(config, logger):
     ''' run the shell script that
     - removes the existing docker
     - downloads the osrm files
@@ -19,36 +19,32 @@ def main(config):
     directory = config['OSM']['data_directory']
     state = config['location']['state']
 
-    # in shell, download the data and init the OSRM server
+    # in shell, remove any existing dockers
     shell_commands = [
-                    # stop any existing dockers
                     'docker stop osrm-{}'.format(state),
                     'docker rm osrm-{}'.format(state),
-                    # download the files
-                    'rm -f {}/{}-latest*'.format(directory, state_name),
-                    'wget -N https://download.geofabrik.de/{}/{}/{}-latest.osm.pbf -P {}'.format(continent, country, state_name, directory),
-                    'echo "building files . . . "',
                     ]
     for com in shell_commands:
-        com = com.split()
-        subprocess.run(com)
+        subprocess.run(com.split())
 
-    shell_commands = [
-                    # init docker data
-                    'docker run -t -v {}:/data osrm/osrm-backend osrm-extract -p /opt/{}.lua /data/{}-latest.osm.pbf'.format(directory, transport_mode, state_name),
-                    'docker run -t -v {}:/data osrm/osrm-backend osrm-partition /data/{}-latest.osrm'.format(directory, state_name),
-                    'docker run -t -v {}:/data osrm/osrm-backend osrm-customize /data/{}-latest.osrm'.format(directory, state_name),
-                    'docker run -d --name osrm-{} -t -i -p {}:5000 -v {}:/data osrm/osrm-backend osrm-routed --algorithm mld --max-table-size 100000 /data/{}-latest.osrm'.format(state, port, directory, state_name),
-                    ]
-    for com in shell_commands:
-        com = com.split()
-        subprocess.run(com, stdout=open(os.devnull, 'wb'))
+    # download the data
+    download_data = 'wget -N https://download.geofabrik.de/{}/{}/{}-latest.osm.pbf -P {}'.format(continent, country, state_name, directory)
+    p = subprocess.run(download_data.split(), stderr=subprocess.PIPE, bufsize=0)
 
-    shell_commands = [
-                    # start docker
-                    'docker run -d --name osrm-{} -t -i -p {}:5000 -v {}:/data osrm/osrm-backend osrm-routed --algorithm mld --max-table-size 100000 /data/{}-latest.osrm'.format(state, port, directory, state_name),
-                    'echo ". . . docker initialized . . ."',
-                    ]
-    for com in shell_commands:
-        com = com.split()
-        subprocess.run(com)
+    # if the data does not redownload, it does not need to re-compile.
+    if not '304 Not Modified' in str(p.stderr):
+        logger.info('Compiling the data files')
+        shell_commands = [
+                        # init docker data
+                        'docker run -t -v {}:/data osrm/osrm-backend osrm-extract -p /opt/{}.lua /data/{}-latest.osm.pbf'.format(directory, transport_mode, state_name),
+                        'docker run -t -v {}:/data osrm/osrm-backend osrm-partition /data/{}-latest.osrm'.format(directory, state_name),
+                        'docker run -t -v {}:/data osrm/osrm-backend osrm-customize /data/{}-latest.osrm'.format(directory, state_name),
+                        'docker run -d --name osrm-{} -t -i -p {}:5000 -v {}:/data osrm/osrm-backend osrm-routed --algorithm mld --max-table-size 100000 /data/{}-latest.osrm'.format(state, port, directory, state_name),
+                        ]
+        for com in shell_commands:
+            subprocess.run(com.split(), stdout=open(os.devnull, 'wb'))
+    else:
+        logger.info('Data not re-downloaded and compiled because no changes to online version')
+
+    run_docker = 'docker run -d --name osrm-{} -t -i -p {}:5000 -v {}:/data osrm/osrm-backend osrm-routed --algorithm mld --max-table-size 100000 /data/{}-latest.osrm'.format(state, port, directory, state_name)
+    subprocess.run(run_docker.split())
