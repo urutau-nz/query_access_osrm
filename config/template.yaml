@@ -9,8 +9,10 @@ services:
 # What mode of transport are you evaluating? ['driving', 'walking', 'cycling'] TYPE: str
 transport_mode: driving
 
-# What metric would you like to evaluate? ['duration', 'distance'] TYPE: str
-metric: distance
+# What metric would you like to evaluate? comment one out, leaving in list TYPE: str
+metric:
+  - distance
+  # - duration
 
 # What percent of CPU cores would you like to utilise? [0.0 - 1.0] TYPE: float
 par_frac: 0.9

@@ -30,15 +30,15 @@ def main(config):
 
     if script_mode == 'setup':
         # init the destination tables
-        create_dest_table(db)
+        create_dest_table(db, config)
 
     elif script_mode == 'query':
         # set up docker
-        init_osrm.main(state, context, transport_mode)
+        init_osrm.main(config)
         # query the distances
-        origxdest = query_points(db, context)
+        origxdest = query_points(db, config)
         # add df to sql
-        write_to_postgres(origxdest, db, table_name)
+        write_to_postgres(origxdest, db)
         # Close the docker
         if close_port == True:
             subprocess.call(['/bin/bash', '/homedirs/man112/access_query_osrm/src/close_docker.sh', state])
@@ -48,11 +48,9 @@ def main(config):
 
 def init_db(config):
     # SQL connection
-    db = dict()
-    db['name'] = 'access_{}'.format(state)
+    db = config['SQL'].copy()
+    db['name'] = 'access_{}'.format(config['location']['state'])
     db['passw'] = open('pass.txt', 'r').read().strip('\n')
-    db['host'] = '132.181.102.2'
-    db['port'] = '5001'
     # connect to database
     db['engine'] = create_engine('postgresql+psycopg2://postgres:' + db['passw'] + '@' + db['host'] + '/' + db['name'] + '?port=' + db['port'])
     db['address'] = "host=" + db['host'] + " dbname=" + db['name'] + " user=postgres password='"+ db['passw'] + "' port=" + db['port']
@@ -61,10 +59,11 @@ def init_db(config):
 
 
 ############## Query Points ##############
-def query_points(db, context):
+def query_points(db, config):
     '''
     query OSRM for distances between origins and destinations
     '''
+    location = config['location']
     # connect to db
     cursor = db['con'].cursor()
 
@@ -78,10 +77,10 @@ def query_points(db, context):
     orig_df.drop('geom',axis=1,inplace=True)
     orig_df.drop_duplicates(inplace=True)
     # set index (different format for different census blocks)
-    if context['country'] == 'nz':
+    if location['country'] == 'nz':
         orig_df.sort_values(by=['sa12018_v1'], inplace=True)
         orig_df = orig_df.set_index('sa12018_v1')
-    elif context['country'] in ('us','usa'):
+    elif location['country'] in ('us','usa'):
         orig_df = orig_df.set_index('geoid10')
         orig_df.sort_values(by=['geoid10'], inplace=True)
     # get list of destination ids
@@ -96,15 +95,15 @@ def query_points(db, context):
     dest_df['lat'] = dest_df.geom.centroid.y
     # list of origxdest pairs
     origxdest = pd.DataFrame(list(itertools.product(orig_df.index, dest_df.index)), columns = ['id_orig', 'id_dest'])
-    if metric == 'distance' or 'duration':
+    for metric in config['metric']:
         origxdest['{}'.format(metric)] = None
     origxdest['dest_type'] = len(orig_df)*list(dest_df['dest_type'])
     # df of durations, distances, ids, and co-ordinates
-    origxdest = execute_table_query(origxdest, orig_df, dest_df, context)
+    origxdest = execute_table_query(origxdest, orig_df, dest_df, config)
     return origxdest
 
 ############## Parallel Table Query ##############
-def execute_table_query(origxdest, orig_df, dest_df, context):
+def execute_table_query(origxdest, orig_df, dest_df, config):
     # Use the table service so as to reduce the amount of requests sent
     # https://github.com/Project-OSRM/osrm-backend/blob/master/docs/http.md#table-service
 
@@ -127,7 +126,10 @@ def execute_table_query(origxdest, orig_df, dest_df, context):
     dest_string = dest_string[:-1]
 
     # options string ('?annotations=duration,distance' will give distance and duration)
-    options_string_base = '?annotations={}'.format(metric) #'?annotations=duration,distance'
+    if len(config['metric']) == 2:
+        options_string_base = '?annotations=duration,distance'
+    else:
+        options_string_base = '?annotations={}'.format(metric[0]) #'?annotations=duration,distance'
     # loop through the sets of
     orig_sets = [(i, min(i+orig_per_batch, orig_n)) for i in range(0,orig_n,orig_per_batch)]
 
@@ -155,9 +157,13 @@ def execute_table_query(origxdest, orig_df, dest_df, context):
     #gets list of tuples which contain 1list of distances and 1list
     results = Parallel(n_jobs=num_workers)(delayed(req)(query_string) for query_string in query_list)
     # get the results in the right format
-    #dists = [l for orig in results for l in orig[0]] was giving errors so i rewrote
-    formed_results = [result for query in results for result in query]
-    origxdest['{}'.format(metric)] = formed_results
+    if len(config['metric']) == 2:
+        dists = [l for orig in results for l in orig[0]]
+        durs = [l for orig in results for l in orig[1]]
+        origxdest['distance'] = dists
+        origxdest['duration'] = durs
+    # formed_results = [result for query in results for result in query]
+    # origxdest['{}'.format(metric)] = formed_results
     return(origxdest)
 
 ############## Read JSON ##############
@@ -167,7 +173,7 @@ def req(query_string):
     return temp_dist
 
 ############## Create Destination Table in SQL ##############
-def create_dest_table(db):
+def create_dest_table(db, config):
     '''
     create a table with the destinations
     '''
@@ -175,7 +181,7 @@ def create_dest_table(db):
     con = db['con']
     engine = db['engine']
     # destinations and locations
-    types = services
+    types = config['services']
     # import the csv's
     gdf = gpd.GeoDataFrame()
     for dest_type in types:
@@ -210,25 +216,26 @@ def create_dest_table(db):
     # commit to db
     con.commit()
 
+
 ############## Save to SQL ##############
-def write_to_postgres(df, db, table_name, indices=True):
+def write_to_postgres(df, db, indices=True):
     ''' quickly write to a postgres database
         from https://stackoverflow.com/a/47984180/5890574'''
 
-    df.head(0).to_sql(table_name, db['engine'], if_exists='replace',index=False) #truncates the table
+    df.head(0).to_sql(db['table_name'], db['engine'], if_exists='replace',index=False) #truncates the table
 
     conn = db['engine'].raw_connection()
     cur = conn.cursor()
     output = io.StringIO()
     df.to_csv(output, sep='\t', header=False, index=False)
     output.seek(0)
-    cur.copy_from(output, table_name, null="") # null values become ''
+    cur.copy_from(output, db['table_name'], null="") # null values become ''
 
     # update indices
     if indices == True:
         queries = [
-                    'CREATE INDEX "{}_dest_id" ON {} ("id_dest");'.format(table_name, table_name),
-                    'CREATE INDEX "{}_orig_id" ON {} ("id_orig");'.format(table_name, table_name)
+                    'CREATE INDEX "{}_dest_id" ON {} ("id_dest");'.format(db['table_name']),
+                    'CREATE INDEX "{}_orig_id" ON {} ("id_orig");'.format(db['table_name'])
                     ]
         for q in queries:
             cur.execute(q)
@@ -238,6 +245,7 @@ def write_to_postgres(df, db, table_name, indices=True):
 
     conn.commit()
     print('Successfully saved to SQL as "{}"'.format(table_name))
+
 
 if __name__ == '__main__':
     main()
