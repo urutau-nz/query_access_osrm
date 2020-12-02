@@ -43,16 +43,26 @@ def main(config):
     '''
     # gather data and context
     db = init_db(config)
+    # Place city boundary shapefile in SQL
+    #if config['set_up']['city_boundary_directory'] != False:
+        # take shp file, insert into SQL
+    # Place destinations in SQL
+    if config['set_up']['destination_directory'] != False:
+        if config['set_up']['destination_file_type'] == 'shp':
+            # init the destination tables
+            create_dest_table(db, config)
+        else:
+            # take list of co-ords then create dest table
+            create_dest_table(db, config)
+    # Place origin blocks in SQL
+    #if config['set_up']['origin_directory'] != False:
+        #insert origin blocks into SQL
 
-    if config['script_mode'] == 'setup':
-        # init the destination tables
-        create_dest_table(db, config)
-    elif config['script_mode'] == 'query':
-        # query the distances
-        logger.info('Querying invoked for {} in {}'.format(config['transport_mode'], config['location']['state']))
-        origxdest = query_points(db, config)
-        # add df to sql
-        write_to_postgres(origxdest, db)
+    # query the distances
+    logger.info('Querying invoked for {} in {}'.format(config['transport_mode'], config['location']['state']))
+    origxdest = query_points(db, config)
+    # add df to sql
+    write_to_postgres(origxdest, db)
 
     # close the connection
     db['con'].close()
@@ -204,64 +214,75 @@ def create_dest_table(db, config):
     engine = db['engine']
     # destinations and locations
     types = config['services']
+    # projection
+    projection = config['set_up']['projection']
     # import the csv's
     gdf = gpd.GeoDataFrame()
+    count = 0
     for dest_type in types:
-        files = '/homedirs/man112/access_inequality_index/data/usa/{}/{}/{}/{}_{}.shp'.format(state, context['city_code'], dest_type, state, dest_type)
-        df_type = gpd.read_file('{}'.format(files))
+        file = config['set_up']['destination_file_directory'][count]
+        df_type = gpd.read_file(r'{}'.format(file))
         # df_type = pd.read_csv('data/destinations/' + dest_type + '_FL.csv', encoding = "ISO-8859-1", usecols = ['id','name','lat','lon'])
-        if df_type.crs['init'] != 'epsg:4269':
+        if df_type.crs['init'] != 'epsg:{}'.format(projection):
             # project into lat lon
-            df_type = df_type.to_crs({'init':'epsg:4269'})
+            df_type = df_type.to_crs({'init':'epsg:{}'.format(projection)})
         df_type['dest_type'] = dest_type
         gdf = gdf.append(df_type)
+        count += 1
 
     # set a unique id for each destination
     gdf['id'] = range(len(gdf))
     # prepare for sql
-    gdf['geom'] = gdf['geometry'].apply(lambda x: WKTElement(x.wkt, srid=4269))
+    gdf['geom'] = gdf['geometry'].apply(lambda x: WKTElement(x.wkt, srid=projection))
     #drop all columns except id, dest_type, and geom
     gdf = gdf[['id','dest_type','geom']]
     # set index
     gdf.set_index(['id','dest_type'], inplace=True)
-
     # export to sql
-    gdf.to_sql('destinations', engine, dtype={'geom': Geometry('POINT', srid= 4269)})
-
-    # update indices
-    cursor = con.cursor()
-    queries = ['CREATE INDEX "destinations_id" ON destinations ("id");',
-            'CREATE INDEX "destinations_type" ON destinations ("dest_type");']
-    for q in queries:
-        cursor.execute(q)
-
-    # commit to db
-    con.commit()
+    write_to_postgres(gdf, db, indices=False) # CHANGE TO TRUE (remove)
+    # gdf.to_sql('destinations', engine, dtype={'geom': Geometry('POINT', srid= projection)})
+    #
+    # # update indices
+    # cursor = con.cursor()
+    # queries = ['CREATE INDEX "destinations_id" ON destinations ("id");',
+    #         'CREATE INDEX "destinations_type" ON destinations ("dest_type");']
+    # for q in queries:
+    #     cursor.execute(q)
+    #
+    # # commit to db
+    # con.commit()
 
 
 ############## Save to SQL ##############
 def write_to_postgres(df, db, indices=True):
     ''' quickly write to a postgres database
         from https://stackoverflow.com/a/47984180/5890574'''
-
+    if 'dest_type' in df.columns() == True:
+        table_name = 'dest_test'
+    else:
+        table_name = db['table_name']
     logger.info('Writing data to SQL')
-    df.head(0).to_sql(db['table_name'], db['engine'], if_exists='replace',index=False) #truncates the table
+    df.head(0).to_sql(table_name, db['engine'], if_exists='replace',index=False) #truncates the table
 
     conn = db['engine'].raw_connection()
     cur = conn.cursor()
     output = io.StringIO()
     df.to_csv(output, sep='\t', header=False, index=False)
     output.seek(0)
-    cur.copy_from(output, db['table_name'], null="") # null values become ''
-    logger.info('Distances written successfully to SQL as "{}"'.format(db['table_name']))
+    cur.copy_from(output, table_name, null="") # null values become ''
+    logger.info('Distances written successfully to SQL as "{}"'.format(table_name))
 
     # update indices
     logger.info('Updating indices on SQL')
     if indices == True:
-        queries = [
-                    'CREATE INDEX "{0}_dest_id" ON {0} ("id_dest");'.format(db['table_name']),
-                    'CREATE INDEX "{0}_orig_id" ON {0} ("id_orig");'.format(db['table_name'])
-                    ]
+        if table_name == db['table_name']:
+            queries = [
+                        'CREATE INDEX "{0}_dest_id" ON {0} ("id_dest");'.format(db['table_name']),
+                        'CREATE INDEX "{0}_orig_id" ON {0} ("id_orig");'.format(db['table_name'])
+                        ]
+        else:
+            queries = ['CREATE INDEX "destinations_id" ON destinations ("id");',
+                    'CREATE INDEX "destinations_type" ON destinations ("dest_type");']
         for q in queries:
             cur.execute(q)
 

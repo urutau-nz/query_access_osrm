@@ -1,5 +1,18 @@
-# Do you want to query access or setup the destination table? ['query', 'setup'] TYPE: str
-script_mode: query
+# # Do you want to query access or setup the destination table? ['query', 'setup', 'both'] TYPE: str
+# script_mode: query
+
+# Add file paths for your city boundary, origin blocks, and destinations. Enter False if data already exists on the SQL database
+set_up:
+  # for US cities use 4269, NZ cities use 4326, otherwise use whatever the origin blocks has been projected in
+  projection: 4269
+  # ['False', 'shp', 'csv']
+  destination_file_type: shp
+  # Use a seperate file for each dest type, use the same order as 'services' below
+  destination_file_directory:
+    - /homedirs/man112/test/superamrket.shp
+    - /homedirs/man112/test/library.shp
+  origin_directory: False
+  city_boundary_directory: False
 
 # Which services do you want to evalaute? (must match 'dest_type' name from destination matix, unless script_mode='setup') TYPE: lst of str's
 services:
