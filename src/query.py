@@ -47,7 +47,7 @@ def main(config):
     #if config['set_up']['city_boundary_directory'] != False:
         # take shp file, insert into SQL
     # Place destinations in SQL
-    if config['set_up']['destination_directory'] != False:
+    if config['set_up']['destination_file_directory'] != False:
         if config['set_up']['destination_file_type'] == 'shp':
             # init the destination tables
             create_dest_table(db, config)
