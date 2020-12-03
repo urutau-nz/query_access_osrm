@@ -47,19 +47,14 @@ def main(config):
 
     # Place destinations in SQL
     if config['set_up']['destination_file_directory'] != False:
-        if config['set_up']['destination_file_type'] == 'shp':
-            # init the destination tables
-            create_dest_table(db, config)
-            logger.info('Successfully exported destination shapefile to SQL')
-        else:
-            # take list of co-ords then create dest table
-            create_dest_table(db, config)
-            logger.info('Successfully exported destination co-ordinates to SQL')
+        # init the destination tables
+        create_dest_table(db, config)
+        logger.info('Successfully exported destination shapefile to SQL')
     # Place origin blocks in SQL
     if config['set_up']['origin_file_directory'] != False:
         #create_origin_table(db, config)
         export_origin = 'shp2pgsql -I -s {} {} block_test | psql -U postgres -d access_{} -h 132.181.102.2 -p 5001'.format(config['set_up']['projection'], config['set_up']['origin_file_directory'], config['location']['state'])
-        subprocess.run(export_origin.split())
+        subprocess.run(export_origin.split(), stdout=open(os.devnull, 'wb'))
         logger.info('Successfully exported origin block shapefile to SQL')
 
     # query the distances

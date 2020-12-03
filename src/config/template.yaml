@@ -2,8 +2,6 @@
 set_up:
   # for US cities use 4269, NZ cities use 4326, otherwise use whatever the origin blocks has been projected in
   projection: 4269
-  # ['False', 'shp', 'csv']
-  destination_file_type: shp
   # Use a seperate file for each dest type, use the same order as 'services' below
   destination_file_directory:
     - /homedirs/man112/test/supermarket.shp
@@ -11,6 +9,7 @@ set_up:
     - /homedirs/man112/test/primary_schools.shp
     - /homedirs/man112/test/hospital.shp
   origin_file_directory: /homedirs/man112/test/sea_block.shp
+  
 # Which services do you want to evalaute? (must match 'dest_type' name from destination matix, unless script_mode='setup') TYPE: lst of str's
 services:
   - supermarket
