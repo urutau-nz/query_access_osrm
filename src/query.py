@@ -55,8 +55,10 @@ def main(config):
         #create_origin_table(db, config)
         export_origin = 'shp2pgsql -I -s {} {} block_test | psql -U postgres -d access_{} -h 132.181.102.2 -p 5001'.format(config['set_up']['projection'], config['set_up']['origin_file_directory'], config['location']['state'])
         print(export_origin)
-        command = subprocess.Popen(export_origin.split(), stdin=subprocess.PIPE, stdout=open(os.devnull, 'wb'))
-        command.communicate(input=open('pass.txt', 'r').read().strip('\n'))
+        command = [export_origin, open('pass.txt', 'r').read().strip('\n')]
+        subprocess.Popen(command, stdin=subprocess.PIPE).wait(timeout=5)
+        # command = subprocess.Popen(export_origin.split(), stdin=subprocess.PIPE, stdout=open(os.devnull, 'wb'))
+        # command.communicate(input=open('pass.txt', 'r').read().strip('\n'))
         logger.info('Successfully exported origin block shapefile to SQL')
 
 
