@@ -45,6 +45,10 @@ def main(config):
     # gather data and context
     db = init_db(config)
 
+    init_origins(config)
+
+    init_destinations(config)
+
     # Place destinations in SQL
     if config['set_up']['destination_file_directory'] != False:
         # init the destination tables
@@ -55,8 +59,9 @@ def main(config):
         create_origin_table(db, config)
         # export_origin = 'shp2pgsql -I -s {} {} block_test | psql -U postgres -d access_{} -h 132.181.102.2 -p 5001'.format(config['set_up']['projection'], config['set_up']['origin_file_directory'], config['location']['state'])
         # print(export_origin)
-        # command = subprocess.Popen(export_origin.split(), stdin=subprocess.PIPE, stdout=open(os.devnull, 'wb'))
-        # command.communicate(input=(open('pass.txt', 'r').read().strip('\n')).encode())
+        # command = subprocess.run(export_origin.split(), stdin=subprocess.PIPE, stdout=open(os.devnull, 'wb'))
+        password = open('pass.txt', 'r').read().strip('\n')
+        # command.communicate(input=password.encode())
         logger.info('Successfully exported origin block shapefile to SQL')
 
 
@@ -265,7 +270,7 @@ def create_origin_table(db, config):
     # prepare for sql
     gdf['geom'] = gdf['geometry'].apply(lambda x: WKTElement(x.wkt, srid=projection))
     # export to sql
-    gdf.to_sql('block_test', engine, if_exists='replace', dtype={'geom': Geometry('POLYGON', srid=projection)})
+    gdf.to_postgis('block_test', engine, if_exists='replace', dtype={'geom': Geometry('POLYGON', srid=projection)})
     # commit to db
     con.commit()
 
