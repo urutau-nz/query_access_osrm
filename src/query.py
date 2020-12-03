@@ -52,10 +52,11 @@ def main(config):
         logger.info('Successfully exported destination shapefile to SQL')
     # Place origin blocks in SQL
     if config['set_up']['origin_file_directory'] != False:
-        #create_origin_table(db, config)
-        export_origin = 'shp2pgsql -I -s {} {} block_test | psql -U postgres -d access_{} -h 132.181.102.2 -p 5001'.format(config['set_up']['projection'], config['set_up']['origin_file_directory'], config['location']['state'])
-        subprocess.run(export_origin.split(), stdout=open(os.devnull, 'wb'))
+        create_origin_table(db, config)
+        # export_origin = 'shp2pgsql -I -s {} {} block_test | psql -U postgres -d access_{} -h 132.181.102.2 -p 5001'.format(config['set_up']['projection'], config['set_up']['origin_file_directory'], config['location']['state'])
+        # subprocess.run(export_origin.split(), stdout=open(os.devnull, 'wb'))
         logger.info('Successfully exported origin block shapefile to SQL')
+
 
     # query the distances
     logger.info('Querying invoked for {} in {}'.format(config['transport_mode'], config['location']['state']))
@@ -246,31 +247,25 @@ def create_dest_table(db, config):
     con.commit()
 
 ############## Create Origin/Block Table in SQL ##############
-# def create_origin_table(db, config):
-#     '''
-#     create a table with the origin blocks
-#     '''
-#     # db connections
-#     con = db['con']
-#     engine = db['engine']
-#     # projection
-#     projection = config['set_up']['projection']
-#     # import the csv's
-#     file = config['set_up']['origin_file_directory'][count]
-#     gdf = gpd.read_file(r'{}'.format(file))
-#     gdf = gdf.to_crs("EPSG:{}".format(projection))
-#     # prepare for sql
-#     gdf['geom'] = gdf['geometry'].apply(lambda x: WKTElement(x.wkt, srid=projection))
-#     # export to sql
-#     gdf.to_sql('block_test', engine, if_exists='replace', dtype={'geom': Geometry('MULTIPOLYGON', srid= projection)})
-#     # update indices
-#     cursor = con.cursor()
-#     queries = ['CREATE INDEX "destinations_id" ON destinations ("id");',
-#             'CREATE INDEX "destinations_type" ON destinations ("dest_type");']
-#     for q in queries:
-#         cursor.execute(q)
-#     # commit to db
-#     con.commit()
+def create_origin_table(db, config):
+    '''
+    create a table with the origin blocks
+    '''
+    # db connections
+    con = db['con']
+    engine = db['engine']
+    # projection
+    projection = config['set_up']['projection']
+    # import the csv's
+    file = config['set_up']['origin_file_directory']
+    gdf = gpd.read_file(r'{}'.format(file))
+    gdf = gdf.to_crs("EPSG:{}".format(projection))
+    # prepare for sql
+    gdf['geom'] = gdf['geometry'].apply(lambda x: WKTElement(x.wkt, srid=projection))
+    # export to sql
+    gdf.to_sql('block_test', engine, if_exists='replace', dtype={'geom': Geometry('MULTIPOLYGON', srid= projection)})
+    # commit to db
+    con.commit()
 
 ############## Save to SQL ##############
 def write_to_postgres(df, db, indices=True):
