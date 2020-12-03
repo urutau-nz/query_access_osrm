@@ -256,7 +256,7 @@ def create_dest_table(db, config):
 def write_to_postgres(df, db, indices=True):
     ''' quickly write to a postgres database
         from https://stackoverflow.com/a/47984180/5890574'''
-    if 'dest_type' in df.columns() == True:
+    if 'dest_type' in list(df.columns) == True:
         table_name = 'dest_test'
     else:
         table_name = db['table_name']
