@@ -236,7 +236,7 @@ def create_dest_table(db, config):
     #drop all columns except id, dest_type, and geom
     gdf = gdf[['id','dest_type','geom']]
     # set index
-    gdf.set_index(['id','dest_type'], inplace=True)
+    gdf.set_index(['id','dest_type'])
     # export to sql
     write_to_postgres(gdf, db, indices=False, dests=True) # CHANGE TO TRUE (remove)
     # gdf.to_sql('destinations', engine, dtype={'geom': Geometry('POINT', srid= projection)})
