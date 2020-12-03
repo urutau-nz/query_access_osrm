@@ -51,6 +51,7 @@ def main(config):
         if config['set_up']['destination_file_type'] == 'shp':
             # init the destination tables
             create_dest_table(db, config)
+            logger.info('Successfully exported destination shapefile to SQL')
         else:
             # take list of co-ords then create dest table
             create_dest_table(db, config)
@@ -223,10 +224,8 @@ def create_dest_table(db, config):
         file = config['set_up']['destination_file_directory'][count]
         df_type = gpd.read_file(r'{}'.format(file))
         # df_type = pd.read_csv('data/destinations/' + dest_type + '_FL.csv', encoding = "ISO-8859-1", usecols = ['id','name','lat','lon'])
-        if df_type.crs['init'] != 'epsg:{}'.format(projection):
-            # project into lat lon
-            df_type = df_type.to_crs({'init':'epsg:{}'.format(projection)})
         df_type['dest_type'] = dest_type
+        df_type = df_type.to_crs("EPSG:{}".format(projection))
         gdf = gdf.append(df_type)
         count += 1
 
