@@ -239,30 +239,26 @@ def create_dest_table(db, config):
     gdf.set_index(['id','dest_type'])
     # export to sql
     write_to_postgres(gdf, db, indices=True, dests=True) # CHANGE TO TRUE (remove)
-    # gdf.to_sql('destinations', engine, dtype={'geom': Geometry('POINT', srid= projection)})
-    #
-    # # update indices
-    # cursor = con.cursor()
-    # queries = ['CREATE INDEX "destinations_id" ON destinations ("id");',
-    #         'CREATE INDEX "destinations_type" ON destinations ("dest_type");']
-    # for q in queries:
-    #     cursor.execute(q)
-    #
-    # # commit to db
-    # con.commit()
+    gdf.to_sql('destinations', engine, dtype={'geom': Geometry('POINT', srid= projection)})
+
+    # update indices
+    cursor = con.cursor()
+    queries = ['CREATE INDEX "destinations_id" ON destinations ("id");',
+            'CREATE INDEX "destinations_type" ON destinations ("dest_type");']
+    for q in queries:
+        cursor.execute(q)
+
+    # commit to db
+    con.commit()
 
 
 ############## Save to SQL ##############
-def write_to_postgres(df, db, indices=True, dests=False):
+def write_to_postgres(df, db, indices=True):
     ''' quickly write to a postgres database
         from https://stackoverflow.com/a/47984180/5890574'''
-    if dests == True:
-        table_name = 'destinations'
-    else:
-        table_name = db['table_name']
+    table_name = db['table_name']
     logger.info('Writing data to SQL')
     df.head(0).to_sql(table_name, db['engine'], if_exists='replace',index=False) #truncates the table
-
     conn = db['engine'].raw_connection()
     cur = conn.cursor()
     output = io.StringIO()
@@ -279,9 +275,6 @@ def write_to_postgres(df, db, indices=True, dests=False):
                         'CREATE INDEX "{0}_dest_id" ON {0} ("id_dest");'.format(db['table_name']),
                         'CREATE INDEX "{0}_orig_id" ON {0} ("id_orig");'.format(db['table_name'])
                         ]
-        else:
-            queries = ['CREATE INDEX "destinations_id" ON destinations ("id");',
-                    'CREATE INDEX "destinations_type" ON destinations ("dest_type");']
         for q in queries:
             cur.execute(q)
 
