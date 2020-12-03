@@ -11,6 +11,8 @@ set_up:
   destination_file_directory:
     - /homedirs/man112/test/supermarket.shp
     - /homedirs/man112/test/library.shp
+    - /homedirs/man112/test/primary_schools.shp
+    - /homedirs/man112/test/hospital.shp
   origin_directory: False
   city_boundary_directory: False
 
@@ -18,6 +20,8 @@ set_up:
 services:
   - supermarket
   - library
+  - school
+  - hospital
 
 # What mode of transport are you evaluating? ['driving', 'walking', 'cycling'] TYPE: str
 transport_mode: driving

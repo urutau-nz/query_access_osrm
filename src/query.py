@@ -238,7 +238,7 @@ def create_dest_table(db, config):
     # set index
     gdf.set_index(['id','dest_type'])
     # export to sql
-    write_to_postgres(gdf, db, indices=False, dests=True) # CHANGE TO TRUE (remove)
+    write_to_postgres(gdf, db, indices=True, dests=True) # CHANGE TO TRUE (remove)
     # gdf.to_sql('destinations', engine, dtype={'geom': Geometry('POINT', srid= projection)})
     #
     # # update indices
@@ -257,7 +257,7 @@ def write_to_postgres(df, db, indices=True, dests=False):
     ''' quickly write to a postgres database
         from https://stackoverflow.com/a/47984180/5890574'''
     if dests == True:
-        table_name = 'dest_test'
+        table_name = 'destinations'
     else:
         table_name = db['table_name']
     logger.info('Writing data to SQL')
