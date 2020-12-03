@@ -238,7 +238,7 @@ def create_dest_table(db, config):
     # set index
     gdf.set_index(['id','dest_type'])
     # export to sql
-    gdf.to_sql('destinations', engine, dtype={'geom': Geometry('POINT', srid= projection)})
+    gdf.to_sql('destinations', engine, if_exists='replace', dtype={'geom': Geometry('POINT', srid= projection)})
 
     # update indices
     cursor = con.cursor()
