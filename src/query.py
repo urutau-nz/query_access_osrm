@@ -52,9 +52,10 @@ def main(config):
         logger.info('Successfully exported destination shapefile to SQL')
     # Place origin blocks in SQL
     if config['set_up']['origin_file_directory'] != False:
-        create_origin_table(db, config)
-        # export_origin = 'shp2pgsql -I -s {} {} block_test | psql -U postgres -d access_{} -h 132.181.102.2 -p 5001'.format(config['set_up']['projection'], config['set_up']['origin_file_directory'], config['location']['state'])
-        # subprocess.run(export_origin.split(), stdout=open(os.devnull, 'wb'))
+        #create_origin_table(db, config)
+        export_origin = 'shp2pgsql -I -s {} {} block_test_one | psql -U postgres -d access_{} -h 132.181.102.2 -p 5001'.format(config['set_up']['projection'], config['set_up']['origin_file_directory'], config['location']['state'])
+        print(export_origin)
+        subprocess.run(export_origin.split(), stdout=open(os.devnull, 'wb'))
         logger.info('Successfully exported origin block shapefile to SQL')
 
 
@@ -263,7 +264,7 @@ def create_origin_table(db, config):
     # prepare for sql
     gdf['geom'] = gdf['geometry'].apply(lambda x: WKTElement(x.wkt, srid=projection))
     # export to sql
-    gdf.to_sql('block_test', engine, if_exists='replace')#, dtype={'geom': Geometry('POLYGON', srid= projection)})
+    gdf.to_sql('block_test', engine, if_exists='replace', dtype={'geom': Geometry('POLYGON', srid=projection)})
     # commit to db
     con.commit()
 
@@ -281,7 +282,6 @@ def write_to_postgres(df, db, indices=True):
     output.seek(0)
     cur.copy_from(output, table_name, null="") # null values become ''
     logger.info('Distances written successfully to SQL as "{}"'.format(table_name))
-
     # update indices
     logger.info('Updating indices on SQL')
     if indices == True:
@@ -292,7 +292,6 @@ def write_to_postgres(df, db, indices=True):
                         ]
         for q in queries:
             cur.execute(q)
-
     conn.commit()
 
 
