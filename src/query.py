@@ -270,6 +270,8 @@ def create_origin_table(db, config):
     # prepare for sql
     gdf['geom'] = gdf['geometry'].apply(lambda x: WKTElement(x.wkt, srid=projection))
     # export to sql
+    import code
+    code.interact(local=locals())
     gdf.to_postgis('block_test', engine, if_exists='replace', dtype={'geom': Geometry('POLYGON', srid=projection)})
     # commit to db
     con.commit()
