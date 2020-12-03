@@ -52,11 +52,11 @@ def main(config):
         logger.info('Successfully exported destination shapefile to SQL')
     # Place origin blocks in SQL
     if config['set_up']['origin_file_directory'] != False:
-        #create_origin_table(db, config)
-        export_origin = 'shp2pgsql -I -s {} {} block_test | psql -U postgres -d access_{} -h 132.181.102.2 -p 5001'.format(config['set_up']['projection'], config['set_up']['origin_file_directory'], config['location']['state'])
-        print(export_origin)
-        command = subprocess.Popen(export_origin.split(), stdin=subprocess.PIPE, stdout=open(os.devnull, 'wb'))
-        command.communicate(input=(open('pass.txt', 'r').read().strip('\n')).encode())
+        create_origin_table(db, config)
+        # export_origin = 'shp2pgsql -I -s {} {} block_test | psql -U postgres -d access_{} -h 132.181.102.2 -p 5001'.format(config['set_up']['projection'], config['set_up']['origin_file_directory'], config['location']['state'])
+        # print(export_origin)
+        # command = subprocess.Popen(export_origin.split(), stdin=subprocess.PIPE, stdout=open(os.devnull, 'wb'))
+        # command.communicate(input=(open('pass.txt', 'r').read().strip('\n')).encode())
         logger.info('Successfully exported origin block shapefile to SQL')
 
 
