@@ -238,7 +238,6 @@ def create_dest_table(db, config):
     # set index
     gdf.set_index(['id','dest_type'])
     # export to sql
-    write_to_postgres(gdf, db, indices=True, dests=True) # CHANGE TO TRUE (remove)
     gdf.to_sql('destinations', engine, dtype={'geom': Geometry('POINT', srid= projection)})
 
     # update indices
