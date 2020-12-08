@@ -78,11 +78,10 @@ def main(config):
 def init_db(config):
     # SQL connection
     db = config['SQL'].copy()
-    db['name'] = 'access_{}'.format(config['location']['state'])
     db['passw'] = open('pass.txt', 'r').read().strip('\n')
     # connect to database
-    db['engine'] = create_engine('postgresql+psycopg2://postgres:' + db['passw'] + '@' + db['host'] + '/' + db['name'] + '?port=' + db['port'])
-    db['address'] = "host=" + db['host'] + " dbname=" + db['name'] + " user=postgres password='"+ db['passw'] + "' port=" + db['port']
+    db['engine'] = create_engine('postgresql+psycopg2://postgres:' + db['passw'] + '@' + db['host'] + '/' + db['database_name'] + '?port=' + db['port'])
+    db['address'] = "host=" + db['host'] + " dbname=" + db['database_name'] + " user=postgres password='"+ db['passw'] + "' port=" + db['port']
     db['con'] = psycopg2.connect(db['address'])
     logger.info('Database connection established')
     return(db)

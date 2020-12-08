@@ -9,7 +9,7 @@ set_up:
     - /homedirs/man112/test/primary_schools.shp
     - /homedirs/man112/test/hospital.shp
   origin_file_directory: /homedirs/man112/test/sea_block.shp
-  
+
 # Which services do you want to evalaute? (must match 'dest_type' name from destination matix, unless script_mode='setup') TYPE: lst of str's
 services:
   - supermarket
@@ -30,7 +30,8 @@ par_frac: 0.9
 
 # What name would save the distance matrix as? TYPE: str
 SQL:
-  table_name: nov_test
+  database_name: my_access_database # this
+  table_name: nov_test # this is the name for the table of distances
   port: '5001'
   host: 132.181.102.2
 
