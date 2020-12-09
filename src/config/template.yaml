@@ -30,7 +30,8 @@ par_frac: 0.9
 
 # What name would save the distance matrix as? TYPE: str
 SQL:
-  database_name: my_access_database # this
+  create_db: True
+  database_name: access_wa # this
   table_name: nov_test # this is the name for the table of distances
   port: '5001'
   host: 132.181.102.2

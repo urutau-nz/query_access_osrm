@@ -45,25 +45,9 @@ def main(config):
     # gather data and context
     db = init_db(config)
 
-    # init_origins(config)
-    #
-    # init_destinations(config)
+    init_destinations(db, config)
 
-    # Place destinations in SQL
-    if config['set_up']['destination_file_directory'] != False:
-        # init the destination tables
-        create_dest_table(db, config)
-        logger.info('Successfully exported destination shapefile to SQL')
-    # Place origin blocks in SQL
-    if config['set_up']['origin_file_directory'] != False:
-        create_origin_table(db, config)
-        # export_origin = 'shp2pgsql -I -s {} {} block_test | psql -U postgres -d access_{} -h 132.181.102.2 -p 5001'.format(config['set_up']['projection'], config['set_up']['origin_file_directory'], config['location']['state'])
-        # print(export_origin)
-        # command = subprocess.run(export_origin.split(), stdin=subprocess.PIPE, stdout=open(os.devnull, 'wb'))
-        # password = open('pass.txt', 'r').read().strip('\n')
-        # command.communicate(input=password.encode())
-        logger.info('Successfully exported origin block shapefile to SQL')
-
+    init_origins(db, config)
 
     # query the distances
     logger.info('Querying invoked for {} in {}'.format(config['transport_mode'], config['location']['state']))
@@ -76,6 +60,9 @@ def main(config):
     logger.info('Database connection closed')
 
 def init_db(config):
+    '''create the database and then connect to it'''
+    # Create the database
+        # you need to create the docker, then the postgis enabled postgresql database
     # SQL connection
     db = config['SQL'].copy()
     db['passw'] = open('pass.txt', 'r').read().strip('\n')
@@ -87,6 +74,63 @@ def init_db(config):
     return(db)
 
 
+############## Create Origin/Block Table in SQL ##############
+def init_origins(db, config):
+    '''
+    create a table with the origin blocks
+    '''
+    if config['set_up']['origin_file_directory'] is not False:
+        # db connections
+        db['passw'] = open('pass.txt', 'r').read().strip('\n')
+        export_origin = 'shp2pgsql -I -s {} {} origins | PGPASSWORD={} psql -U postgres -d access_{} -h 132.181.102.2 -p 5001'.format(config['set_up']['projection'], config['set_up']['origin_file_directory'], db['passw'], config['location']['state'])
+        subprocess.run(export_origin.split(), stdin=subprocess.PIPE, stdout=open(os.devnull, 'wb'))
+        logger.info('Successfully imported origin shapefile into SQL')
+
+
+############## Create Destination Table in SQL ##############
+def init_destinations(db, config):
+    '''
+    create the table of destinations
+    '''
+    if config['set_up']['destination_file_directory'] != False:
+        # db connections
+        con = db['con']
+        engine = db['engine']
+        # destinations and locations
+        types = config['services']
+        # projection
+        projection = config['set_up']['projection']
+        # import the csv's
+        gdf = gpd.GeoDataFrame()
+        count = 0
+        for dest_type in types:
+            file = config['set_up']['destination_file_directory'][count]
+            df_type = gpd.read_file(r'{}'.format(file))
+            # df_type = pd.read_csv('data/destinations/' + dest_type + '_FL.csv', encoding = "ISO-8859-1", usecols = ['id','name','lat','lon'])
+            df_type['dest_type'] = dest_type
+            df_type = df_type.to_crs("EPSG:{}".format(projection))
+            gdf = gdf.append(df_type)
+            count += 1
+        # set a unique id for each destination
+        gdf['id'] = range(len(gdf))
+        # prepare for sql
+        gdf['geom'] = gdf['geometry'].apply(lambda x: WKTElement(x.wkt, srid=projection))
+        #drop all columns except id, dest_type, and geom
+        gdf = gdf[['id','dest_type','geom']]
+        # set index
+        gdf.set_index(['id','dest_type'])
+        # export to sql
+        gdf.to_sql('destinations', engine, if_exists='replace', dtype={'geom': Geometry('POINT', srid= projection)})
+        # update indices
+        cursor = con.cursor()
+        queries = ['CREATE INDEX "destinations_id" ON destinations ("id");',
+                'CREATE INDEX "destinations_type" ON destinations ("dest_type");']
+        for q in queries:
+            cursor.execute(q)
+        # commit to db
+        con.commit()
+        logger.info('Successfully exported destination shapefile to SQL')
+
 ############## Query Points ##############
 def query_points(db, config):
     '''
@@ -97,7 +141,7 @@ def query_points(db, config):
     cursor = db['con'].cursor()
 
     # get list of all origin ids
-    sql = "SELECT * FROM block"
+    sql = "SELECT * FROM origin"
     orig_df = gpd.GeoDataFrame.from_postgis(sql, db['con'], geom_col='geom')
 
     orig_df['x'] = orig_df.geom.centroid.x
@@ -209,71 +253,6 @@ def req(query_string, config):
     else:
         return [item for sublist in response['{}s'.format(config['metric'][0])] for item in sublist]
 
-
-############## Create Destination Table in SQL ##############
-def create_dest_table(db, config):
-    '''
-    create a table with the destinations
-    '''
-    # db connections
-    con = db['con']
-    engine = db['engine']
-    # destinations and locations
-    types = config['services']
-    # projection
-    projection = config['set_up']['projection']
-    # import the csv's
-    gdf = gpd.GeoDataFrame()
-    count = 0
-    for dest_type in types:
-        file = config['set_up']['destination_file_directory'][count]
-        df_type = gpd.read_file(r'{}'.format(file))
-        # df_type = pd.read_csv('data/destinations/' + dest_type + '_FL.csv', encoding = "ISO-8859-1", usecols = ['id','name','lat','lon'])
-        df_type['dest_type'] = dest_type
-        df_type = df_type.to_crs("EPSG:{}".format(projection))
-        gdf = gdf.append(df_type)
-        count += 1
-    # set a unique id for each destination
-    gdf['id'] = range(len(gdf))
-    # prepare for sql
-    gdf['geom'] = gdf['geometry'].apply(lambda x: WKTElement(x.wkt, srid=projection))
-    #drop all columns except id, dest_type, and geom
-    gdf = gdf[['id','dest_type','geom']]
-    # set index
-    gdf.set_index(['id','dest_type'])
-    # export to sql
-    gdf.to_sql('destinations', engine, if_exists='replace', dtype={'geom': Geometry('POINT', srid= projection)})
-    # update indices
-    cursor = con.cursor()
-    queries = ['CREATE INDEX "destinations_id" ON destinations ("id");',
-            'CREATE INDEX "destinations_type" ON destinations ("dest_type");']
-    for q in queries:
-        cursor.execute(q)
-    # commit to db
-    con.commit()
-
-############## Create Origin/Block Table in SQL ##############
-def create_origin_table(db, config):
-    '''
-    create a table with the origin blocks
-    '''
-    # db connections
-    con = db['con']
-    engine = db['engine']
-    # projection
-    projection = config['set_up']['projection']
-    # import the csv's
-    file = config['set_up']['origin_file_directory']
-    gdf = gpd.read_file(r'{}'.format(file))
-    gdf = gdf.to_crs("EPSG:{}".format(projection))
-    # prepare for sql
-    gdf['geom'] = gdf['geometry'].apply(lambda x: WKTElement(x.wkt, srid=projection))
-    # export to sql
-    import code
-    code.interact(local=locals())
-    gdf.to_postgis('block_test', engine, if_exists='replace', dtype={'geom': Geometry('POLYGON', srid=projection)})
-    # commit to db
-    con.commit()
 
 ############## Save to SQL ##############
 def write_to_postgres(df, db, indices=True):
