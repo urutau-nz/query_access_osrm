@@ -39,7 +39,7 @@ location:
     city: Christchurch
     city_code: ch
     # State code (e.g. 'wa' for Washington, Seattle), this selects the SQL database, 'access_{state}' TYPE: str
-    state: new-zealand
+    state: nz
     country: new-zealand
 
 # For logging information and downloading the latest OSM data (Check continent/country/state for the osm.pbf download link from https://download.geofabrik.de/north-america/us.html) TYPE: str
