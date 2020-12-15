@@ -247,8 +247,8 @@ def execute_table_query(origxdest, orig_df, dest_df, config):
 def req(query_string, config):
     response = requests.get(query_string).json()
     if len(config['metric']) == 2:
-        temp_dist = [item for sublist in response['distances'] for item in sublist]
-        temp_dur = [item for sublist in response['durations'] for item in sublist]
+        temp_dist = [item for sublist in response['distance'] for item in sublist]
+        temp_dur = [item for sublist in response['duration'] for item in sublist]
         return temp_dist, temp_dur
     else:
         return [item for sublist in response['{}s'.format(config['metric'][0])] for item in sublist]

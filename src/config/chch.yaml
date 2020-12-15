@@ -4,9 +4,9 @@ set_up:
   projection: 4326
   # Use a seperate file for each dest type, use the same order as 'services' below
   destination_file_directory:
-    - /homedirs/encn493/urban-optim/data/christchurch/pre_processed/schools.shp
-    - /homedirs/encn493/urban-optim/data/christchurch/pre_processed/parks.shp
-    - /homedirs/encn493/urban-optim/data/christchurch/pre_processed/malls.shp
+    - /homedirs/encn493/urban-optim/data/christchurch/clipped/schools.shp
+    - /homedirs/encn493/urban-optim/data/christchurch/clipped/parks.shp
+    - /homedirs/encn493/urban-optim/data/christchurch/clipped/malls.shp
   origin_file_directory: /homedirs/encn493/urban-optim/data/christchurch/raw/census-dwellings.shp
 
 # Which services do you want to evalaute? (must match 'dest_type' name from destination matix | UNLESS making new destinations) TYPE: lst of str's
