@@ -53,6 +53,6 @@ OSM:
 
 OSRM:
     host: http://localhost
-    port: '6010'
+    port: '9000'
     # Do you want the port closed after use? [True, False] TYPE: bool
     shutdown: True

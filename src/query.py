@@ -224,7 +224,6 @@ def execute_table_query(origxdest, orig_df, dest_df, config):
         # combine and create the query string
         options_string = options_string_base + source_str + dest_idx_str
         query_string = base_string + orig_string + dest_string + options_string
-        print(query_string[0:30])
         # append to list of queries
         query_list.append(query_string)
     # # Table Query OSRM in parallel
@@ -248,13 +247,12 @@ def execute_table_query(origxdest, orig_df, dest_df, config):
 ############## Read JSON ##############
 def req(query_string, config):
     response = requests.get(query_string).json()
-    print(response['distances'])
     if len(config['metric']) == 2:
         temp_dist = [item for sublist in response['distances'] for item in sublist]
         temp_dur = [item for sublist in response['durations'] for item in sublist]
         return temp_dist, temp_dur
     else:
-        return [item for sublist in response['{}'.format(config['metric'][0])] for item in sublist]
+        return [item for sublist in response['{}s'.format(config['metric'][0])] for item in sublist]
 
 
 ############## Save to SQL ##############
