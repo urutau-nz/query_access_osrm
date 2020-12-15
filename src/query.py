@@ -81,6 +81,7 @@ def init_origins(db, config):
     create a table with the origin blocks
     '''
     projected_origin_file = config['set_up']['origin_file_directory'][:-4] + '_projected.shp'
+    projection = config['set_up']['projection']
     origin = gpd.read_file(r'{}'.format(config['set_up']['origin_file_directory']))
     origin = origin.to_crs("EPSG:{}".format(projection))
     origin.tofile(r'{}'.format(projected_origin_file))
