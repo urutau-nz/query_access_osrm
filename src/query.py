@@ -46,15 +46,14 @@ def main(config):
     # gather data and context
     db = init_db(config)
 
-    # init_destinations(db, config)
+    init_destinations(db, config)
 
-    init_origins(db, config)
+    # init_origins(db, config)
 
     # query the distances
-    # logger.info('Querying invoked for {} in {}'.format(config['transport_mode'], config['location']['state']))
-    # origxdest = query_points(db, config)
+    origxdest = query_points(db, config)
     # add df to sql
-    # write_to_postgres(origxdest, db)
+    write_to_postgres(origxdest, db)
 
     # close the connection
     db['con'].close()
@@ -90,7 +89,7 @@ def init_origins(db, config):
         db['passw'] = open('pass.txt', 'r').read().strip('\n')
         export_origin = "shp2pgsql -I -s {} {} origin | PGPASSWORD='{}' psql -U postgres -d access_{} -h 132.181.102.2 -p 5001".format(config['set_up']['projection'], projected_origin_file, db['passw'], config['location']['state'])
         print(export_origin)
-        subprocess.Popen(export_origin.split(), stdin=subprocess.PIPE, stdout=open(os.devnull, 'wb'))
+        subprocess.call(export_origin.split(), stdin=subprocess.PIPE, stdout=open(os.devnull, 'wb'))
         # subprocess.run(export_origin.split(), shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
         logger.info('Successfully exported origin shapefile to SQL')
 
@@ -144,6 +143,7 @@ def query_points(db, config):
     '''
     query OSRM for distances between origins and destinations
     '''
+    logger.info('Querying invoked for {} in {}'.format(config['transport_mode'], config['location']['state']))
     location = config['location']
     # connect to db
     cursor = db['con'].cursor()
