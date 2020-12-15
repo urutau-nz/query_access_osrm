@@ -88,10 +88,10 @@ def init_origins(db, config):
     if config['set_up']['origin_file_directory'] is not False:
         # db connections
         db['passw'] = open('pass.txt', 'r').read().strip('\n')
-        export_origin = 'shp2pgsql -I -s {} {} origin | PGPASSWORD={} psql -U postgres -d access_{} -h 132.181.102.2 -p 5001'.format(config['set_up']['projection'], config['set_up']['origin_file_directory'], db['passw'], config['location']['state'])
+        export_origin = "shp2pgsql -I -s {} {} origin | PGPASSWORD='{}' psql -U postgres -d access_{} -h 132.181.102.2 -p 5001".format(config['set_up']['projection'], config['set_up']['origin_file_directory'], db['passw'], config['location']['state'])
         print(export_origin)
-        #subprocess.run(export_origin.split(), stdin=subprocess.PIPE, stdout=open(os.devnull, 'wb'))
-        subprocess.run(export_origin.split(), shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
+        subprocess.run(export_origin.split(), stdin=subprocess.PIPE, stdout=open(os.devnull, 'wb'))
+        # subprocess.run(export_origin.split(), shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
         logger.info('Successfully exported origin shapefile to SQL')
 
 
