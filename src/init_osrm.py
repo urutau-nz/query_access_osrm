@@ -28,7 +28,7 @@ def main(config, logger):
         subprocess.run(com.split())
 
     # download the data
-    download_data = 'wget -N https://download.geofabrik.de/{}/{}/{}-latest.osm.pbf -P {}'.format(continent, country, state_name, directory)
+    download_data = 'wget -N https://download.geofabrik.de/{}/{}-latest.osm.pbf -P {}'.format(continent, country, directory)
     p = subprocess.run(download_data.split(), stderr=subprocess.PIPE, bufsize=0)
 
     # if the data does not redownload, it does not need to re-compile.
