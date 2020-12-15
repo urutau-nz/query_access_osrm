@@ -84,7 +84,7 @@ def init_origins(db, config):
     projection = config['set_up']['projection']
     origin = gpd.read_file(r'{}'.format(config['set_up']['origin_file_directory']))
     origin = origin.to_crs("EPSG:{}".format(projection))
-    origin.tofile(r'{}'.format(projected_origin_file))
+    origin.to_file(r'{}'.format(projected_origin_file))
     if config['set_up']['origin_file_directory'] is not False:
         # db connections
         db['passw'] = open('pass.txt', 'r').read().strip('\n')
