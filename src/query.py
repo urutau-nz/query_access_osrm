@@ -224,7 +224,7 @@ def execute_table_query(origxdest, orig_df, dest_df, config):
         # combine and create the query string
         options_string = options_string_base + source_str + dest_idx_str
         query_string = base_string + orig_string + dest_string + options_string
-        print(query_string)
+        print(query_string[0:30])
         # append to list of queries
         query_list.append(query_string)
     # # Table Query OSRM in parallel
