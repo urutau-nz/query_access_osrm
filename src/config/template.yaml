@@ -46,9 +46,8 @@ location:
 
 # For logging information and downloading the latest OSM data (Check continent/country/state for the osm.pbf download link from https://download.geofabrik.de/north-america/us.html) TYPE: str
 OSM:
-    state: washington
-    country: us
-    continent: north-america
+    osm_subregion: washington
+    osm_region: north-america/us
     # where do you want your OSM data saved
     data_directory: /homedirs/man112/osm_data
 
