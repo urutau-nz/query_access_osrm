@@ -35,30 +35,21 @@ def main(config_filename=None):
         config = yaml.load(file)
 
     # initialize the OSRM server
-    # logger.info('Initialize the OSRM server for {} to {} in {}'.format(config['transport_mode'], config['services'],config['location']['city']))
-    # init_osrm.main(config, logger)
-    # logger.info('OSRM server initialized')
+    init_osrm.main(config, logger)
 
     # initialize and connect to the server
     db = init_db(config)
 
     # add origins and destinations
-    # init_destinations(db, config)
+    init_destinations(db, config)
     init_origins(db, config)
     db['con'].close()
 
-    # query.main(config)
+    # query
+    query.main(config)
 
     # shutdown the OSRM server
-    # if config['OSRM']['shutdown']:
-    #     shell_commands = [
-    #                         'docker stop osrm-{}'.format(config['location']['state']),
-    #                         'docker rm osrm-{}'.format(config['location']['state']),
-    #                         ]
-    #     for com in shell_commands:
-    #         com = com.split()
-    #         subprocess.run(com)
-    # logger.info('OSRM server shutdown and removed')
+    shutdown_db(config)
 
 
 def init_db(config):
@@ -168,6 +159,17 @@ def init_destinations(db, config):
         con.commit()
         logger.info('Successfully exported destination shapefile to SQL')
 
+
+def shutdown_db(config):
+    if config['OSRM']['shutdown']:
+        shell_commands = [
+                            'docker stop osrm-{}'.format(config['location']['state']),
+                            'docker rm osrm-{}'.format(config['location']['state']),
+                            ]
+        for com in shell_commands:
+            com = com.split()
+            subprocess.run(com)
+    logger.info('OSRM server shutdown and removed')
 
 def multi_regions():
     # establish config filenames

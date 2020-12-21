@@ -18,7 +18,7 @@ services:
   - hospital
 
 # What mode of transport are you evaluating? ['driving', 'walking', 'cycling'] TYPE: str
-transport_mode: driving
+transport_mode: walking
 
 # What metric would you like to evaluate? comment one out, leaving in list TYPE: str
 metric:
@@ -31,8 +31,8 @@ par_frac: 0.9
 # What name would save the distance matrix as? TYPE: str
 SQL:
   create_db: True
-  database_name: access_wa # this
-  table_name: nov_test # this is the name for the table of distances
+  database_name: new_database # this is the name of the database
+  table_name: distances # this is the name for the table of distances
   port: '5001'
   host: 132.181.102.2
 
@@ -44,7 +44,7 @@ location:
     state: wa
     country: us
 
-# For logging information and downloading the latest OSM data (Check continent/country/state for the osm.pbf download link from https://download.geofabrik.de/north-america/us.html) TYPE: str
+# For logging information and downloading the latest OSM data (Check osm_region/osm_subregion for the osm.pbf download link from https://download.geofabrik.de/north-america/us.html) TYPE: str
 OSM:
     osm_subregion: washington
     osm_region: north-america/us

@@ -44,25 +44,18 @@ def main(config):
     gathers context and runs functions based on 'script_mode'
     '''
     # gather data and context
-    db = init_db(config)
-
-    init_destinations(db, config)
-
-    # init_origins(db, config)
-
+    db = connect_db(config)
     # query the distances
     origxdest = query_points(db, config)
     # add df to sql
     write_to_postgres(origxdest, db)
-
     # close the connection
     db['con'].close()
     logger.info('Database connection closed')
 
-def init_db(config):
+
+def connect_db(config):
     '''create the database and then connect to it'''
-    # Create the database
-        # you need to create the docker, then the postgis enabled postgresql database
     # SQL connection
     db = config['SQL'].copy()
     db['passw'] = open('pass.txt', 'r').read().strip('\n')
@@ -73,70 +66,6 @@ def init_db(config):
     logger.info('Database connection established')
     return(db)
 
-
-############## Create Origin/Block Table in SQL ##############
-def init_origins(db, config):
-    '''
-    create a table with the origin blocks
-    '''
-    projected_origin_file = config['set_up']['origin_file_directory'][:-4] + '_projected.shp'
-    projection = config['set_up']['projection']
-    origin = gpd.read_file(r'{}'.format(config['set_up']['origin_file_directory']))
-    origin = origin.to_crs("EPSG:{}".format(projection))
-    origin.to_file(r'{}'.format(projected_origin_file))
-    if config['set_up']['origin_file_directory'] is not False:
-        # db connections
-        db['passw'] = open('pass.txt', 'r').read().strip('\n')
-        export_origin = "shp2pgsql -I -s {} {} origin | PGPASSWORD='{}' psql -U postgres -d access_{} -h 132.181.102.2 -p 5001".format(config['set_up']['projection'], projected_origin_file, db['passw'], config['location']['state'])
-        print(export_origin)
-        subprocess.call(export_origin.split(), stdin=subprocess.PIPE, stdout=open(os.devnull, 'wb'))
-        # subprocess.run(export_origin.split(), shell=True, check=True, stdout=subprocess.PIPE, universal_newlines=True)
-        logger.info('Successfully exported origin shapefile to SQL')
-
-
-############## Create Destination Table in SQL ##############
-def init_destinations(db, config):
-    '''
-    create the table of destinations
-    '''
-    if config['set_up']['destination_file_directory'] != False:
-        # db connections
-        con = db['con']
-        engine = db['engine']
-        # destinations and locations
-        types = config['services']
-        # projection
-        projection = config['set_up']['projection']
-        # import the csv's
-        gdf = gpd.GeoDataFrame()
-        count = 0
-        for dest_type in types:
-            file = config['set_up']['destination_file_directory'][count]
-            df_type = gpd.read_file(r'{}'.format(file))
-            # df_type = pd.read_csv('data/destinations/' + dest_type + '_FL.csv', encoding = "ISO-8859-1", usecols = ['id','name','lat','lon'])
-            df_type['dest_type'] = dest_type
-            df_type = df_type.to_crs("EPSG:{}".format(projection))
-            gdf = gdf.append(df_type)
-            count += 1
-        # set a unique id for each destination
-        gdf['id'] = range(len(gdf))
-        # prepare for sql
-        gdf['geom'] = gdf['geometry'].apply(lambda x: WKTElement(x.wkt, srid=projection))
-        #drop all columns except id, dest_type, and geom
-        gdf = gdf[['id','dest_type','geom']]
-        # set index
-        gdf.set_index(['id','dest_type'])
-        # export to sql
-        gdf.to_sql('destinations', engine, if_exists='replace', dtype={'geom': Geometry('POINT', srid= projection)})
-        # update indices
-        cursor = con.cursor()
-        queries = ['CREATE INDEX "destinations_id" ON destinations ("id");',
-                'CREATE INDEX "destinations_type" ON destinations ("dest_type");']
-        for q in queries:
-            cursor.execute(q)
-        # commit to db
-        con.commit()
-        logger.info('Successfully exported destination shapefile to SQL')
 
 ############## Query Points ##############
 def query_points(db, config):

@@ -7,6 +7,7 @@ def main(config, logger):
     - downloads the osrm files
     - establishes the osrm routing docker
     '''
+    logger.info('Initialize the OSRM server for {} to {} in {}'.format(config['transport_mode'], config['services'],config['location']['city']))
     # transport mode options
     mode_dict = {'driving':'car','walking':'foot','cycling':'bicycle'}
 
@@ -46,3 +47,6 @@ def main(config, logger):
 
     run_docker = 'docker run -d --name osrm-{} -t -i -p {}:5000 -v {}:/data osrm/osrm-backend osrm-routed --algorithm mld --max-table-size 100000 /data/{}-latest.osrm'.format(state, port, directory, osm_subregion)
     subprocess.run(run_docker.split())
+
+    logger.info('OSRM server initialized')
+    
