@@ -131,6 +131,7 @@ def init_destinations(db, config):
         # import the csv's
         gdf = gpd.GeoDataFrame()
         count = 0
+        id_dest = []
         for dest_type in types:
             file = config['set_up']['destination_file_directory'][count]
             df_type = gpd.read_file(r'{}'.format(file))
@@ -138,13 +139,19 @@ def init_destinations(db, config):
             df_type['dest_type'] = dest_type
             df_type = df_type.to_crs("EPSG:{}".format(projection))
             gdf = gdf.append(df_type)
+            # import code
+            # code.interact(local=locals())
+            id_dest = np.append(id_dest, df_type[config['set_up']['dest_id_colname'][count]].values, axis=0)
             count += 1
+            logger.info('{} loaded'.format(dest_type))
         # set a unique id for each destination
         gdf['id'] = range(len(gdf))
+        # retrieve id from file
+        gdf['id_type'] = id_dest
         # prepare for sql
         gdf['geom'] = gdf['geometry'].apply(lambda x: WKTElement(x.wkt, srid=projection))
         #drop all columns except id, dest_type, and geom
-        gdf = gdf[['id','dest_type','geom']]
+        gdf = gdf[['id','id_type','dest_type','geom']]
         # set index
         gdf.set_index(['id','dest_type'])
         # export to sql
